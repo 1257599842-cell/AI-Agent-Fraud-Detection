@@ -1,0 +1,137 @@
+{
+ "txn_id": 3512722,
+ "arm": "E3_starved",
+ "mode": "llm",
+ "p": 0.002883027669427669,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 3,
+ "report": {
+  "txn_id": 3512722,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $107.95，属小额交易，潜在损失有限。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "交易为 ProductCD=W 的 visa debit 卡交易，来自 addr1=231。",
+    "evidence_ids": [
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "关联实体无任何历史记录：无历史交易、无扇出、无成熟欺诈标签，因此无团伙关联证据。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "本笔未命中任何风控规则，相似案例检索也无返回，缺乏指向欺诈的直接证据。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "ProductCD=W、card4=visa、card6=debit、addr1=231 在成熟窗内均无历史欺诈率样本，无法独立核实上游 p=0.0029 低分；该低分缺乏本地证据佐证，但也无任何反向证据。",
+    "evidence_ids": [
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_005"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [],
+   "evidence_ids": [],
+   "rationale": "实体图无任何历史记录（无交易史、无扇出、无成熟标签），无团伙形态可判定。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "无任何指向欺诈的正向证据：无团伙信号、未命中规则、无相似欺诈案例、各字段历史欺诈率无样本。金额仅 $107.95，属小额；即便存在残余不确定性，其潜在损失也低于挂起复核/上报的处置成本，且没有支持 decline 的高概率证据。故放行。",
+  "confidence": "medium",
+  "evidence_insufficient": true,
+  "summary": "交易 3512722 为一笔 $107.95 的 visa debit（ProductCD=W，addr1=231）小额交易。除交易快照外，所有证据源均为空：关联实体无任何历史与扇出，未命中风控规则，相似案例检索无返回，各字段在成熟窗内无历史欺诈率样本。因此我无法用本地证据独立核实上游 p=0.0029 的低分，但同样没有发现任何指向欺诈的信号，也无团伙关联迹象。鉴于金额较小且缺乏正向风险证据，放行的期望成本最低——挂起或上报的固定成本高于该小额交易的潜在损失，且没有达到 decline 所需的高概率证据。结论为放行，置信度中等，并标注证据不足（缺乏对低分的独立佐证）。"
+ },
+ "schema_violations": [
+  "key_findings[2]: evidence_ids 缺失或为空（断言必须给证据）",
+  "key_findings[3]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 7,
+ "cost_usd": 0.1055,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3512722",
+   "value": 107.95,
+   "window": [
+    13817434,
+    13817434
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3512722",
+   "value": "W",
+   "window": [
+    13817434,
+    13817434
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3512722",
+   "value": 8900,
+   "window": [
+    13817434,
+    13817434
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3512722",
+   "value": "visa",
+   "window": [
+    13817434,
+    13817434
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3512722",
+   "value": "debit",
+   "window": [
+    13817434,
+    13817434
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3512722",
+   "value": 231.0,
+   "window": [
+    13817434,
+    13817434
+   ],
+   "label_based": false
+  }
+ ]
+}

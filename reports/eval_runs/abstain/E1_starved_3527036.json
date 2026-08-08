@@ -1,0 +1,319 @@
+{
+ "txn_id": 3527036,
+ "arm": "E1_starved",
+ "mode": "llm",
+ "p": 0.0007588484072380111,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 1,
+ "report": {
+  "txn_id": 3527036,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额仅 $49，属小额交易，即便放错损失有限。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "使用 card1=9992，为高频成熟卡，历史交易达 1163 笔，历史欺诈率仅 1.28%，低于全体基率 3.5%。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "该卡与本笔 addr1 的组合历史 100 笔且欺诈率为 0%，卡-地址配对干净，支持正常持卡人画像。",
+    "evidence_ids": [
+     "GRAPH_001",
+     "GRAPH_006"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "团伙形态分 gang_score=0.064（低），扇出（47 地址/12 邮箱/5 设备）与高频合法卡一致，无团伙聚集特征。",
+    "evidence_ids": [
+     "GRAPH_008",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "ProductCD=W(2.08%)、card6=debit(2.4%) 的历史欺诈率均低于基率；仅 P_emaildomain=gmail.com(4.42%) 略高，但单独为弱信号，不足以推翻整体低风险画像。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_003",
+     "STAT_002",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "未命中任何风控规则，相似案例检索无返回，无高危对照命中。",
+    "evidence_ids": [],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "上游 GBDT 风险分 p=0.0008（极低）与本次证据方向一致（成熟卡、卡-地址零欺诈、无规则命中），无冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_006"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=9992"
+   ],
+   "evidence_ids": [
+    "GRAPH_008",
+    "GRAPH_005",
+    "GRAPH_006"
+   ],
+   "rationale": "gang_score 仅 0.064，卡历史欺诈率 1.28%，卡-地址组合零欺诈，扇出规模与高频合法卡一致，无团伙关联证据。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "多方证据（成熟高频卡、卡-地址 100 笔零欺诈、低 gang_score、无规则命中、类别欺诈率多低于基率）一致指向低风险，且金额仅 $49；上游低分与证据无冲突。放行的期望成本最低。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3527036 为一笔 $49 的小额 W 类借记卡消费，使用成熟高频卡 card1=9992（1163 笔历史、1.28% 欺诈率），其与本笔地址的配对有 100 笔且零欺诈。团伙分数低（0.064），扇出规模与合法高频卡相符，未命中任何风控规则，也无相似欺诈案例。各类别历史欺诈率大多低于基率（仅 gmail 略高，属弱信号）。证据与上游极低风险分 p=0.0008 方向一致，不存在冲突。综合判断为低风险，建议放行。"
+ },
+ "schema_violations": [
+  "key_findings[5]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 7,
+ "cost_usd": 0.1254,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3527036",
+   "value": 49.0,
+   "window": [
+    14239418,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3527036",
+   "value": "W",
+   "window": [
+    14239418,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3527036",
+   "value": 9992,
+   "window": [
+    14239418,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3527036",
+   "value": "mastercard",
+   "window": [
+    14239418,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3527036",
+   "value": "debit",
+   "window": [
+    14239418,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3527036",
+   "value": 204.0,
+   "window": [
+    14239418,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3527036",
+   "value": "gmail.com",
+   "window": [
+    14239418,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=9992",
+   "value": 1163,
+   "window": [
+    0,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=9992|addr1",
+   "value": 100,
+   "window": [
+    0,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=9992",
+   "value": 47,
+   "window": [
+    0,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=9992",
+   "value": 12,
+   "window": [
+    0,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=9992",
+   "value": 5,
+   "window": [
+    0,
+    14239418
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=9992",
+   "value": 0.0128,
+   "window": [
+    0,
+    12425018
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    12425018
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0081,
+   "window": [
+    0,
+    12425018
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=9992",
+   "value": 0.064,
+   "window": [
+    0,
+    12425018
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0208,
+   "window": [
+    0,
+    12425018
+   ],
+   "support_n": 351148,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "card4=mastercard",
+   "value": 0.035,
+   "window": [
+    0,
+    12425018
+   ],
+   "support_n": 152834,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=gmail.com",
+   "value": 0.0442,
+   "window": [
+    0,
+    12425018
+   ],
+   "support_n": 185244,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_003",
+   "type": "fraud_rate",
+   "entity": "card6=debit",
+   "value": 0.024,
+   "window": [
+    0,
+    12425018
+   ],
+   "support_n": 354794,
+   "label_based": true
+  }
+ ]
+}

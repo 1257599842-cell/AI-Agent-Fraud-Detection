@@ -1,0 +1,373 @@
+{
+ "txn_id": 3508456,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.08734105487687178,
+ "prompt_version": "v2-lenient-fix",
+ "report": {
+  "txn_id": 3508456,
+  "risk_level": "high",
+  "key_findings": [
+   {
+    "finding": "card1=2755 shows gang-like fan-out (43 addr1, 26 emails, 13 devices) with a gang_score of 0.556, indicating an entity dispersed across many identities atypical for a single legitimate cardholder.",
+    "evidence_ids": [
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_008"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card1=2755 carries a matured prior fraud rate of 5.56% (and 6.78% on card1|email), well above the 3.5% base rate and the 2.08% ProductCD=W base rate.",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_007",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "Three of four structurally similar cases tied to card1=2755 are confirmed fraud (chargebacks), all matching ProductCD=W / mastercard / credit; only one was a cleared false positive, so the entity has a repeated real-fraud footprint rather than being merely 'fraud-shaped'.",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_003",
+     "CASE_002"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "This transaction hits the high-risk card6=credit pattern (rule R_card6_credit; matured fraud rate 6.74%, ~1.9x base), adding an independent risk signal beyond the entity graph.",
+    "evidence_ids": [
+     "RULE_000",
+     "STAT_002",
+     "TXN_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "Conflict with upstream model: GBDT p=0.0873 reads as low, but independent entity-level evidence (fan-out, gang_score, matured entity fraud rate, repeated confirmed-fraud cases) indicates materially higher risk than the score suggests.",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_008",
+     "CASE_000",
+     "CASE_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "The specific addr1=476 on this transaction has no direct fraud history under card1|addr1 (rate 0.0), so this exact identity pairing is not yet confirmed fraudulent, tempering direct-fraud certainty for this single txn.",
+    "evidence_ids": [
+     "GRAPH_006",
+     "TXN_005"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": true,
+   "entities": [
+    "card1=2755"
+   ],
+   "evidence_ids": [
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005",
+    "GRAPH_007",
+    "GRAPH_008",
+    "CASE_000",
+    "CASE_001",
+    "CASE_003"
+   ],
+   "rationale": "card1=2755 fans out across 43 addresses, 26 emails, and 13 devices with gang_score 0.556 and matured fraud rate ~5.6-6.8%, and is repeatedly linked to confirmed-fraud chargeback cases (3 of 4 similar cases). This pattern is consistent with a shared/compromised card operated across many synthetic identities."
+  },
+  "disposition": "escalate",
+  "disposition_rationale": "Strong entity-level gang signals (high fan-out + matured entity fraud history + repeated confirmed-fraud cases) mean freezing/reviewing card1=2755 can prevent batch future fraud, which justifies escalation even at a moderate $335 amount. The upstream low score understates entity risk, so passive approval would be a costly error; escalation ($40) is warranted to build a case on the entity rather than just decline this single txn.",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "Transaction 3508456 ($335, ProductCD=W, mastercard/credit, gmail) is tied to card1=2755, an entity with strong gang-like characteristics: fan-out across 43 addresses, 26 emails, and 13 devices, gang_score 0.556, matured fraud rates of 5.6-6.8% (above base), and three of four similar cases confirmed as fraud. It also hits the high-risk credit-card rule (6.74% fraud). The upstream GBDT score of 0.0873 conflicts with this entity-level evidence and appears to understate the risk. While this exact addr1=476 pairing has no direct confirmed fraud yet, the weight of entity/gang evidence supports escalating to freeze and build a case on card1=2755 to stop potential batch fraud."
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "api_calls": 4,
+ "tokens": {
+  "input": 15188,
+  "output": 2674,
+  "api_calls": 4
+ },
+ "cost_usd": 0.1428,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3508456",
+   "value": 335.0,
+   "window": [
+    13706464,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3508456",
+   "value": "W",
+   "window": [
+    13706464,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3508456",
+   "value": 2755,
+   "window": [
+    13706464,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3508456",
+   "value": "mastercard",
+   "window": [
+    13706464,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3508456",
+   "value": "credit",
+   "window": [
+    13706464,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3508456",
+   "value": 476.0,
+   "window": [
+    13706464,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3508456",
+   "value": "gmail.com",
+   "window": [
+    13706464,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=2755",
+   "value": 618,
+   "window": [
+    0,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=2755|addr1",
+   "value": 28,
+   "window": [
+    0,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=2755",
+   "value": 43,
+   "window": [
+    0,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=2755",
+   "value": 26,
+   "window": [
+    0,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=2755",
+   "value": 13,
+   "window": [
+    0,
+    13706464
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=2755",
+   "value": 0.0556,
+   "window": [
+    0,
+    11892064
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    11892064
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0678,
+   "window": [
+    0,
+    11892064
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=2755",
+   "value": 0.556,
+   "window": [
+    0,
+    11892064
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3037439",
+   "value": "案例 #3037439（day 12）：确认欺诈（拒付举报）。金额 $664.00（$300-1k），ProductCD=W，mastercard/credit，邮箱域=gmail.com，设备=缺失，card1=2755, addr1=299。实体历史：prior 6 笔、无成熟标签；设备 fan-out 4。",
+   "window": [
+    1194471,
+    1194471
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3379387",
+   "value": "案例 #3379387（day 112）：确认欺诈（拒付举报）。金额 $554.00（$300-1k），ProductCD=W，mastercard/credit，邮箱域=yahoo.com，设备=缺失，card1=2755, addr1=204。实体历史：prior 35 笔、成熟欺诈率 8%；设备 fan-out 13。",
+   "window": [
+    9844022,
+    9844022
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3384209",
+   "value": "案例 #3384209（day 114）：高分假阳（人工洗清，当时模型分 0.15）。金额 $117.00（$100-300），ProductCD=W，mastercard/credit，邮箱域=yahoo.com，设备=缺失，card1=2755, addr1=251。实体历史：prior 13 笔、成熟欺诈率 0%；设备 fan-out 13。",
+   "window": [
+    10006708,
+    10006708
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3239357",
+   "value": "案例 #3239357（day 68）：确认欺诈（拒付举报）。金额 $171.00（$100-300），ProductCD=W，mastercard/credit，邮箱域=outlook.com，设备=缺失，card1=2755, addr1=324。实体历史：prior 18 笔、成熟欺诈率 0%；设备 fan-out 13。",
+   "window": [
+    6029465,
+    6029465
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0208,
+   "window": [
+    0,
+    11892064
+   ],
+   "support_n": 337671,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=gmail.com",
+   "value": 0.0441,
+   "window": [
+    0,
+    11892064
+   ],
+   "support_n": 178602,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card6=credit",
+   "value": 0.0674,
+   "window": [
+    0,
+    11892064
+   ],
+   "support_n": 119361,
+   "label_based": true
+  }
+ ]
+}

@@ -1,0 +1,358 @@
+{
+ "txn_id": 3481840,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.02816698909495733,
+ "prompt_version": "v2-lenient-fix",
+ "report": {
+  "txn_id": 3481840,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易为 $445 的 Visa credit 购买（ProductCD=W, yahoo.com），金额中等，各字段无异常。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "ProductCD=W 历史欺诈率 2.05%、yahoo.com 2.32%，均低于全体基率 ~3.5%，属低风险画像。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card1=16326 有 570 笔厚重历史，成熟欺诈率仅 2.36%（低于基率），card1|addr1 欺诈率为 0，gang_score 0.236 偏低；扇出（41 地区/25 邮箱/20 设备）相对 570 笔历史属正常范围，不构成团伙特征。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005",
+     "GRAPH_006",
+     "GRAPH_008",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "命中的 card6=credit 规则仅为泛化弱信号（1.9x lift、触发 11 万笔），不具针对性，不足以支撑拦截。",
+    "evidence_ids": [
+     "RULE_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "本笔画像（W/visa/credit/yahoo.com/设备缺失/数百美元）高度吻合两条被人工洗清的高分假阳案例；而同 card1 的两条确认欺诈案例为更早期、小额($75-150)、不同 ProductCD(R/H)、不同 addr1(299 vs 本笔 204)，相关性弱。",
+    "evidence_ids": [
+     "CASE_002",
+     "CASE_003",
+     "CASE_000",
+     "CASE_001",
+     "TXN_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "GBDT 风险分 p=0.0282（低）与独立证据一致，无冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=16326"
+   ],
+   "evidence_ids": [
+    "GRAPH_008",
+    "GRAPH_005",
+    "GRAPH_006",
+    "GRAPH_002"
+   ],
+   "rationale": "gang_score 0.236 偏低，实体成熟欺诈率 2.36% 低于基率，card1|addr1 欺诈率为 0，扇出相对 570 笔历史属正常，无团伙批量欺诈特征。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "多维证据一致指向低风险：ProductCD/邮箱域欺诈率均低于基率，实体历史厚重且成熟欺诈率低，gang_score 低，命中规则为泛化弱信号，且本笔画像精确匹配被人工洗清的高分假阳案例。GBDT 低分与证据相符。同 card1 的历史欺诈为早期小额且 addr1 不同，关联弱。放行是有证据支撑的结论而非默认。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3481840 为 $445 Visa credit 购买（ProductCD=W, yahoo.com）。所有独立证据（品类/邮箱欺诈率低于基率、实体 570 笔厚历史且成熟欺诈率 2.36%、card1|addr1 欺诈率 0、gang_score 0.236 偏低）与 GBDT 低分 p=0.0282 一致。命中的 card6=credit 规则仅为泛化弱信号。本笔画像高度吻合两条被人工洗清的高分假阳案例，而同卡的确认欺诈案例为更早期、小额、不同品类与地区，关联弱。无团伙特征。综合判断为低风险，建议放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10193,
+  "output": 2351,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1097,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3481840",
+   "value": 445.0,
+   "window": [
+    12935968,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3481840",
+   "value": "W",
+   "window": [
+    12935968,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3481840",
+   "value": 16326,
+   "window": [
+    12935968,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3481840",
+   "value": "visa",
+   "window": [
+    12935968,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3481840",
+   "value": "credit",
+   "window": [
+    12935968,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3481840",
+   "value": 204.0,
+   "window": [
+    12935968,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3481840",
+   "value": "yahoo.com",
+   "window": [
+    12935968,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=16326",
+   "value": 570,
+   "window": [
+    0,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=16326|addr1",
+   "value": 90,
+   "window": [
+    0,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=16326",
+   "value": 41,
+   "window": [
+    0,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=16326",
+   "value": 25,
+   "window": [
+    0,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=16326",
+   "value": 20,
+   "window": [
+    0,
+    12935968
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=16326",
+   "value": 0.0236,
+   "window": [
+    0,
+    11121568
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    11121568
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0217,
+   "window": [
+    0,
+    11121568
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=16326",
+   "value": 0.236,
+   "window": [
+    0,
+    11121568
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3168182",
+   "value": "案例 #3168182（day 45）：确认欺诈（拒付举报）。金额 $150.00（$100-300），ProductCD=R，visa/credit，邮箱域=gmail.com，设备=MacOS，card1=16326, addr1=299。实体历史：prior 62 笔、成熟欺诈率 2%；设备 fan-out 17。",
+   "window": [
+    3982912,
+    3982912
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3154125",
+   "value": "案例 #3154125（day 40）：确认欺诈（拒付举报）。金额 $75.00（$50-100），ProductCD=H，visa/credit，邮箱域=hotmail.com，设备=Windows，card1=16326, addr1=299。实体历史：prior 61 笔、成熟欺诈率 3%；设备 fan-out 16。",
+   "window": [
+    3574643,
+    3574643
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3413887",
+   "value": "案例 #3413887（day 123）：高分假阳（人工洗清，当时模型分 0.15）。金额 $315.00（$300-1k），ProductCD=W，visa/credit，邮箱域=yahoo.com，设备=缺失，card1=7585, addr1=264。实体历史：prior 207 笔、成熟欺诈率 5%；设备 fan-out 66。",
+   "window": [
+    10788805,
+    10788805
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3413885",
+   "value": "案例 #3413885（day 123）：高分假阳（人工洗清，当时模型分 0.15）。金额 $315.00（$300-1k），ProductCD=W，visa/credit，邮箱域=yahoo.com，设备=缺失，card1=7585, addr1=264。实体历史：prior 206 笔、成熟欺诈率 5%；设备 fan-out 66。",
+   "window": [
+    10788777,
+    10788777
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0205,
+   "window": [
+    0,
+    11121568
+   ],
+   "support_n": 318769,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=yahoo.com",
+   "value": 0.0232,
+   "window": [
+    0,
+    11121568
+   ],
+   "support_n": 74983,
+   "label_based": true
+  }
+ ]
+}

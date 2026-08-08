@@ -1,0 +1,357 @@
+{
+ "txn_id": 3481803,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.004832968421499147,
+ "report": {
+  "txn_id": 3481803,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "Transaction is very small ($34), ProductCD=W, mastercard/debit, gmail.com — a low-value everyday profile.",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "The card entity (card1=15224) has a substantial clean history: 84 prior transactions with 0% mature fraud rate, and gang_score=0, indicating an established, non-fraudulent account.",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005",
+     "GRAPH_008"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "No coordinated/gang structure: device fanout is 1, and although addr1 fanout (19) and email fanout (5) are moderate, the associated fraud rates are 0%.",
+    "evidence_ids": [
+     "GRAPH_004",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_006",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "Categorical base rates for all card fields are at or below the ~3.5% population base rate (ProductCD=W 2.05%, gmail 4.39%, mastercard 3.52%), so no field materially elevates risk.",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "No risk rules were triggered, and 3 of the 4 similar historical cases were high-scoring false positives (manually cleared). The single confirmed-fraud case (CASE_000) came from an entity with 1110 priors, 1% fraud rate and device fanout 12 — a profile that does NOT match this transaction's clean, low-fanout entity.",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "The independent evidence corroborates the upstream GBDT low score (p=0.0048); no conflict found.",
+    "evidence_ids": [
+     "GRAPH_005",
+     "STAT_000",
+     "CASE_001"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=15224"
+   ],
+   "evidence_ids": [
+    "GRAPH_008",
+    "GRAPH_004",
+    "GRAPH_005"
+   ],
+   "rationale": "gang_score=0, device fanout=1, and 0% historical fraud rate for the card entity. No structural signals of a coordinated fraud ring."
+  },
+  "disposition": "approve",
+  "disposition_rationale": "Multiple independent lines of evidence (clean 84-transaction entity with 0% fraud, no gang structure, benign category base rates, no rules hit, dominant false-positive analogs) all point to low risk. The $34 amount is far below any level where interdiction cost is justified. Expected cost is minimized by approving.",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "Transaction 3481803 is a low-value ($34) mastercard/debit purchase (ProductCD=W, gmail.com) on an established card (card1=15224) with 84 clean prior transactions, 0% mature fraud rate, gang_score of 0, and no device clustering. All categorical base rates are at or below the population baseline, no risk rules fired, and the closest historical analogs are predominantly manually-cleared false positives; the lone confirmed-fraud case had a completely different high-volume/high-fanout profile. This independently confirms the upstream GBDT low score (p=0.0048). Recommend approve."
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "api_calls": 3,
+ "tokens": {
+  "input": 9032,
+  "output": 2026,
+  "api_calls": 3
+ },
+ "cost_usd": 0.0958,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3481803",
+   "value": 34.0,
+   "window": [
+    12935315,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3481803",
+   "value": "W",
+   "window": [
+    12935315,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3481803",
+   "value": 15224,
+   "window": [
+    12935315,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3481803",
+   "value": "mastercard",
+   "window": [
+    12935315,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3481803",
+   "value": "debit",
+   "window": [
+    12935315,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3481803",
+   "value": 441.0,
+   "window": [
+    12935315,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3481803",
+   "value": "gmail.com",
+   "window": [
+    12935315,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=15224",
+   "value": 84,
+   "window": [
+    0,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=15224|addr1",
+   "value": 4,
+   "window": [
+    0,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=15224",
+   "value": 19,
+   "window": [
+    0,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=15224",
+   "value": 5,
+   "window": [
+    0,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=15224",
+   "value": 1,
+   "window": [
+    0,
+    12935315
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=15224",
+   "value": 0.0,
+   "window": [
+    0,
+    11120915
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    11120915
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0,
+   "window": [
+    0,
+    11120915
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=15224",
+   "value": 0.0,
+   "window": [
+    0,
+    11120915
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3414443",
+   "value": "案例 #3414443（day 123）：确认欺诈（拒付举报）。金额 $35.00（$10-50），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=17131, addr1=264。实体历史：prior 1110 笔、成熟欺诈率 1%；设备 fan-out 12。",
+   "window": [
+    10796864,
+    10796864
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3413040",
+   "value": "案例 #3413040（day 123）：高分假阳（人工洗清，当时模型分 0.17）。金额 $49.00（$10-50），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=14089, addr1=264。实体历史：prior 13 笔、成熟欺诈率 0%；设备 fan-out 1。",
+   "window": [
+    10777337,
+    10777337
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3392785",
+   "value": "案例 #3392785（day 117）：高分假阳（人工洗清，当时模型分 0.28）。金额 $49.00（$10-50），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=12257, addr1=110。实体历史：prior 12 笔、成熟欺诈率 0%；设备 fan-out 0。",
+   "window": [
+    10256268,
+    10256268
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3387416",
+   "value": "案例 #3387416（day 115）：高分假阳（人工洗清，当时模型分 0.25）。金额 $49.00（$10-50），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=9992, addr1=204。实体历史：prior 70 笔、成熟欺诈率 0%；设备 fan-out 5。",
+   "window": [
+    10098291,
+    10098291
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0205,
+   "window": [
+    0,
+    11120915
+   ],
+   "support_n": 318733,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=gmail.com",
+   "value": 0.0439,
+   "window": [
+    0,
+    11120915
+   ],
+   "support_n": 169477,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=mastercard",
+   "value": 0.0352,
+   "window": [
+    0,
+    11120915
+   ],
+   "support_n": 139893,
+   "label_based": true
+  }
+ ]
+}

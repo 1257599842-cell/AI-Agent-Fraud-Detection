@@ -1,0 +1,190 @@
+{
+ "txn_id": 3557367,
+ "mode": "degraded",
+ "degraded_reason": "BadRequestError",
+ "p": 0.005039489476229562,
+ "report": {
+  "txn_id": 3557367,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "GBDT 风险分 p=0.0050（决策区间校准已验，raw 可当概率用）",
+    "evidence_ids": [
+     "STAT_000"
+    ],
+    "assertion_strength": "confirmed"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "四档期望成本 argmin（降级模式：LLM 不可用，处置由确定性成本框架直接给出）",
+  "confidence": "low",
+  "evidence_insufficient": true,
+  "summary": "[降级模式：BadRequestError] LLM 不可用，本报告由 GBDT 分数 + 规则模板生成。风险分 0.01，命中规则 0 条，处置建议 approve。拦截能力不受影响；LLM 恢复后可补充叙事性调查。"
+ },
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 0,
+ "api_calls": 0,
+ "tokens": {
+  "input": 0,
+  "output": 0
+ },
+ "cost_usd": 0.0,
+ "facts": [
+  {
+   "fact_id": "STAT_000",
+   "type": "model_score",
+   "entity": "txn=3557367",
+   "value": 0.005,
+   "window": [
+    15126648,
+    15126648
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3204639",
+   "value": "案例 #3204639（day 57）：确认欺诈（拒付举报）。金额 $49.00（$10-50），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=7207, addr1=325。实体历史：prior 10 笔、成熟欺诈率 0%；设备 fan-out 16。",
+   "window": [
+    5082995,
+    5082995
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3368719",
+   "value": "案例 #3368719（day 109）：高分假阳（人工洗清，当时模型分 0.15）。金额 $500.00（$300-1k），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=7207, addr1=204。实体历史：prior 1551 笔、成熟欺诈率 1%；设备 fan-out 16。",
+   "window": [
+    9564833,
+    9564833
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3331191",
+   "value": "案例 #3331191（day 97）：确认欺诈（拒付举报）。金额 $39.00（$10-50），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=7207, addr1=498。实体历史：prior 5 笔、成熟欺诈率 0%；设备 fan-out 16。",
+   "window": [
+    8476459,
+    8476459
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3307144",
+   "value": "案例 #3307144（day 91）：确认欺诈（拒付举报）。金额 $29.00（$10-50），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=7207, addr1=498。实体历史：prior 2 笔、成熟欺诈率 0%；设备 fan-out 16。",
+   "window": [
+    7952142,
+    7952142
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=7207",
+   "value": 2507,
+   "window": [
+    0,
+    15126648
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=7207|addr1",
+   "value": 33,
+   "window": [
+    0,
+    15126648
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=7207",
+   "value": 34,
+   "window": [
+    0,
+    15126648
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=7207",
+   "value": 28,
+   "window": [
+    0,
+    15126648
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=7207",
+   "value": 17,
+   "window": [
+    0,
+    15126648
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=7207",
+   "value": 0.0297,
+   "window": [
+    0,
+    13312248
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0323,
+   "window": [
+    0,
+    13312248
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0316,
+   "window": [
+    0,
+    13312248
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=7207",
+   "value": 0.297,
+   "window": [
+    0,
+    13312248
+   ],
+   "label_based": true
+  }
+ ]
+}

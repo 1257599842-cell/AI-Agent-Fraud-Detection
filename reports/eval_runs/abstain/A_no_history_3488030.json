@@ -1,0 +1,353 @@
+{
+ "txn_id": 3488030,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.018153596921303635,
+ "p_true": 0.018153596921303635,
+ "p_injected": false,
+ "prompt_version": "v3-strength-ceiling",
+ "report": {
+  "txn_id": 3488030,
+  "risk_level": "medium",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $81.50，属小额；ProductCD=W，visa/credit 卡，邮箱域 yahoo.com。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "card1=1182 为首现实体：无历史交易、无地区/邮箱/设备扇出、gang_score=0，且 card1+addr1 组合亦无历史。无任何团伙关联证据。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_001",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "各类别字段历史欺诈率均在基率（约3.5%）附近或以下（ProductCD=W 2.06%，yahoo.com 2.31%，visa 3.47%），单看类别无明显异常。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "命中两条高危规则：新实体首现 R_NEW_ENTITY（欺诈率7.78%，基率2.2倍）与 card6=credit（6.65%，1.9倍），使该笔风险画像较基率有中度抬升。",
+    "evidence_ids": [
+     "RULE_000",
+     "RULE_001",
+     "TXN_004",
+     "GRAPH_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "相似案例两类并存：相同 W/visa/credit/yahoo 画像既出现于确认欺诈也出现于被人工洗清的高分假阳；确认欺诈案例多伴随实体成熟欺诈率高（如55%），而本笔实体无任何欺诈史，故'长得像'不足以定性。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 分 p=0.0182 偏低，与本笔无团伙、类别基本正常大体一致；但新实体规则将画像抬至基率2.2倍，规则侧信号较该分数略高，存在轻度张力。",
+    "evidence_ids": [
+     "RULE_000",
+     "STAT_000"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [],
+   "evidence_ids": [
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005"
+   ],
+   "rationale": "实体扇出全为0、gang_score=0、无历史交易，无任何团伙形态证据。"
+  },
+  "disposition": "hold",
+  "disposition_rationale": "存在真实的中间地带不确定性：首现实体命中新实体高危规则（2.2倍基率）构成存疑信号，但同时缺乏团伙证据、金额小、类别基率正常，相似案例正反并存无法定性。金额小（$81.50）使直接拒绝不划算（误拦成本约$25量级已接近整笔金额、且概率不足以支撑decline）；而首现实体的规则抬升又让直接放行不踏实。$5复核比拦错或放错都便宜，犹豫时留下更省钱，故挂起。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易3488030为一笔$81.50的小额W类visa/credit交易，卡实体card1=1182系首现，无任何历史、扇出与团伙信号（gang_score=0）。类别字段历史欺诈率均在基率附近，上游GBDT分0.0182偏低。但本笔命中'新实体首现'与'card6=credit'两条高危规则，将风险画像抬至基率约2倍，构成中度存疑信号。相似案例正反并存——同画像既有确认欺诈也有被洗清的假阳，且确认欺诈多伴随实体高成熟欺诈率，而本笔实体无欺诈史，故无法定性为欺诈，也不宜直接放行。综合：无团伙证据不必上报，金额小不值得拒绝，规则抬升使放行不踏实，故挂起$5人工复核。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10876,
+  "output": 2489,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1166,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3488030",
+   "value": 81.5,
+   "window": [
+    13129538,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3488030",
+   "value": "W",
+   "window": [
+    13129538,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3488030",
+   "value": 1182,
+   "window": [
+    13129538,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3488030",
+   "value": "visa",
+   "window": [
+    13129538,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3488030",
+   "value": "credit",
+   "window": [
+    13129538,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3488030",
+   "value": 436.0,
+   "window": [
+    13129538,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3488030",
+   "value": "yahoo.com",
+   "window": [
+    13129538,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=1182",
+   "value": 0,
+   "window": [
+    0,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=1182|addr1",
+   "value": 0,
+   "window": [
+    0,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=1182",
+   "value": 0,
+   "window": [
+    0,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=1182",
+   "value": 0,
+   "window": [
+    0,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=1182",
+   "value": 0,
+   "window": [
+    0,
+    13129538
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "gang_score",
+   "entity": "card1=1182",
+   "value": 0.0,
+   "window": [
+    0,
+    11315138
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0206,
+   "window": [
+    0,
+    11315138
+   ],
+   "support_n": 323878,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=yahoo.com",
+   "value": 0.0231,
+   "window": [
+    0,
+    11315138
+   ],
+   "support_n": 76061,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=visa",
+   "value": 0.0347,
+   "window": [
+    0,
+    11315138
+   ],
+   "support_n": 290274,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_NEW_ENTITY",
+   "value": "新实体首现（card1+addr1 无历史）（card1_addr1_prior_cnt=0）：训练窗 [0,125)天 内该模式欺诈率 7.78%，为基率 3.51% 的 2.2 倍（触发 82,512 笔，其中欺诈 6,417）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 82512,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3424940",
+   "value": "案例 #3424940（day 127）：高分假阳（人工洗清，当时模型分 0.35）。金额 $97.00（$50-100），ProductCD=W，visa/credit，邮箱域=yahoo.com，设备=缺失，card1=16659, addr1=225。实体历史：prior 63 笔、成熟欺诈率 2%；设备 fan-out 58。",
+   "window": [
+    11070834,
+    11070834
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3274420",
+   "value": "案例 #3274420（day 80）：确认欺诈（拒付举报）。金额 $97.00（$50-100），ProductCD=W，visa/credit，邮箱域=yahoo.com，设备=缺失，card1=9749, addr1=226。实体历史：prior 51 笔、成熟欺诈率 55%；设备 fan-out 11。",
+   "window": [
+    7068949,
+    7068949
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3425540",
+   "value": "案例 #3425540（day 127）：高分假阳（人工洗清，当时模型分 0.52）。金额 $250.00（$100-300），ProductCD=W，visa/credit，邮箱域=yahoo.com，设备=缺失，card1=7006, addr1=387。实体历史：prior 13 笔、成熟欺诈率 0%；设备 fan-out 3。",
+   "window": [
+    11116356,
+    11116356
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3425500",
+   "value": "案例 #3425500（day 127）：确认欺诈（拒付举报）。金额 $171.00（$100-300），ProductCD=W，visa/credit，邮箱域=yahoo.com，设备=缺失，card1=15525, addr1=441。实体历史：prior 1 笔、无成熟标签；设备 fan-out 2。",
+   "window": [
+    11115389,
+    11115389
+   ],
+   "label_based": true
+  }
+ ],
+ "arm": "A_no_history"
+}

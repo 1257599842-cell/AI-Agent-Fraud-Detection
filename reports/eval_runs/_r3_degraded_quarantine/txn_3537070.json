@@ -1,0 +1,190 @@
+{
+ "txn_id": 3537070,
+ "mode": "degraded",
+ "degraded_reason": "BadRequestError",
+ "p": 0.0008509584286397674,
+ "report": {
+  "txn_id": 3537070,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "GBDT 风险分 p=0.0009（决策区间校准已验，raw 可当概率用）",
+    "evidence_ids": [
+     "STAT_000"
+    ],
+    "assertion_strength": "confirmed"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "四档期望成本 argmin（降级模式：LLM 不可用，处置由确定性成本框架直接给出）",
+  "confidence": "low",
+  "evidence_insufficient": true,
+  "summary": "[降级模式：BadRequestError] LLM 不可用，本报告由 GBDT 分数 + 规则模板生成。风险分 0.00，命中规则 0 条，处置建议 approve。拦截能力不受影响；LLM 恢复后可补充叙事性调查。"
+ },
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 0,
+ "api_calls": 0,
+ "tokens": {
+  "input": 0,
+  "output": 0
+ },
+ "cost_usd": 0.0,
+ "facts": [
+  {
+   "fact_id": "STAT_000",
+   "type": "model_score",
+   "entity": "txn=3537070",
+   "value": 0.0009,
+   "window": [
+    14518560,
+    14518560
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3092931",
+   "value": "案例 #3092931（day 23）：确认欺诈（拒付举报）。金额 $300.00（$300-1k），ProductCD=H，mastercard/debit，邮箱域=gmail.com，设备=iOS Device，card1=17399, addr1=204。实体历史：prior 244 笔、成熟欺诈率 0%；设备 fan-out 8。",
+   "window": [
+    2094826,
+    2094826
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3414443",
+   "value": "案例 #3414443（day 123）：确认欺诈（拒付举报）。金额 $35.00（$10-50），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=17131, addr1=264。实体历史：prior 1110 笔、成熟欺诈率 1%；设备 fan-out 12。",
+   "window": [
+    10796864,
+    10796864
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3226470",
+   "value": "案例 #3226470（day 64）：确认欺诈（拒付举报）。金额 $39.00（$10-50），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=10057, addr1=269。实体历史：prior 84 笔、成熟欺诈率 4%；设备 fan-out 19。",
+   "window": [
+    5669289,
+    5669289
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3428587",
+   "value": "案例 #3428587（day 128）：高分假阳（人工洗清，当时模型分 0.16）。金额 $50.00（$50-100），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=17055, addr1=325。实体历史：prior 232 笔、成熟欺诈率 1%；设备 fan-out 13。",
+   "window": [
+    11216344,
+    11216344
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=17399",
+   "value": 1768,
+   "window": [
+    0,
+    14518560
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=17399|addr1",
+   "value": 1664,
+   "window": [
+    0,
+    14518560
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=17399",
+   "value": 30,
+   "window": [
+    0,
+    14518560
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=17399",
+   "value": 21,
+   "window": [
+    0,
+    14518560
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=17399",
+   "value": 11,
+   "window": [
+    0,
+    14518560
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=17399",
+   "value": 0.0077,
+   "window": [
+    0,
+    12704160
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0081,
+   "window": [
+    0,
+    12704160
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0014,
+   "window": [
+    0,
+    12704160
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=17399",
+   "value": 0.077,
+   "window": [
+    0,
+    12704160
+   ],
+   "label_based": true
+  }
+ ]
+}

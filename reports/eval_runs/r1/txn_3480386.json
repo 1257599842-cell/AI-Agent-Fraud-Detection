@@ -1,0 +1,353 @@
+{
+ "txn_id": 3480386,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.1330783904095465,
+ "report": {
+  "txn_id": 3480386,
+  "risk_level": "medium",
+  "key_findings": [
+   {
+    "finding": "交易本身金额较小（$117），ProductCD=W 的历史欺诈率仅 2.05%，低于全体基率约 3.5%，不构成独立风险信号。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card1=2616 + addr1 组合的成熟欺诈率高达 18.37%，规则 R_PRIOR_FRAUD_CARD1_ADDR1 也确认该模式约 13.5%（基率 3.8 倍），是本笔最主要的风险线索。",
+    "evidence_ids": [
+     "GRAPH_006",
+     "RULE_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card1=2616 为高频实体（3730 笔历史），自身成熟欺诈率 5.65%，扇出可观（addr1=53/email=39/device=68），gang_score=0.565 属中等；具备团伙形态但未达强团伙。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "全部 4 条最相似历史案例（均为同一 card1=2616）都是被人工洗清的高分假阳，且当时模型分（0.14/0.44/0.47/0.49）普遍高于本笔 0.1331，共享 W/discover/credit/设备缺失画像——强烈提示该实体属于'长得像欺诈'的合法高频账户。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 分 p=0.1331 偏低，与被洗清假阳案例的低分表现一致，与 card1+addr1 的高欺诈率线索存在方向冲突；结合案例证据，倾向于低风险一侧，但两组证据未能完全收敛。",
+    "evidence_ids": [
+     "GRAPH_006",
+     "CASE_000",
+     "CASE_003"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": true,
+   "entities": [
+    "card1=2616"
+   ],
+   "evidence_ids": [
+    "GRAPH_007",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "CASE_000",
+    "CASE_001",
+    "CASE_002",
+    "CASE_003"
+   ],
+   "rationale": "card1=2616 具备中等 gang_score(0.565) 与显著扇出，形态上像团伙实体；但 4 条同实体相似案例均被人工洗清为假阳，更支持其为合法高频商户/账户而非活跃欺诈团伙。团伙嫌疑存在但证据偏向被证伪，不足以支持冻结上报。"
+  },
+  "disposition": "hold",
+  "disposition_rationale": "证据呈冲突态势：card1+addr1 历史欺诈率高（18.37%）指向风险，但低模型分（0.1331）与 4 条同实体高分假阳被洗清的案例强烈指向合法高频实体。金额仅 $117，直接 decline 有误拦 $25 风险且与案例证据矛盾；escalate 需团伙确证而现有案例反证其合法。$5 人工复核在此中间地带成本最低，最稳妥。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3480386（$117, W/discover/credit, card1=2616, addr1=203）风险信号相互矛盾。主要风险来自 card1+addr1 组合 18.37% 的高成熟欺诈率及规则命中；但反向证据更充分：ProductCD=W 欺诈率低、金额小、上游模型分仅 0.1331，且 4 条最相似案例全部是同一 card1 被人工洗清的高分假阳（当时分数还更高），共享同款画像。综合看该实体更像'长得像欺诈'的合法高频账户，团伙嫌疑存在但被案例反证，未达上报门槛。鉴于中间地带与冲突信号，建议 hold 人工复核（$5）作为最低期望成本处置。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 7,
+ "api_calls": 4,
+ "tokens": {
+  "input": 15207,
+  "output": 2478,
+  "api_calls": 4
+ },
+ "cost_usd": 0.138,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3480386",
+   "value": 117.0,
+   "window": [
+    12868937,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3480386",
+   "value": "W",
+   "window": [
+    12868937,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3480386",
+   "value": 2616,
+   "window": [
+    12868937,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3480386",
+   "value": "discover",
+   "window": [
+    12868937,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3480386",
+   "value": "credit",
+   "window": [
+    12868937,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3480386",
+   "value": 203.0,
+   "window": [
+    12868937,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=2616",
+   "value": 3730,
+   "window": [
+    0,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=2616|addr1",
+   "value": 65,
+   "window": [
+    0,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=2616",
+   "value": 53,
+   "window": [
+    0,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=2616",
+   "value": 39,
+   "window": [
+    0,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=2616",
+   "value": 68,
+   "window": [
+    0,
+    12868937
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=2616",
+   "value": 0.0565,
+   "window": [
+    0,
+    11054537
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.1837,
+   "window": [
+    0,
+    11054537
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "gang_score",
+   "entity": "card1=2616",
+   "value": 0.565,
+   "window": [
+    0,
+    11054537
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_PRIOR_FRAUD_CARD1_ADDR1",
+   "value": "实体欺诈史：card1+addr1（card1_addr1_prior_fraud_rate>=0.1）：训练窗 [0,125)天 内该模式欺诈率 13.49%，为基率 3.51% 的 3.8 倍（触发 9,065 笔，其中欺诈 1,223）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 9065,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_002",
+   "type": "rule",
+   "entity": "rule=R_card4_discover",
+   "value": "高危取值 card4=discover（card4=discover）：训练窗 [0,125)天 内该模式欺诈率 6.49%，为基率 3.51% 的 1.8 倍（触发 4,929 笔，其中欺诈 320）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 4929,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3377936",
+   "value": "案例 #3377936（day 112）：高分假阳（人工洗清，当时模型分 0.14）。金额 $226.00（$100-300），ProductCD=W，discover/credit，邮箱域=gmail.com，设备=缺失，card1=2616, addr1=204。实体历史：prior 238 笔、成熟欺诈率 16%；设备 fan-out 57。",
+   "window": [
+    9820343,
+    9820343
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3361101",
+   "value": "案例 #3361101（day 106）：高分假阳（人工洗清，当时模型分 0.47）。金额 $265.00（$100-300），ProductCD=W，discover/credit，邮箱域=aol.com，设备=缺失，card1=2616, addr1=220。实体历史：prior 32 笔、成熟欺诈率 11%；设备 fan-out 56。",
+   "window": [
+    9320448,
+    9320448
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3361088",
+   "value": "案例 #3361088（day 106）：高分假阳（人工洗清，当时模型分 0.44）。金额 $265.00（$100-300），ProductCD=W，discover/credit，邮箱域=aol.com，设备=缺失，card1=2616, addr1=220。实体历史：prior 31 笔、成熟欺诈率 11%；设备 fan-out 56。",
+   "window": [
+    9320244,
+    9320244
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3391046",
+   "value": "案例 #3391046（day 116）：高分假阳（人工洗清，当时模型分 0.49）。金额 $390.00（$300-1k），ProductCD=W，discover/credit，邮箱域=gmail.com，设备=缺失，card1=2616, addr1=204。实体历史：prior 247 笔、成熟欺诈率 15%；设备 fan-out 59。",
+   "window": [
+    10194095,
+    10194095
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0205,
+   "window": [
+    0,
+    11054537
+   ],
+   "support_n": 317509,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "card4=discover",
+   "value": 0.0645,
+   "window": [
+    0,
+    11054537
+   ],
+   "support_n": 4979,
+   "label_based": true
+  }
+ ]
+}

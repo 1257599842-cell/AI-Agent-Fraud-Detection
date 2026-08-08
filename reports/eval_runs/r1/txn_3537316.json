@@ -1,0 +1,424 @@
+{
+ "txn_id": 3537316,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.8241603944004304,
+ "report": {
+  "txn_id": 3537316,
+  "risk_level": "high",
+  "key_findings": [
+   {
+    "finding": "card1=1976 carries a matured (label-lagged) fraud rate of 18.94%, ~5.4x the ~3.5% base rate, over 867 prior transactions — a genuine high-risk entity, not noise.",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "The card1+email combination shows an even higher matured fraud rate of 34.05%, and this exact rule (R_PRIOR_FRAUD_CARD1_EMAIL) fired with 19.11% historical fraud, 5.4x lift over 16,801 supporting cases.",
+    "evidence_ids": [
+     "GRAPH_006",
+     "RULE_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "card1=1976 has a maximal gang_score of 1.0 with extreme device fan-out (101 devices), plus 12 addr1 and 13 email fan-out — a classic gang/entity-abuse topology.",
+    "evidence_ids": [
+     "GRAPH_007",
+     "GRAPH_004",
+     "GRAPH_002",
+     "GRAPH_003"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "Transaction-level attributes (ProductCD=C at 11.4% fraud, card6=credit, DeviceType=desktop) are moderately elevated risk categories, consistent with the GBDT score direction.",
+    "evidence_ids": [
+     "STAT_000",
+     "RULE_002",
+     "RULE_005",
+     "RULE_006"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "CONFLICT with GBDT p=0.8242: all 4 structurally-similar retrieved cases sharing this exact fingerprint (card1=1976, ProductCD=C, visa/credit, gmail, $100-300 amt) were human-cleared false positives — including one at model score 0.65. This suggests this specific pattern is prone to false positives despite the entity's overall fraud history.",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "The email domain itself (gmail.com, 4.4% fraud) is near base rate and NOT a driver; the risk concentrates in the card1 entity, not the transaction's generic attributes.",
+    "evidence_ids": [
+     "STAT_001",
+     "TXN_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "card1+addr1 has zero prior history (new entity-address pairing), triggering R_NEW_ENTITY (7.78% fraud), though addr1 field is missing in the snapshot.",
+    "evidence_ids": [
+     "GRAPH_001",
+     "RULE_003"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": true,
+   "entities": [
+    "card1=1976"
+   ],
+   "evidence_ids": [
+    "GRAPH_007",
+    "GRAPH_004",
+    "GRAPH_005",
+    "GRAPH_006",
+    "GRAPH_002",
+    "GRAPH_003"
+   ],
+   "rationale": "card1=1976 shows a maximal gang_score (1.0), extreme device fan-out (101 devices across 867 txns), and matured fraud rates of 18.94% (card1) / 34.05% (card1+email) — a strong, label-confirmed team/entity-abuse pattern. The specific transaction may or may not itself be fraudulent (similar cases were cleared), but the underlying entity is a confirmed high-risk hub warranting entity-level action."
+  },
+  "disposition": "escalate",
+  "disposition_rationale": "Under the cost framework, entity-level gang evidence (matured 18.94–34.05% fraud rate + gang_score 1.0 + fan-out 101) makes freezing/investigating card1=1976 highly cost-effective even at $179.83, since it can halt batch fraud. A blunt decline is disfavored because 4 identical-fingerprint cases were human-cleared false positives (including one at 0.65) — so this individual txn's fraud status is uncertain despite the high entity risk. Escalation ($40) routes to a team that can act on the entity while a human adjudicates this specific charge.",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "Transaction 3537316 ($179.83, ProductCD=C, visa/credit, gmail, desktop) sits on card1=1976, a confirmed high-risk entity: matured fraud rate 18.94% (34.05% with email), gang_score 1.0, and device fan-out of 101 across 867 prior transactions — strongly corroborating the GBDT score's direction at the entity level. However, this exact transaction fingerprint has a track record of human-cleared false positives: all 4 similar retrieved cases (same card1, ProductCD, card type, email, amount band) were washed clean, one even at model score 0.65. This is a genuine conflict — the entity is dangerous, but this specific pattern over-triggers. Rather than a blunt decline, I recommend escalate: the gang/entity evidence justifies entity-level action against card1=1976, while a human adjudicates whether this individual charge is a true positive or another look-alike false positive."
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 11804,
+  "output": 2427,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1197,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3537316",
+   "value": 179.829,
+   "window": [
+    14524681,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3537316",
+   "value": "C",
+   "window": [
+    14524681,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3537316",
+   "value": 1976,
+   "window": [
+    14524681,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3537316",
+   "value": "visa",
+   "window": [
+    14524681,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3537316",
+   "value": "credit",
+   "window": [
+    14524681,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3537316",
+   "value": "gmail.com",
+   "window": [
+    14524681,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3537316",
+   "value": "desktop",
+   "window": [
+    14524681,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=1976",
+   "value": 867,
+   "window": [
+    0,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=1976|addr1",
+   "value": 0,
+   "window": [
+    0,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=1976",
+   "value": 12,
+   "window": [
+    0,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=1976",
+   "value": 13,
+   "window": [
+    0,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=1976",
+   "value": 101,
+   "window": [
+    0,
+    14524681
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=1976",
+   "value": 0.1894,
+   "window": [
+    0,
+    12710281
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.3405,
+   "window": [
+    0,
+    12710281
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "gang_score",
+   "entity": "card1=1976",
+   "value": 1.0,
+   "window": [
+    0,
+    12710281
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_PRIOR_FRAUD_CARD1_EMAIL",
+   "value": "实体欺诈史：card1+邮箱（card1_email_prior_fraud_rate>=0.1）：训练窗 [0,125)天 内该模式欺诈率 19.11%，为基率 3.51% 的 5.4 倍（触发 16,801 笔，其中欺诈 3,210）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 16801,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_PRIOR_FRAUD_CARD1",
+   "value": "实体欺诈史：card1（card1_prior_fraud_rate>=0.1）：训练窗 [0,125)天 内该模式欺诈率 17.32%，为基率 3.51% 的 4.9 倍（触发 21,568 笔，其中欺诈 3,735）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 21568,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_002",
+   "type": "rule",
+   "entity": "rule=R_ProductCD_C",
+   "value": "高危取值 ProductCD=C（ProductCD=C）：训练窗 [0,125)天 内该模式欺诈率 11.27%，为基率 3.51% 的 3.2 倍（触发 51,857 笔，其中欺诈 5,844）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 51857,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_003",
+   "type": "rule",
+   "entity": "rule=R_NEW_ENTITY",
+   "value": "新实体首现（card1+addr1 无历史）（card1_addr1_prior_cnt=0）：训练窗 [0,125)天 内该模式欺诈率 7.78%，为基率 3.51% 的 2.2 倍（触发 82,512 笔，其中欺诈 6,417）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 82512,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_004",
+   "type": "rule",
+   "entity": "rule=R_HAS_IDENTITY",
+   "value": "有设备/身份采集记录（id_01 存在）：训练窗 [0,125)天 内该模式欺诈率 7.44%，为基率 3.51% 的 2.1 倍（触发 112,859 笔，其中欺诈 8,397）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112859,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_005",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_006",
+   "type": "rule",
+   "entity": "rule=R_DeviceType_desktop",
+   "value": "高危取值 DeviceType=desktop（DeviceType=desktop）：训练窗 [0,125)天 内该模式欺诈率 6.09%，为基率 3.51% 的 1.7 倍（触发 67,488 笔，其中欺诈 4,113）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 67488,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3389587",
+   "value": "案例 #3389587（day 116）：高分假阳（人工洗清，当时模型分 0.24）。金额 $203.62（$100-300），ProductCD=C，visa/credit，邮箱域=gmail.com，设备=缺失，card1=1976。实体历史：prior 0 笔、无成熟标签；设备 fan-out 74。",
+   "window": [
+    10166957,
+    10166957
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3376899",
+   "value": "案例 #3376899（day 112）：高分假阳（人工洗清，当时模型分 0.18）。金额 $283.91（$100-300），ProductCD=C，visa/credit，邮箱域=gmail.com，设备=缺失，card1=1976。实体历史：prior 0 笔、无成熟标签；设备 fan-out 69。",
+   "window": [
+    9772135,
+    9772135
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3389146",
+   "value": "案例 #3389146（day 116）：高分假阳（人工洗清，当时模型分 0.15）。金额 $407.23（$300-1k），ProductCD=C，visa/credit，邮箱域=gmail.com，设备=M4 SS4458 Build/MMB29M，card1=1976。实体历史：prior 0 笔、无成熟标签；设备 fan-out 74。",
+   "window": [
+    10156316,
+    10156316
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3388952",
+   "value": "案例 #3388952（day 116）：高分假阳（人工洗清，当时模型分 0.65）。金额 $407.23（$300-1k），ProductCD=C，visa/credit，邮箱域=gmail.com，设备=M4 SS4458 Build/MMB29M，card1=1976。实体历史：prior 0 笔、无成熟标签；设备 fan-out 73。",
+   "window": [
+    10135789,
+    10135789
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=C",
+   "value": 0.114,
+   "window": [
+    0,
+    12710281
+   ],
+   "support_n": 57815,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=gmail.com",
+   "value": 0.044,
+   "window": [
+    0,
+    12710281
+   ],
+   "support_n": 188871,
+   "label_based": true
+  }
+ ]
+}

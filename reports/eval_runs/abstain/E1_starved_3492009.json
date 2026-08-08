@@ -1,0 +1,292 @@
+{
+ "txn_id": 3492009,
+ "arm": "E1_starved",
+ "mode": "llm",
+ "p": 0.0415901555994954,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 1,
+ "report": {
+  "txn_id": 3492009,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $226，ProductCD=W，卡为 mastercard/debit，addr1=476。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "持卡实体 card1=7919 历史交易量极大（12902 笔），历史欺诈率仅 0.8%，远低于全体基率约 3.5%，表明是成熟的低风险账户。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "该卡与本次 addr1 的组合有 209 笔历史交易且欺诈率为 0%，说明本次地区并非新奇/异常组合。",
+    "evidence_ids": [
+     "GRAPH_001",
+     "GRAPH_006"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "团伙形态分 gang_score=0.056（低），扇出（57 地区/32 邮箱/7 设备）相对 12902 笔的巨量交易属正常范围，无团伙关联迹象。",
+    "evidence_ids": [
+     "GRAPH_007",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "ProductCD=W（2.05%）与 debit（2.39%）历史欺诈率均低于全体基率约 3.5%；mastercard（3.52%）约等于基率，整体渠道画像偏低风险。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_002",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "未命中任何风控规则，相似案例检索无返回，无确认欺诈的相似先例可对照。",
+    "evidence_ids": [],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "上游 GBDT 风险分 p=0.0416（低）与本次独立收集的证据一致，无冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_006",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=7919"
+   ],
+   "evidence_ids": [
+    "GRAPH_007",
+    "GRAPH_005",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004"
+   ],
+   "rationale": "gang_score 仅 0.056，实体历史欺诈率 0.8% 极低，扇出规模相对 12902 笔巨量交易属正常，无团伙批量欺诈特征。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "多方证据一致指向低风险：成熟高频账户（12902 笔）历史欺诈率 0.8%，本卡+地区组合 209 笔 0% 欺诈，渠道欺诈率低于基率，无规则命中、无团伙信号，GBDT 低分被证据佐证。$226 金额中等但欺诈概率很低，放行的期望成本低于挂起复核（$5）。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3492009（$226，ProductCD=W，mastercard/debit）由一张交易量极大、历史欺诈率仅 0.8% 的成熟卡 card1=7919 发起。该卡与本次地区的组合有 209 笔历史交易且从无欺诈，团伙分 0.056 无关联迹象，渠道欺诈率低于总体基率，且未命中任何风控规则。独立证据与上游 GBDT 低分（0.0416）一致，无冲突。综合判断为低风险，建议放行。"
+ },
+ "schema_violations": [
+  "key_findings[5]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "cost_usd": 0.1007,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3492009",
+   "value": 226.0,
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3492009",
+   "value": "W",
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3492009",
+   "value": 7919,
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3492009",
+   "value": "mastercard",
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3492009",
+   "value": "debit",
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3492009",
+   "value": 476.0,
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=7919",
+   "value": 12902,
+   "window": [
+    0,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=7919|addr1",
+   "value": 209,
+   "window": [
+    0,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=7919",
+   "value": 57,
+   "window": [
+    0,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=7919",
+   "value": 32,
+   "window": [
+    0,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=7919",
+   "value": 7,
+   "window": [
+    0,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=7919",
+   "value": 0.008,
+   "window": [
+    0,
+    11402717
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    11402717
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "gang_score",
+   "entity": "card1=7919",
+   "value": 0.056,
+   "window": [
+    0,
+    11402717
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0205,
+   "window": [
+    0,
+    11402717
+   ],
+   "support_n": 326189,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "card4=mastercard",
+   "value": 0.0352,
+   "window": [
+    0,
+    11402717
+   ],
+   "support_n": 142876,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card6=debit",
+   "value": 0.0239,
+   "window": [
+    0,
+    11402717
+   ],
+   "support_n": 330736,
+   "label_based": true
+  }
+ ]
+}

@@ -1,0 +1,405 @@
+{
+ "txn_id": 3565452,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.005676017571260536,
+ "p_true": 0.005676017571260536,
+ "p_injected": false,
+ "prompt_version": "v3-strength-ceiling",
+ "report": {
+  "txn_id": 3565452,
+  "risk_level": "medium",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $100，ProductCD=R，卡为 american express/credit，邮箱域 aol.com，设备为 mobile/iOS Device。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006",
+     "TXN_007",
+     "TXN_008"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "单字段历史欺诈率均接近或低于全体基率(~3.5%)：ProductCD=R 为 3.69%、aol.com 2.23%、amex 2.98%，未见任一字段呈现强欺诈信号。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "命中的规则(mobile 9.88%、新实体 7.78%、credit 6.65%)均为覆盖数万至十万笔的宽口径低-lift规则(1.9~2.8倍基率)，区分度有限，不足以单独定性。",
+    "evidence_ids": [
+     "RULE_000",
+     "RULE_001",
+     "RULE_003"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "无团伙关联证据：该 card1+addr1 组合为首现(prior_cnt=0)，地区/邮箱/设备扇出均为 0，gang_score=0。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_001",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "top-4 相似历史案例全部为确认欺诈，且共享高度一致的画像(小额$100-300、ProductCD=R、amex/credit、iOS Device)，构成与低模型分冲突的存疑信号；但该画像较通用，'长得像欺诈'不等于欺诈。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 分 p=0.0057 极低，与相似案例全命中确认欺诈的画像存在冲突；单字段统计偏中性，无法单方面证伪任一侧，故存疑而非低风险。",
+    "evidence_ids": [
+     "STAT_000",
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=2421"
+   ],
+   "evidence_ids": [
+    "GRAPH_000",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005"
+   ],
+   "rationale": "实体首现、各类扇出全为 0、gang_score=0，无任何团伙形态或批量关联证据，不支持 escalate。"
+  },
+  "disposition": "hold",
+  "disposition_rationale": "证据两侧冲突：GBDT 极低分与中性的单字段统计倾向放行，但 4/4 相似案例均为确认欺诈且画像高度吻合、多条宽口径规则命中，构成真实存疑。无团伙证据不足以 escalate；金额仅 $100 且概率不明确，不足以 decline。犹豫时成本更低的一侧是留下——$5 人工复核优于放错整笔或误拦。",
+  "confidence": "low",
+  "evidence_insufficient": true,
+  "summary": "交易 3565452($100, ProductCD=R, amex/credit, aol.com, mobile/iOS)呈现证据矛盾局面。单字段历史欺诈率均接近基率(2~4%)，上游模型给出极低分 0.0057，倾向无害；但检索到的 4 条最相似历史案例全部为确认欺诈，且共享小额+ProductCD=R+amex/credit+iOS 的一致画像，加之多条低-lift风控规则命中，构成不可忽视的存疑信号。实体侧无任何团伙证据(扇出/gang_score 均为 0)，排除 escalate；金额小且欺诈概率不明朗，不足以 decline。综合判断为 medium 风险，建议 hold 交人工复核($5)以化解模型分与案例画像之间的冲突。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "api_calls": 3,
+ "tokens": {
+  "input": 12841,
+  "output": 2383,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1238,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3565452",
+   "value": 100.0,
+   "window": [
+    15387158,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3565452",
+   "value": "R",
+   "window": [
+    15387158,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3565452",
+   "value": 2421,
+   "window": [
+    15387158,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3565452",
+   "value": "american express",
+   "window": [
+    15387158,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3565452",
+   "value": "credit",
+   "window": [
+    15387158,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3565452",
+   "value": 343.0,
+   "window": [
+    15387158,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3565452",
+   "value": "aol.com",
+   "window": [
+    15387158,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_007",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3565452",
+   "value": "mobile",
+   "window": [
+    15387158,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_008",
+   "type": "txn_field:DeviceInfo",
+   "entity": "txn=3565452",
+   "value": "iOS Device",
+   "window": [
+    15387158,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=2421",
+   "value": 0,
+   "window": [
+    0,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=2421|addr1",
+   "value": 0,
+   "window": [
+    0,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=2421",
+   "value": 0,
+   "window": [
+    0,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=2421",
+   "value": 0,
+   "window": [
+    0,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=2421",
+   "value": 0,
+   "window": [
+    0,
+    15387158
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "gang_score",
+   "entity": "card1=2421",
+   "value": 0.0,
+   "window": [
+    0,
+    13572758
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_DeviceType_mobile",
+   "value": "高危取值 DeviceType=mobile（DeviceType=mobile）：训练窗 [0,125)天 内该模式欺诈率 9.88%，为基率 3.51% 的 2.8 倍（触发 42,771 笔，其中欺诈 4,226）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 42771,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_NEW_ENTITY",
+   "value": "新实体首现（card1+addr1 无历史）（card1_addr1_prior_cnt=0）：训练窗 [0,125)天 内该模式欺诈率 7.78%，为基率 3.51% 的 2.2 倍（触发 82,512 笔，其中欺诈 6,417）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 82512,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_002",
+   "type": "rule",
+   "entity": "rule=R_HAS_IDENTITY",
+   "value": "有设备/身份采集记录（id_01 存在）：训练窗 [0,125)天 内该模式欺诈率 7.44%，为基率 3.51% 的 2.1 倍（触发 112,859 笔，其中欺诈 8,397）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112859,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_003",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3199615",
+   "value": "案例 #3199615（day 56）：确认欺诈（拒付举报）。金额 $200.00（$100-300），ProductCD=R，visa/credit，邮箱域=aol.com，设备=iOS Device，card1=3656, addr1=325。实体历史：prior 0 笔、无成熟标签；设备 fan-out 0。",
+   "window": [
+    4927960,
+    4927960
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3416669",
+   "value": "案例 #3416669（day 124）：确认欺诈（拒付举报）。金额 $100.00（$100-300），ProductCD=R，american express/credit，邮箱域=gmail.com，设备=iOS Device，card1=9401, addr1=126。实体历史：prior 2 笔、无成熟标签；设备 fan-out 1。",
+   "window": [
+    10863735,
+    10863735
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3416662",
+   "value": "案例 #3416662（day 124）：确认欺诈（拒付举报）。金额 $200.00（$100-300），ProductCD=R，american express/credit，邮箱域=gmail.com，设备=iOS Device，card1=9401, addr1=126。实体历史：prior 1 笔、无成熟标签；设备 fan-out 1。",
+   "window": [
+    10863678,
+    10863678
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3275309",
+   "value": "案例 #3275309（day 81）：确认欺诈（拒付举报）。金额 $250.00（$100-300），ProductCD=R，american express/credit，邮箱域=yahoo.com，设备=iOS Device，card1=17306, addr1=325。实体历史：prior 4 笔、成熟欺诈率 0%；设备 fan-out 6。",
+   "window": [
+    7085353,
+    7085353
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=R",
+   "value": 0.0369,
+   "window": [
+    0,
+    13572758
+   ],
+   "support_n": 34105,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=aol.com",
+   "value": 0.0223,
+   "window": [
+    0,
+    13572758
+   ],
+   "support_n": 24832,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=american express",
+   "value": 0.0298,
+   "window": [
+    0,
+    13572758
+   ],
+   "support_n": 7625,
+   "label_based": true
+  }
+ ],
+ "arm": "A_no_history"
+}

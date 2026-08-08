@@ -1,0 +1,353 @@
+{
+ "txn_id": 3479908,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.07267932462716485,
+ "p_true": 0.07267932462716485,
+ "p_injected": false,
+ "prompt_version": "v3-strength-ceiling",
+ "report": {
+  "txn_id": 3479908,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额较小（$72），ProductCD=W，visa/debit，邮箱域 embarqmail.com，card1=9112，addr1=441。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006",
+     "TXN_002",
+     "TXN_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "card1=9112 历史交易量极高（1985 笔），成熟欺诈率仅 1.68%，低于全体基率 3.5%；card1|addr1 欺诈率 1.61%、card1|email 欺诈率为 0%，均低于基率。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005",
+     "GRAPH_006",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "扇出规模（16 地区 / 24 邮箱 / 18 设备）相对 1985 笔历史交易属正常范围，gang_score 仅 0.168，未见团伙形态特征。",
+    "evidence_ids": [
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_008"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "邮箱域 embarqmail.com（2.55%，n=196）与 ProductCD=W（2.05%，n=317k）历史欺诈率均低于全体基率 3.5%，不构成加分项。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 分 p=0.0727（约 7.3%）高于全体基率，但本次独立证据（所有相关欺诈率均低于基率、低 gang_score）不支持该风险抬升，存在冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_007",
+     "GRAPH_008",
+     "STAT_000",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "命中规则 0 条；相似案例中确有一例确认欺诈（#3002265）共享 card1=9112/addr1=441，但金额高达 $475、邮箱域为 gmail 且当时无成熟标签，与本笔画像差异明显；其余确认欺诈案例为不同 card1，仅共享 W/visa/debit 等通用属性。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=9112"
+   ],
+   "evidence_ids": [
+    "GRAPH_008",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005"
+   ],
+   "rationale": "gang_score 仅 0.168，扇出相对海量历史交易属正常，实体成熟欺诈率低于基率，无团伙批量欺诈证据。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "各项独立证据（实体成熟欺诈率 1.68%、card1|email 0%、邮箱域与 ProductCD 均低于基率、低 gang_score）一致指向低欺诈概率；金额仅 $72，损失有限。GBDT 的 p=0.0727 抬升未被证据佐证。按期望成本，放行优于挂起复核（$5）与拒绝（误拦 $25）。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3479908 为一笔 $72 的 W 类 visa/debit 交易。其主卡 card1=9112 历史交易量近 2000 笔、成熟欺诈率 1.68%（低于 3.5% 基率），card1|email 欺诈率为 0%，扇出与 gang_score（0.168）均无团伙特征，邮箱域和 ProductCD 的历史欺诈率也低于基率。上游 GBDT 给出的 p=0.0727 虽略高于基率，但与本次全部独立证据相冲突，未获佐证。相似案例中虽有一例共享同卡的确认欺诈，但其金额、邮箱域画像差异明显。综合低欺诈概率与小金额，建议放行；风险等级低，置信度中等。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10635,
+  "output": 2389,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1129,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3479908",
+   "value": 72.0,
+   "window": [
+    12860897,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3479908",
+   "value": "W",
+   "window": [
+    12860897,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3479908",
+   "value": 9112,
+   "window": [
+    12860897,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3479908",
+   "value": "visa",
+   "window": [
+    12860897,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3479908",
+   "value": "debit",
+   "window": [
+    12860897,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3479908",
+   "value": 441.0,
+   "window": [
+    12860897,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3479908",
+   "value": "embarqmail.com",
+   "window": [
+    12860897,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=9112",
+   "value": 1985,
+   "window": [
+    0,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=9112|addr1",
+   "value": 1925,
+   "window": [
+    0,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=9112",
+   "value": 16,
+   "window": [
+    0,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=9112",
+   "value": 24,
+   "window": [
+    0,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=9112",
+   "value": 18,
+   "window": [
+    0,
+    12860897
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=9112",
+   "value": 0.0168,
+   "window": [
+    0,
+    11046497
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0161,
+   "window": [
+    0,
+    11046497
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0,
+   "window": [
+    0,
+    11046497
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=9112",
+   "value": 0.168,
+   "window": [
+    0,
+    11046497
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3002265",
+   "value": "案例 #3002265（day 3）：确认欺诈（拒付举报）。金额 $475.00（$300-1k），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=9112, addr1=441。实体历史：prior 56 笔、无成熟标签；设备 fan-out 4。",
+   "window": [
+    421083,
+    421083
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3139832",
+   "value": "案例 #3139832（day 35）：确认欺诈（拒付举报）。金额 $25.00（$10-50），ProductCD=H，visa/debit，邮箱域=yahoo.com，设备=iOS Device，card1=9112, addr1=441。实体历史：prior 528 笔、成熟欺诈率 2%；设备 fan-out 13。",
+   "window": [
+    3171287,
+    3171287
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3421960",
+   "value": "案例 #3421960（day 126）：确认欺诈（拒付举报）。金额 $59.00（$50-100），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=12598, addr1=299。实体历史：prior 343 笔、成熟欺诈率 0%；设备 fan-out 14。",
+   "window": [
+    11008156,
+    11008156
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3419661",
+   "value": "案例 #3419661（day 125）：确认欺诈（拒付举报）。金额 $97.00（$50-100），ProductCD=W，visa/debit，邮箱域=yahoo.com，设备=缺失，card1=9500, addr1=330。实体历史：prior 1404 笔、成熟欺诈率 5%；设备 fan-out 61。",
+   "window": [
+    10944867,
+    10944867
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=embarqmail.com",
+   "value": 0.0255,
+   "window": [
+    0,
+    11046497
+   ],
+   "support_n": 196,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0205,
+   "window": [
+    0,
+    11046497
+   ],
+   "support_n": 317084,
+   "label_based": true
+  }
+ ]
+}

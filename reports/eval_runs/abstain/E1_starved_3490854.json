@@ -1,0 +1,342 @@
+{
+ "txn_id": 3490854,
+ "arm": "E1_starved",
+ "mode": "llm",
+ "p": 0.015179884511430156,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 1,
+ "report": {
+  "txn_id": 3490854,
+  "risk_level": "medium",
+  "key_findings": [
+   {
+    "finding": "交易金额 $150，ProductCD=R，mastercard credit 卡，yahoo.com 邮箱，desktop/Windows 设备。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006",
+     "TXN_007",
+     "TXN_008"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "字段类别层面风险均接近或低于全体基率（ProductCD=R 3.6%、yahoo.com 2.3%、mastercard 3.5%），不构成独立高风险信号。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "卡实体 card1=16075 存在团伙特征：gang_score=0.512，且扇出显著（56 地区 / 37 邮箱 / 49 设备），配合 3231 笔历史交易，符合多实体扇出形态。",
+    "evidence_ids": [
+     "GRAPH_009",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "该卡历史欺诈率高于基率：card1 整体 5.12%、card1|email 组合高达 7.91%（约为全体基率 3.5% 的 2.2 倍），是最危险的关联维度。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 分 p=0.0152（低风险）与实体图团伙信号及卡历史高欺诈率相互冲突：模型分未反映该卡的实体层面风险聚集。",
+    "evidence_ids": [
+     "GRAPH_009",
+     "GRAPH_005",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "本笔未命中任何真实数据准入风控规则，且相似历史案例检索无返回，无法据规则/案例直接定性。",
+    "evidence_ids": [],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": true,
+   "entities": [
+    "card1=16075"
+   ],
+   "evidence_ids": [
+    "GRAPH_009",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005",
+    "GRAPH_007"
+   ],
+   "rationale": "card1=16075 的 gang_score=0.512 处于中等偏高区间，配合 56/37/49 的地区/邮箱/设备扇出与显著高于基率的历史欺诈率（尤其 card1|email 7.91%），提示该卡关联到一个跨多实体的可疑聚集。但 gang_score 未达强团伙阈值、且无规则/案例佐证，故为疑似而非确认。"
+  },
+  "disposition": "hold",
+  "disposition_rationale": "GBDT 低分与实体图团伙信号明显冲突：卡历史欺诈率（5.1%~7.9%）高于基率且有中等 gang_score 与显著扇出，但字段类别风险平平、无规则/案例佐证，尚不足以确认欺诈或支撑 escalate 冻结实体。金额 $150 属中等，直接放行的潜在损失远高于 $5 人工复核。存疑即留下，选择挂起复核以核实该卡实体的团伙关联。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3490854（$150，mastercard credit / yahoo / desktop）在字段类别层面风险平平，均接近或低于全体基率。但其卡实体 card1=16075 呈现团伙特征：gang_score 0.512、地区/邮箱/设备扇出达 56/37/49、历史欺诈率高于基率（card1 5.1%、card1|email 7.9%）。这些实体层面信号与上游 GBDT 的低分 p=0.0152 明显冲突，说明模型分可能未捕捉到卡的实体聚集风险。无命中规则、无相似案例佐证，团伙关联仅为疑似。综合：中等风险、中等金额、证据存在冲突，判定挂起（hold）交人工复核核实该卡的团伙关联，成本更低且避免误放。"
+ },
+ "schema_violations": [
+  "key_findings[5]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "cost_usd": 0.1087,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3490854",
+   "value": 150.0,
+   "window": [
+    13200076,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3490854",
+   "value": "R",
+   "window": [
+    13200076,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3490854",
+   "value": 16075,
+   "window": [
+    13200076,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3490854",
+   "value": "mastercard",
+   "window": [
+    13200076,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3490854",
+   "value": "credit",
+   "window": [
+    13200076,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3490854",
+   "value": 325.0,
+   "window": [
+    13200076,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3490854",
+   "value": "yahoo.com",
+   "window": [
+    13200076,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_007",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3490854",
+   "value": "desktop",
+   "window": [
+    13200076,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_008",
+   "type": "txn_field:DeviceInfo",
+   "entity": "txn=3490854",
+   "value": "Windows",
+   "window": [
+    13200076,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=16075",
+   "value": 3231,
+   "window": [
+    0,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=16075|addr1",
+   "value": 455,
+   "window": [
+    0,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=16075",
+   "value": 56,
+   "window": [
+    0,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=16075",
+   "value": 37,
+   "window": [
+    0,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=16075",
+   "value": 49,
+   "window": [
+    0,
+    13200076
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=16075",
+   "value": 0.0512,
+   "window": [
+    0,
+    11385676
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0172,
+   "window": [
+    0,
+    11385676
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0791,
+   "window": [
+    0,
+    11385676
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "prior_fraud_rate",
+   "entity": "card1|device",
+   "value": 0.0523,
+   "window": [
+    0,
+    11385676
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_009",
+   "type": "gang_score",
+   "entity": "card1=16075",
+   "value": 0.512,
+   "window": [
+    0,
+    11385676
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=R",
+   "value": 0.0361,
+   "window": [
+    0,
+    11385676
+   ],
+   "support_n": 31193,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=yahoo.com",
+   "value": 0.0231,
+   "window": [
+    0,
+    11385676
+   ],
+   "support_n": 76390,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=mastercard",
+   "value": 0.0352,
+   "window": [
+    0,
+    11385676
+   ],
+   "support_n": 142584,
+   "label_based": true
+  }
+ ]
+}

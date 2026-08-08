@@ -1,0 +1,228 @@
+{
+ "txn_id": 3486872,
+ "mode": "degraded",
+ "degraded_reason": "BadRequestError",
+ "p": 0.002932490196961202,
+ "report": {
+  "txn_id": 3486872,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "GBDT 风险分 p=0.0029（决策区间校准已验，raw 可当概率用）",
+    "evidence_ids": [
+     "STAT_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "命中规则：高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+    "evidence_ids": [
+     "RULE_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "命中规则：高危取值 P_emaildomain=hotmail.com（P_emaildomain=hotmail.com）：训练窗 [0,125)天 内该模式欺诈率 5.32%，为基率 3.51% 的 1.5 倍（触发 34,076 笔，其中欺诈 1,813）。",
+    "evidence_ids": [
+     "RULE_001"
+    ],
+    "assertion_strength": "confirmed"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "四档期望成本 argmin（降级模式：LLM 不可用，处置由确定性成本框架直接给出）",
+  "confidence": "low",
+  "evidence_insufficient": false,
+  "summary": "[降级模式：BadRequestError] LLM 不可用，本报告由 GBDT 分数 + 规则模板生成。风险分 0.00，命中规则 2 条，处置建议 approve。拦截能力不受影响；LLM 恢复后可补充叙事性调查。"
+ },
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 0,
+ "api_calls": 0,
+ "tokens": {
+  "input": 0,
+  "output": 0
+ },
+ "cost_usd": 0.0,
+ "facts": [
+  {
+   "fact_id": "STAT_000",
+   "type": "model_score",
+   "entity": "txn=3486872",
+   "value": 0.0029,
+   "window": [
+    13109446,
+    13109446
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_P_emaildomain_hotmail_com",
+   "value": "高危取值 P_emaildomain=hotmail.com（P_emaildomain=hotmail.com）：训练窗 [0,125)天 内该模式欺诈率 5.32%，为基率 3.51% 的 1.5 倍（触发 34,076 笔，其中欺诈 1,813）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 34076,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3429572",
+   "value": "案例 #3429572（day 129）：确认欺诈（拒付举报）。金额 $280.00（$100-300），ProductCD=W，mastercard/credit，邮箱域=hotmail.com，设备=缺失，card1=9098, addr1=272。实体历史：prior 2 笔、成熟欺诈率 0%；设备 fan-out 4。",
+   "window": [
+    11236363,
+    11236363
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3364941",
+   "value": "案例 #3364941（day 108）：高分假阳（人工洗清，当时模型分 0.20）。金额 $117.00（$100-300），ProductCD=W，mastercard/credit，邮箱域=hotmail.com，设备=缺失，card1=5985, addr1=330。实体历史：prior 9 笔、成熟欺诈率 0%；设备 fan-out 4。",
+   "window": [
+    9466124,
+    9466124
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3364938",
+   "value": "案例 #3364938（day 108）：高分假阳（人工洗清，当时模型分 0.20）。金额 $117.00（$100-300），ProductCD=W，mastercard/credit，邮箱域=hotmail.com，设备=缺失，card1=5985, addr1=330。实体历史：prior 8 笔、成熟欺诈率 0%；设备 fan-out 4。",
+   "window": [
+    9466056,
+    9466056
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3194249",
+   "value": "案例 #3194249（day 54）：确认欺诈（拒付举报）。金额 $226.00（$100-300），ProductCD=W，mastercard/credit，邮箱域=hotmail.com，设备=缺失，card1=12928, addr1=485。实体历史：prior 7 笔、成熟欺诈率 100%；设备 fan-out 2。",
+   "window": [
+    4759565,
+    4759565
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=5524",
+   "value": 36,
+   "window": [
+    0,
+    13109446
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=5524|addr1",
+   "value": 4,
+   "window": [
+    0,
+    13109446
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=5524",
+   "value": 9,
+   "window": [
+    0,
+    13109446
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=5524",
+   "value": 9,
+   "window": [
+    0,
+    13109446
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=5524",
+   "value": 5,
+   "window": [
+    0,
+    13109446
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=5524",
+   "value": 0.0,
+   "window": [
+    0,
+    11295046
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    11295046
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0,
+   "window": [
+    0,
+    11295046
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=5524",
+   "value": 0.0,
+   "window": [
+    0,
+    11295046
+   ],
+   "label_based": true
+  }
+ ]
+}

@@ -1,0 +1,303 @@
+{
+ "txn_id": 3553788,
+ "arm": "E1_starved",
+ "mode": "llm",
+ "p": 0.0017014570990033161,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 1,
+ "report": {
+  "txn_id": 3553788,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额仅 $29.50，属小额交易，即便放行错误潜在损失也有限。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "付款卡 card1=15813 有 439 笔历史交易，其中 436 笔集中在同一 addr1，行为稳定且长期一致，不像一次性欺诈卡。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "该卡历史成熟欺诈率为 0.0%（卡+地址、卡+邮箱维度亦为 0.0%），gang_score=0.0，扇出温和（3 地区/11 邮箱/8 设备），无团伙关联迹象。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_006",
+     "GRAPH_007",
+     "GRAPH_008",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "各类别字段历史欺诈率均不高于全体基率(~3.5%)：rocketmail.com=0.35%、ProductCD=W=2.07%、visa=3.45%，无任何高危画像。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "本笔未命中任何风控规则，且相似案例检索无返回，缺少任何指向欺诈的正向信号。",
+    "evidence_ids": [],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "独立核实结果与上游 GBDT 低分(p=0.0017)方向一致，无冲突：多维证据一致支持低风险结论。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_008",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=15813"
+   ],
+   "evidence_ids": [
+    "GRAPH_008",
+    "GRAPH_005",
+    "GRAPH_003",
+    "GRAPH_004"
+   ],
+   "rationale": "gang_score=0.0，卡历史欺诈率 0.0%，扇出规模温和且交易高度集中于单一地址，无团伙批量作案特征。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "金额小($29.50)、付款卡历史长期稳定且欺诈率为0、无团伙信号、类别字段均不高危、未命中任何规则。多维独立证据与上游低分一致，欺诈概率低，放行成本最优。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3553788 为一笔 $29.50 的 W 类目 visa 借记卡消费。付款卡(card1=15813)有 439 笔历史交易、436 笔集中在同一地址，行为稳定，历史欺诈率 0.0%，gang_score=0.0，扇出温和，无团伙关联。所用邮箱域(rocketmail.com)、卡组织与产品类目的历史欺诈率均不高于总体基率。本笔未命中任何风控规则、无相似欺诈案例。独立核实与上游 GBDT 低分(p=0.0017)方向一致，无证据冲突，判定为低风险，予以放行。"
+ },
+ "schema_violations": [
+  "key_findings[4]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "cost_usd": 0.0977,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3553788",
+   "value": 29.5,
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3553788",
+   "value": "W",
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3553788",
+   "value": 15813,
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3553788",
+   "value": "visa",
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3553788",
+   "value": "debit",
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3553788",
+   "value": 441.0,
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3553788",
+   "value": "rocketmail.com",
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=15813",
+   "value": 439,
+   "window": [
+    0,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=15813|addr1",
+   "value": 436,
+   "window": [
+    0,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=15813",
+   "value": 3,
+   "window": [
+    0,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=15813",
+   "value": 11,
+   "window": [
+    0,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=15813",
+   "value": 8,
+   "window": [
+    0,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=15813",
+   "value": 0.0,
+   "window": [
+    0,
+    13210168
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    13210168
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0,
+   "window": [
+    0,
+    13210168
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=15813",
+   "value": 0.0,
+   "window": [
+    0,
+    13210168
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=rocketmail.com",
+   "value": 0.0035,
+   "window": [
+    0,
+    13210168
+   ],
+   "support_n": 564,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0207,
+   "window": [
+    0,
+    13210168
+   ],
+   "support_n": 372457,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=visa",
+   "value": 0.0345,
+   "window": [
+    0,
+    13210168
+   ],
+   "support_n": 329392,
+   "label_based": true
+  }
+ ]
+}

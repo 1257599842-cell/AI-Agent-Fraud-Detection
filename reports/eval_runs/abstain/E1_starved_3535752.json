@@ -1,0 +1,288 @@
+{
+ "txn_id": 3535752,
+ "arm": "E1_starved",
+ "mode": "llm",
+ "p": 0.001399434728544928,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 1,
+ "report": {
+  "txn_id": 3535752,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额仅 $34，属小额交易，即便判断失误损失也有限。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "ProductCD=W 的历史欺诈率 2.09%，低于全体基率约 3.5%。",
+    "evidence_ids": [
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "支付方式为 visa debit，card4=visa 欺诈率 3.47%、card6=debit 欺诈率 2.40%，均在或低于基率附近，无异常。",
+    "evidence_ids": [
+     "TXN_003",
+     "TXN_004",
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card1=11207 有 3494 笔历史交易，为成熟稳定实体，其历史欺诈率仅 1.15%，card1|addr1 组合欺诈率 1.32%，均远低于基率。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005",
+     "GRAPH_006"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "团伙形态分 gang_score=0.115 偏低，扇出（地区30/邮箱26/设备32）在 3494 笔历史体量下属正常范围，无团伙批量作案特征。",
+    "evidence_ids": [
+     "GRAPH_007",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "未命中任何风控规则，且相似案例检索无返回，无欺诈画像匹配。",
+    "evidence_ids": [],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "独立证据与上游 GBDT 低风险分 p=0.0014 方向一致，无冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=11207"
+   ],
+   "evidence_ids": [
+    "GRAPH_007",
+    "GRAPH_005",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004"
+   ],
+   "rationale": "gang_score 仅 0.115，实体历史欺诈率 1.15%，扇出规模相对 3494 笔历史交易属正常水平，无团伙批量作案迹象。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "多维证据一致指向低风险：小额 $34、成熟实体（3494 笔历史、欺诈率 1.15%）、各字段欺诈率均在基率附近或以下、无规则命中、无团伙迹象，且与上游低分吻合。拦截或复核的期望成本高于放行价值，放行为最省钱选择。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3535752 为一笔 $34 的 visa debit、ProductCD=W 小额交易。持卡实体 card1=11207 拥有 3494 笔历史交易，历史欺诈率仅 1.15%，团伙分 0.115，扇出正常，无团伙关联迹象。各类别历史欺诈率（W 2.09%、visa 3.47%、debit 2.40%）均在或低于全体基率 3.5%，未命中任何风控规则，也无相似欺诈案例。独立证据与上游 GBDT 风险分 p=0.0014 一致，判定为低风险，建议放行。"
+ },
+ "schema_violations": [
+  "key_findings[5]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "cost_usd": 0.1146,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3535752",
+   "value": 34.0,
+   "window": [
+    14493825,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3535752",
+   "value": "W",
+   "window": [
+    14493825,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3535752",
+   "value": 11207,
+   "window": [
+    14493825,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3535752",
+   "value": "visa",
+   "window": [
+    14493825,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3535752",
+   "value": "debit",
+   "window": [
+    14493825,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3535752",
+   "value": 126.0,
+   "window": [
+    14493825,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=11207",
+   "value": 3494,
+   "window": [
+    0,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=11207|addr1",
+   "value": 866,
+   "window": [
+    0,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=11207",
+   "value": 30,
+   "window": [
+    0,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=11207",
+   "value": 26,
+   "window": [
+    0,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=11207",
+   "value": 32,
+   "window": [
+    0,
+    14493825
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=11207",
+   "value": 0.0115,
+   "window": [
+    0,
+    12679425
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0132,
+   "window": [
+    0,
+    12679425
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "gang_score",
+   "entity": "card1=11207",
+   "value": 0.115,
+   "window": [
+    0,
+    12679425
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0209,
+   "window": [
+    0,
+    12679425
+   ],
+   "support_n": 357633,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "card4=visa",
+   "value": 0.0347,
+   "window": [
+    0,
+    12679425
+   ],
+   "support_n": 317475,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card6=debit",
+   "value": 0.024,
+   "window": [
+    0,
+    12679425
+   ],
+   "support_n": 360768,
+   "label_based": true
+  }
+ ]
+}

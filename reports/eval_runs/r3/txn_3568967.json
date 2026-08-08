@@ -1,0 +1,336 @@
+{
+ "txn_id": 3568967,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.0017431603558947513,
+ "prompt_version": "v2-lenient-fix",
+ "report": {
+  "txn_id": 3568967,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易为小额 $117，ProductCD=W，visa/debit，邮箱域 verizon.net——本身属于低风险常规消费画像。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "邮箱域 verizon.net 历史欺诈率仅 0.85%（support_n=2459），远低于全体基率约 3.5%，为保护性信号。",
+    "evidence_ids": [
+     "STAT_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "card1=12695 有 6982 笔历史交易，成熟欺诈率 2.54%，低于基率 3.5%；且该卡与邮箱组合(card1|email)历史欺诈率为 0%。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "gang_score 仅 0.254（低-中），扇出规模(addr1=38/email=28/device=41)对 6982 笔的历史体量属正常范围，无明显团伙形态。",
+    "evidence_ids": [
+     "GRAPH_008",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "关键对照：3 笔确认欺诈案例(CASE_000/002/003)与被洗清的高分假阳(CASE_001)全部为 gmail.com 邮箱 + addr1=325；而本交易为 verizon.net + addr1=126，与该卡的欺诈/风险特征签名不匹配——'长得像同卡'但不匹配真正驱动欺诈的两个属性。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003",
+     "TXN_006",
+     "TXN_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "GBDT 风险分 p=0.0017 与独立证据一致（低邮箱欺诈率、卡欺诈率低于基率、与欺诈签名不匹配），无冲突。",
+    "evidence_ids": [
+     "STAT_000",
+     "GRAPH_005",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=12695"
+   ],
+   "evidence_ids": [
+    "GRAPH_008",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005"
+   ],
+   "rationale": "gang_score 0.254 偏低，扇出相对历史体量正常，成熟欺诈率低于基率；该卡历史上的欺诈事件集中于 gmail+addr1=325 签名，本交易不属于该团伙簇。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "多项独立证据(邮箱欺诈率0.85%、card1|email欺诈率0%、卡欺诈率低于基率、与欺诈签名不匹配)一致支持低风险，且与低 GBDT 分吻合；金额仅 $117。放行是基于正向证据的结论而非默认值，期望成本最低。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3568967 为 $117 的常规 W 类 visa/debit 消费，邮箱域 verizon.net。独立核实显示：该邮箱域历史欺诈率仅 0.85%（远低于 3.5% 基率），card1=12695 成熟欺诈率 2.54%（低于基率）、card1|email 组合欺诈率为 0%，团伙分 0.254 偏低。相似案例虽同为该卡，但确认欺诈簇(及被洗清的假阳)均为 gmail.com + addr1=325 签名，而本交易为 verizon.net + addr1=126，不匹配欺诈签名。证据与低 GBDT 分(0.0017)一致，无冲突。判定低风险，放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10744,
+  "output": 2288,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1109,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3568967",
+   "value": 117.0,
+   "window": [
+    15541283,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3568967",
+   "value": "W",
+   "window": [
+    15541283,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3568967",
+   "value": 12695,
+   "window": [
+    15541283,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3568967",
+   "value": "visa",
+   "window": [
+    15541283,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3568967",
+   "value": "debit",
+   "window": [
+    15541283,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3568967",
+   "value": 126.0,
+   "window": [
+    15541283,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3568967",
+   "value": "verizon.net",
+   "window": [
+    15541283,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=12695",
+   "value": 6982,
+   "window": [
+    0,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=12695|addr1",
+   "value": 673,
+   "window": [
+    0,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=12695",
+   "value": 38,
+   "window": [
+    0,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=12695",
+   "value": 28,
+   "window": [
+    0,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=12695",
+   "value": 41,
+   "window": [
+    0,
+    15541283
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=12695",
+   "value": 0.0254,
+   "window": [
+    0,
+    13726883
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0255,
+   "window": [
+    0,
+    13726883
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0,
+   "window": [
+    0,
+    13726883
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=12695",
+   "value": 0.254,
+   "window": [
+    0,
+    13726883
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3419828",
+   "value": "案例 #3419828（day 125）：确认欺诈（拒付举报）。金额 $117.00（$100-300），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=12695, addr1=325。实体历史：prior 4074 笔、成熟欺诈率 2%；设备 fan-out 33。",
+   "window": [
+    10948383,
+    10948383
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3389691",
+   "value": "案例 #3389691（day 116）：高分假阳（人工洗清，当时模型分 0.15）。金额 $107.00（$100-300），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=12695, addr1=325。实体历史：prior 3777 笔、成熟欺诈率 2%；设备 fan-out 31。",
+   "window": [
+    10169091,
+    10169091
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3377263",
+   "value": "案例 #3377263（day 112）：确认欺诈（拒付举报）。金额 $206.00（$100-300），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=12695, addr1=325。实体历史：prior 3657 笔、成熟欺诈率 2%；设备 fan-out 31。",
+   "window": [
+    9795221,
+    9795221
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3311366",
+   "value": "案例 #3311366（day 91）：确认欺诈（拒付举报）。金额 $213.00（$100-300），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=12695, addr1=325。实体历史：prior 2988 笔、成熟欺诈率 2%；设备 fan-out 28。",
+   "window": [
+    8020179,
+    8020179
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=verizon.net",
+   "value": 0.0085,
+   "window": [
+    0,
+    13726883
+   ],
+   "support_n": 2459,
+   "label_based": true
+  }
+ ]
+}

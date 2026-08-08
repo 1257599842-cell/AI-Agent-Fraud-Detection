@@ -1,0 +1,302 @@
+[
+ {
+  "txn_id": 3480871,
+  "idx": 6,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3481803,
+  "idx": 4,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3490572,
+  "idx": 1,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   false
+  ]
+ },
+ {
+  "txn_id": 3490572,
+  "idx": 5,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   false
+  ]
+ },
+ {
+  "txn_id": 3492272,
+  "idx": 5,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3493969,
+  "idx": 0,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3494922,
+  "idx": 0,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3501730,
+  "idx": 1,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3510638,
+  "idx": 1,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3515768,
+  "idx": 3,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3523865,
+  "idx": 2,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3529881,
+  "idx": 4,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3529936,
+  "idx": 2,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3537316,
+  "idx": 3,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3537557,
+  "idx": 5,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3547972,
+  "idx": 6,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3548749,
+  "idx": 0,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3550069,
+  "idx": 0,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3551044,
+  "idx": 2,
+  "human": [
+   false,
+   false
+  ],
+  "judge": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3552038,
+  "idx": 5,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3554924,
+  "idx": 1,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3556671,
+  "idx": 4,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   false
+  ]
+ },
+ {
+  "txn_id": 3558979,
+  "idx": 2,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3562477,
+  "idx": 1,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3568967,
+  "idx": 0,
+  "human": [
+   true,
+   false
+  ],
+  "judge": [
+   false,
+   true
+  ]
+ }
+]

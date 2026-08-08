@@ -1,0 +1,290 @@
+{
+ "txn_id": 3513175,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.007588168340020122,
+ "p_true": 0.007588168340020122,
+ "p_injected": false,
+ "prompt_version": "v3-strength-ceiling",
+ "report": {
+  "txn_id": 3513175,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易为小额 $59，ProductCD=W，gmail 邮箱，无缺失字段外的异常字段值",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_004"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "实体无团伙信号：gang_score=0，addr1/email/device 扇出均为 1 或 0，历史仅 1 笔交易，无成熟欺诈标签",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "本笔未命中任何风控规则",
+    "evidence_ids": [
+     "CASE_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "字段级欺诈率均为弱信号：ProductCD=W 为 2.07%，低于全体基率约 3.5%；gmail 为 4.4%，仅略高于基率，均不支持高风险判断",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "相似确认欺诈案例主要靠 'W+gmail+$50-100' 这一常见组合匹配，画像不特异；且这些确认欺诈实体多有 prior 交易或更高扇出，与本笔近乎无历史、无扇出的实体画像不吻合，更接近被洗清的假阳形态",
+    "evidence_ids": [
+     "CASE_001",
+     "CASE_002",
+     "CASE_003",
+     "GRAPH_000",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "GBDT 风险分 p=0.0076（低）与证据方向一致，无冲突",
+    "evidence_ids": [
+     "GRAPH_005",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=10259"
+   ],
+   "evidence_ids": [
+    "GRAPH_005",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004"
+   ],
+   "rationale": "gang_score=0，各维度扇出为 1 或 0，无任何团伙关联迹象"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "无规则命中、无团伙信号、字段欺诈率接近或低于基率、GBDT 低分且与证据一致，欺诈概率低；金额仅 $59，即便存在残余不确定性，其期望损失也远低于挂起复核的成本，直接放行成本最优",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3513175 为 $59 小额 W 类交易，使用 gmail 邮箱。实体图无任何团伙信号（gang_score=0、扇出 1/0、历史仅 1 笔），未命中任何风控规则，字段级欺诈率接近或低于全体基率。相似确认欺诈案例仅靠常见组合匹配、画像不特异，且其实体历史/扇出与本笔不吻合，更像被洗清的假阳。上游 GBDT 低分（0.0076）与证据一致，无冲突。综合判断为低风险，建议放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10157,
+  "output": 1799,
+  "api_calls": 3
+ },
+ "cost_usd": 0.0958,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3513175",
+   "value": 59.0,
+   "window": [
+    13825587,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3513175",
+   "value": "W",
+   "window": [
+    13825587,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3513175",
+   "value": 10259,
+   "window": [
+    13825587,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:addr1",
+   "entity": "txn=3513175",
+   "value": 327.0,
+   "window": [
+    13825587,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3513175",
+   "value": "gmail.com",
+   "window": [
+    13825587,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=10259",
+   "value": 1,
+   "window": [
+    0,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=10259|addr1",
+   "value": 1,
+   "window": [
+    0,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=10259",
+   "value": 1,
+   "window": [
+    0,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=10259",
+   "value": 1,
+   "window": [
+    0,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=10259",
+   "value": 0,
+   "window": [
+    0,
+    13825587
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "gang_score",
+   "entity": "card1=10259",
+   "value": 0.0,
+   "window": [
+    0,
+    12011187
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3451703",
+   "value": "案例 #3451703（day 137）：确认欺诈（拒付举报）。金额 $83.50（$50-100），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=2569, addr1=272。实体历史：prior 0 笔、无成熟标签；设备 fan-out 0。",
+   "window": [
+    11969090,
+    11969090
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3451132",
+   "value": "案例 #3451132（day 137）：高分假阳（人工洗清，当时模型分 0.18）。金额 $65.00（$50-100），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=2157, addr1=512。实体历史：prior 8 笔、成熟欺诈率 0%；设备 fan-out 11。",
+   "window": [
+    11930167,
+    11930167
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3450124",
+   "value": "案例 #3450124（day 136）：确认欺诈（拒付举报）。金额 $77.00（$50-100），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=14098, addr1=325。实体历史：prior 34 笔、成熟欺诈率 4%；设备 fan-out 3。",
+   "window": [
+    11912322,
+    11912322
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3448336",
+   "value": "案例 #3448336（day 136）：确认欺诈（拒付举报）。金额 $53.00（$50-100），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=12469, addr1=269。实体历史：prior 2 笔、成熟欺诈率 0%；设备 fan-out 1。",
+   "window": [
+    11847541,
+    11847541
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0207,
+   "window": [
+    0,
+    12011187
+   ],
+   "support_n": 341384,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=gmail.com",
+   "value": 0.044,
+   "window": [
+    0,
+    12011187
+   ],
+   "support_n": 180426,
+   "label_based": true
+  }
+ ],
+ "arm": "C_thin_history"
+}

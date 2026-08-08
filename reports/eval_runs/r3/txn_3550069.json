@@ -1,0 +1,360 @@
+{
+ "txn_id": 3550069,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.0046069532092836525,
+ "prompt_version": "v2-lenient-fix",
+ "report": {
+  "txn_id": 3550069,
+  "risk_level": "high",
+  "key_findings": [
+   {
+    "finding": "上游 GBDT 风险分 p=0.0046（极低）与实体证据严重冲突：同一 card1=7585/addr1=299 实体在历史窗内有多笔确认欺诈拒付案例，模型分明显低估了实体层风险。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_008",
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card1=7585 实体呈团伙形态：gang_score=0.516，扇出显著（地区 56、邮箱 43、设备 76），成熟欺诈率 5.16%（约基率 1.5 倍），card1|email 组合欺诈率高达 7.93%。",
+    "evidence_ids": [
+     "GRAPH_008",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_005",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "检索到 4 条相似案例全部为确认欺诈（拒付举报），且均落在同一 card1=7585/addr1=299 实体上，无被洗清的假阳对照，方向一致指向该实体高危。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "本笔 ProductCD=W（历史欺诈率 2.08%，低于 3.5% 基率）、card1|addr1 组合欺诈率 3.93%、该组合历史交易达 735 笔属成熟配对，这些为缓解信号；但金额 $311.95 与其中一笔 W 型确认欺诈（$117，邮箱/设备均缺失）形态相近，且本笔设备字段亦缺失。",
+    "evidence_ids": [
+     "STAT_000",
+     "GRAPH_006",
+     "GRAPH_001",
+     "TXN_000",
+     "CASE_001"
+    ],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "命中规则 R_card6_credit：card6=credit 欺诈率 6.65%，为基率 1.9 倍，本笔 card6=credit 命中该高危取值。",
+    "evidence_ids": [
+     "RULE_000",
+     "TXN_004"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": true,
+   "entities": [
+    "card1=7585",
+    "addr1=299"
+   ],
+   "evidence_ids": [
+    "GRAPH_008",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005",
+    "GRAPH_007",
+    "CASE_000",
+    "CASE_001",
+    "CASE_002",
+    "CASE_003"
+   ],
+   "rationale": "card1=7585 gang_score=0.516、多维扇出显著、实体成熟欺诈率与 card1|email 组合欺诈率均高于基率，且检索到的 4 条相似案例全部为同一实体的确认欺诈拒付，团伙关联证据充分。"
+  },
+  "disposition": "escalate",
+  "disposition_rationale": "存在明确的实体级团伙证据（高 gang_score + 显著扇出 + 同实体 4 笔确认欺诈拒付），上报建档冻结实体可拦住该 card1/addr1 上的批量未来欺诈，即便本笔金额中等（$311.95）也值得上报。GBDT 低分（0.0046）与实体证据冲突，不应据此放行；本笔本身 ProductCD=W 有缓解信号故非直接 decline，但绝非 approve。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3550069（$311.95, ProductCD=W, visa/credit, gmail, addr1=299, card1=7585）上游 GBDT 给出极低分 0.0046，但与实体层证据严重冲突。该 card1=7585/addr1=299 实体呈明显团伙形态（gang_score=0.516，地区/邮箱/设备扇出 56/43/76，实体欺诈率 5.16%，card1|email 组合 7.93%），且检索到的 4 条相似案例全部是同一实体的确认欺诈拒付。本笔虽有缓解信号（ProductCD=W 欺诈率 2.08%、card1|addr1 成熟配对 735 笔），但设备字段缺失、命中 card6=credit 高危规则，整体风险为高。鉴于团伙证据充分，建议上报建档（escalate）冻结实体以拦截批量欺诈，而非依据模型低分放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10175,
+  "output": 2382,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1104,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3550069",
+   "value": 311.95,
+   "window": [
+    14923295,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3550069",
+   "value": "W",
+   "window": [
+    14923295,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3550069",
+   "value": 7585,
+   "window": [
+    14923295,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3550069",
+   "value": "visa",
+   "window": [
+    14923295,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3550069",
+   "value": "credit",
+   "window": [
+    14923295,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3550069",
+   "value": 299.0,
+   "window": [
+    14923295,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3550069",
+   "value": "gmail.com",
+   "window": [
+    14923295,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=7585",
+   "value": 5124,
+   "window": [
+    0,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=7585|addr1",
+   "value": 735,
+   "window": [
+    0,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=7585",
+   "value": 56,
+   "window": [
+    0,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=7585",
+   "value": 43,
+   "window": [
+    0,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=7585",
+   "value": 76,
+   "window": [
+    0,
+    14923295
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=7585",
+   "value": 0.0516,
+   "window": [
+    0,
+    13108895
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0393,
+   "window": [
+    0,
+    13108895
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0793,
+   "window": [
+    0,
+    13108895
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=7585",
+   "value": 0.516,
+   "window": [
+    0,
+    13108895
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3260344",
+   "value": "案例 #3260344（day 75）：确认欺诈（拒付举报）。金额 $300.00（$300-1k），ProductCD=R，visa/credit，邮箱域=gmail.com，设备=SAMSUNG SM-G955U Build/NRD90M，card1=7585, addr1=299。实体历史：prior 420 笔、成熟欺诈率 3%；设备 fan-out 53。",
+   "window": [
+    6636456,
+    6636456
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3220557",
+   "value": "案例 #3220557（day 62）：确认欺诈（拒付举报）。金额 $117.00（$100-300），ProductCD=W，visa/credit，邮箱域=缺失，设备=缺失，card1=7585, addr1=299。实体历史：prior 389 笔、成熟欺诈率 2%；设备 fan-out 52。",
+   "window": [
+    5524892,
+    5524892
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3260949",
+   "value": "案例 #3260949（day 75）：确认欺诈（拒付举报）。金额 $250.00（$100-300），ProductCD=R，visa/credit，邮箱域=gmail.com，设备=VS425PP Build/LMY47V，card1=7585, addr1=299。实体历史：prior 425 笔、成熟欺诈率 3%；设备 fan-out 55。",
+   "window": [
+    6645805,
+    6645805
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3093135",
+   "value": "案例 #3093135（day 23）：确认欺诈（拒付举报）。金额 $450.00（$300-1k），ProductCD=R，visa/credit，邮箱域=yahoo.com，设备=rv:11.0，card1=7585, addr1=299。实体历史：prior 207 笔、成熟欺诈率 0%；设备 fan-out 42。",
+   "window": [
+    2115117,
+    2115117
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0208,
+   "window": [
+    0,
+    13108895
+   ],
+   "support_n": 368469,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=gmail.com",
+   "value": 0.0438,
+   "window": [
+    0,
+    13108895
+   ],
+   "support_n": 193385,
+   "label_based": true
+  }
+ ]
+}

@@ -1,0 +1,420 @@
+{
+ "txn_id": 3528434,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.9957375065647671,
+ "report": {
+  "txn_id": 3528434,
+  "risk_level": "high",
+  "key_findings": [
+   {
+    "finding": "card1=9633 carries a 16.69% mature (chargeback-window-settled) fraud rate over 3,883 prior transactions — ~4.8x the ~3.5% base rate — independently corroborating the GBDT score rather than relying on it.",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "card1+email combination shows an even higher 24.29% mature fraud rate, reinforcing that the current gmail.com pairing is high-risk despite gmail's own benign base rate.",
+    "evidence_ids": [
+     "GRAPH_006",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "Entity exhibits a textbook gang/mule topology: gang_score=1.0, device fan-out of 372, spanning 28 addr1 and 17 emails on a single card1.",
+    "evidence_ids": [
+     "GRAPH_007",
+     "GRAPH_004",
+     "GRAPH_002",
+     "GRAPH_003"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "ProductCD=C has an 11.39% mature fraud rate (3.2x base), and the transaction matches the high-lift entity-fraud rules R_PRIOR_FRAUD_CARD1_EMAIL (19.11%) and R_PRIOR_FRAUD_CARD1 (17.32%).",
+    "evidence_ids": [
+     "STAT_000",
+     "RULE_000",
+     "RULE_001",
+     "RULE_002",
+     "TXN_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "The current txn's profile (visa/debit, gmail.com, Samsung mobile, ProductCD=C, card1=9633, small ~$81 amount) is a near-match to confirmed-fraud case #3456924 (chargeback-confirmed on the same card1).",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_003",
+     "TXN_004",
+     "TXN_005",
+     "TXN_006",
+     "CASE_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "Conflict/caveat: the same card1=9633 profile was human-cleared as high-score false-positive in cases #3418774/#3418760/#3398149 — but those clearances predated the now-matured 16.69% card-level fraud label and occurred at much lower model scores (0.41-0.59). The matured entity history now decisively favors fraud; the GBDT p=0.9957 is corroborated but this profile has historically produced FPs, so entity-level evidence (not the score) is the deciding factor.",
+    "evidence_ids": [
+     "CASE_001",
+     "CASE_002",
+     "CASE_003",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": true,
+   "entities": [
+    "card1=9633"
+   ],
+   "evidence_ids": [
+    "GRAPH_007",
+    "GRAPH_004",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_005",
+    "GRAPH_006"
+   ],
+   "rationale": "gang_score=1.0 with device fan-out 372 across 28 addr1 and 17 emails, plus a matured 16.69% card-level (24.29% card+email) fraud rate over 3,883 prior txns, indicates a coordinated mule/gang operation centered on card1=9633."
+  },
+  "disposition": "escalate",
+  "disposition_rationale": "Despite the small $81 amount, strong gang evidence (gang_score=1.0, fan-out 372, matured 16.69%+ entity fraud rate) means freezing/building a case on card1=9633 prevents batch fraud, making escalation ($40) net-beneficial versus a per-transaction decline that ignores the coordinated entity.",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "Transaction 3528434 ($81.34, ProductCD=C, visa/debit, gmail.com, Samsung mobile) rides on card1=9633, an entity with a matured 16.69% fraud rate over 3,883 prior transactions (24.29% when paired with email) and an unambiguous gang topology (gang_score=1.0, device fan-out 372 across 28 addresses and 17 emails). Multiple high-lift rules fire and the profile closely matches chargeback-confirmed fraud case #3456924 on the same card. While the identical profile was previously human-cleared as false-positive, those clearances predated the matured fraud label and came at low model scores; the GBDT p=0.9957 is here independently corroborated by hard entity-level evidence. Given the coordinated gang footprint, escalation to freeze/build a case on card1=9633 is recommended over a single decline, as it stops future batch fraud at low cost."
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 9816,
+  "output": 2641,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1151,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3528434",
+   "value": 81.338,
+   "window": [
+    14268211,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3528434",
+   "value": "C",
+   "window": [
+    14268211,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3528434",
+   "value": 9633,
+   "window": [
+    14268211,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3528434",
+   "value": "visa",
+   "window": [
+    14268211,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3528434",
+   "value": "debit",
+   "window": [
+    14268211,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3528434",
+   "value": "gmail.com",
+   "window": [
+    14268211,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3528434",
+   "value": "mobile",
+   "window": [
+    14268211,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_007",
+   "type": "txn_field:DeviceInfo",
+   "entity": "txn=3528434",
+   "value": "SM-G920P Build/NRD90M",
+   "window": [
+    14268211,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=9633",
+   "value": 3883,
+   "window": [
+    0,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=9633|addr1",
+   "value": 0,
+   "window": [
+    0,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=9633",
+   "value": 28,
+   "window": [
+    0,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=9633",
+   "value": 17,
+   "window": [
+    0,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=9633",
+   "value": 372,
+   "window": [
+    0,
+    14268211
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=9633",
+   "value": 0.1669,
+   "window": [
+    0,
+    12453811
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.2429,
+   "window": [
+    0,
+    12453811
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "gang_score",
+   "entity": "card1=9633",
+   "value": 1.0,
+   "window": [
+    0,
+    12453811
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_PRIOR_FRAUD_CARD1_EMAIL",
+   "value": "实体欺诈史：card1+邮箱（card1_email_prior_fraud_rate>=0.1）：训练窗 [0,125)天 内该模式欺诈率 19.11%，为基率 3.51% 的 5.4 倍（触发 16,801 笔，其中欺诈 3,210）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 16801,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_PRIOR_FRAUD_CARD1",
+   "value": "实体欺诈史：card1（card1_prior_fraud_rate>=0.1）：训练窗 [0,125)天 内该模式欺诈率 17.32%，为基率 3.51% 的 4.9 倍（触发 21,568 笔，其中欺诈 3,735）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 21568,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_002",
+   "type": "rule",
+   "entity": "rule=R_ProductCD_C",
+   "value": "高危取值 ProductCD=C（ProductCD=C）：训练窗 [0,125)天 内该模式欺诈率 11.27%，为基率 3.51% 的 3.2 倍（触发 51,857 笔，其中欺诈 5,844）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 51857,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_003",
+   "type": "rule",
+   "entity": "rule=R_DeviceType_mobile",
+   "value": "高危取值 DeviceType=mobile（DeviceType=mobile）：训练窗 [0,125)天 内该模式欺诈率 9.88%，为基率 3.51% 的 2.8 倍（触发 42,771 笔，其中欺诈 4,226）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 42771,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_004",
+   "type": "rule",
+   "entity": "rule=R_NEW_ENTITY",
+   "value": "新实体首现（card1+addr1 无历史）（card1_addr1_prior_cnt=0）：训练窗 [0,125)天 内该模式欺诈率 7.78%，为基率 3.51% 的 2.2 倍（触发 82,512 笔，其中欺诈 6,417）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 82512,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_005",
+   "type": "rule",
+   "entity": "rule=R_HAS_IDENTITY",
+   "value": "有设备/身份采集记录（id_01 存在）：训练窗 [0,125)天 内该模式欺诈率 7.44%，为基率 3.51% 的 2.1 倍（触发 112,859 笔，其中欺诈 8,397）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112859,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3456924",
+   "value": "案例 #3456924（day 139）：确认欺诈（拒付举报）。金额 $55.33（$50-100），ProductCD=C，visa/debit，邮箱域=gmail.com，设备=SM-G955U Build/R16NW，card1=9633。实体历史：prior 0 笔、无成熟标签；设备 fan-out 339。",
+   "window": [
+    12116910,
+    12116910
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3418774",
+   "value": "案例 #3418774（day 125）：高分假阳（人工洗清，当时模型分 0.51）。金额 $64.43（$50-100），ProductCD=C，visa/debit，邮箱域=gmail.com，设备=缺失，card1=9633。实体历史：prior 0 笔、无成熟标签；设备 fan-out 329。",
+   "window": [
+    10900575,
+    10900575
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3418760",
+   "value": "案例 #3418760（day 125）：高分假阳（人工洗清，当时模型分 0.59）。金额 $64.43（$50-100），ProductCD=C，visa/debit，邮箱域=gmail.com，设备=缺失，card1=9633。实体历史：prior 0 笔、无成熟标签；设备 fan-out 329。",
+   "window": [
+    10899850,
+    10899850
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3398149",
+   "value": "案例 #3398149（day 119）：高分假阳（人工洗清，当时模型分 0.41）。金额 $65.98（$50-100），ProductCD=C，visa/debit，邮箱域=gmail.com，设备=TA-1039 Build/N2G47H，card1=9633。实体历史：prior 0 笔、无成熟标签；设备 fan-out 313。",
+   "window": [
+    10381901,
+    10381901
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=C",
+   "value": 0.1139,
+   "window": [
+    0,
+    12453811
+   ],
+   "support_n": 57148,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=gmail.com",
+   "value": 0.0441,
+   "window": [
+    0,
+    12453811
+   ],
+   "support_n": 185685,
+   "label_based": true
+  }
+ ]
+}

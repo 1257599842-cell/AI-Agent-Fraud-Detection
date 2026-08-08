@@ -1,0 +1,138 @@
+{
+ "txn_id": 3492009,
+ "arm": "E3_starved",
+ "mode": "llm",
+ "p": 0.0415901555994954,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 3,
+ "report": {
+  "txn_id": 3492009,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $226.00，属中等金额（非微额，也非高额）。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "交易为 ProductCD=W、mastercard、debit 卡，addr1=476；均为常规字段取值，无异常组合。",
+    "evidence_ids": [
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "关联实体无任何图特征记录（无历史交易、无扇出、无成熟标签），因此无团伙关联证据。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "ProductCD=W、card4=mastercard、card6=debit 在成熟窗内均无历史欺诈率样本，无法据历史基线判断风险。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "本笔未命中任何风控规则，相似案例检索无返回，缺少支持欺诈的独立证据。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 风险分 p=0.0416（低）；虽无法用历史基线独立佐证，但也无任何证据与之矛盾，整体无红旗信号，倾向低风险。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "关联实体无任何历史与扇出，排除团伙上报场景；本笔未命中规则、无相似欺诈案例、无历史欺诈基线，且 GBDT 低分与'无红旗'现状一致。虽金额中等（$226），但所有可查证据一致指向无异常，不存在'互相矛盾/存疑'的 hold 触发条件，故放行。",
+  "confidence": "low",
+  "evidence_insufficient": true,
+  "summary": "交易 3492009 为一笔 $226 的 mastercard debit、ProductCD=W 常规购物交易。实体图无任何历史或扇出记录，排除团伙关联；各关键字段在成熟窗内均无历史欺诈率样本，本笔未命中任何风控规则、相似案例检索也为空。除交易字段快照外几乎没有可用证据，故 evidence_insufficient=true、置信度 low。在'无任何红旗信号'且 GBDT 低分（0.0416）不与证据冲突的前提下，判定为低风险并放行；但因证据稀薄，此结论断言强度有限。"
+ },
+ "schema_violations": [
+  "key_findings[2]: evidence_ids 缺失或为空（断言必须给证据）",
+  "key_findings[3]: evidence_ids 缺失或为空（断言必须给证据）",
+  "key_findings[4]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "cost_usd": 0.0855,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3492009",
+   "value": 226.0,
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3492009",
+   "value": "W",
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3492009",
+   "value": 7919,
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3492009",
+   "value": "mastercard",
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3492009",
+   "value": "debit",
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3492009",
+   "value": 476.0,
+   "window": [
+    13217117,
+    13217117
+   ],
+   "label_based": false
+  }
+ ]
+}

@@ -1,0 +1,413 @@
+{
+ "txn_id": 3519778,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.9985949899533324,
+ "p_true": 0.9985949899533324,
+ "p_injected": false,
+ "prompt_version": "v3-strength-ceiling",
+ "report": {
+  "txn_id": 3519778,
+  "risk_level": "medium",
+  "key_findings": [
+   {
+    "finding": "交易为 ProductCD=R、visa/debit、gmail.com、desktop/Windows，金额 $175.0，card1=11839、addr1=123。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_005",
+     "TXN_006",
+     "TXN_007",
+     "TXN_008",
+     "TXN_002"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "card1=11839 是成熟老实体：1746 笔历史交易，成熟欺诈率仅 3.07%，与全体基率约 3.5% 基本持平，并未表现出高危。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "扇出规模温和（30 地区/25 邮箱/24 设备，均摊到 1746 笔），gang_score=0.307 偏低，团伙特征不显著。",
+    "evidence_ids": [
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_009",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "字段级欺诈率均接近基率：ProductCD=R 3.63%、gmail.com 4.41%、DeviceType=desktop 6.09%（1.7x），无一构成强高危信号。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "RULE_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 分 p=0.9986 与独立证据严重冲突：实体欺诈率、扇出、gang_score、字段欺诈率全部处于基率量级，均不支持接近确定的欺诈判断。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_009",
+     "STAT_000",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "本笔 addr1=123 与被人工洗清的高分假阳案例 #3357308（card1=11839, addr1=123）画像一致；而该 card1 上的确认欺诈案例均为 addr1=512/420 且 ProductCD=W，与本笔不同，倾向假阳而非欺诈。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003",
+     "TXN_005",
+     "TXN_001"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=11839"
+   ],
+   "evidence_ids": [
+    "GRAPH_009",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005"
+   ],
+   "rationale": "gang_score 仅 0.307，扇出温和，实体成熟欺诈率约等于基率，不构成团伙批量欺诈证据。"
+  },
+  "disposition": "hold",
+  "disposition_rationale": "模型分 0.9986 与独立证据严重冲突：证据侧欺诈概率仅在基率量级，且本笔 addr1=123 匹配被洗清的高分假阳画像，而非该卡的确认欺诈画像（addr1=512/420, ProductCD=W）。金额 $175 中等，直接放行有放错整笔的风险，直接拒绝则可能重演一次假阳误拦。存在明确冲突与不确定性，$5 人工复核成本最低，符合『存疑就留下』。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3519778（$175，ProductCD=R，visa/debit，gmail，desktop，card1=11839/addr1=123）被上游模型打出 0.9986 的近确定欺诈分，但独立证据不支持：该卡是 1746 笔的成熟实体，成熟欺诈率 3.07%、gang_score 0.307、扇出温和，各字段欺诈率均在基率附近。更关键的是本笔 addr1=123 与被人工洗清的高分假阳案例画像一致，而该卡的确认欺诈案例均为 addr1=512/420、ProductCD=W，与本笔不符。因此判为中风险，模型分与证据存在冲突，建议挂起人工复核（$5）而非直接放行或拒绝。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 11282,
+  "output": 2261,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1129,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3519778",
+   "value": 175.0,
+   "window": [
+    14046842,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3519778",
+   "value": "R",
+   "window": [
+    14046842,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3519778",
+   "value": 11839,
+   "window": [
+    14046842,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3519778",
+   "value": "visa",
+   "window": [
+    14046842,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3519778",
+   "value": "debit",
+   "window": [
+    14046842,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3519778",
+   "value": 123.0,
+   "window": [
+    14046842,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3519778",
+   "value": "gmail.com",
+   "window": [
+    14046842,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_007",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3519778",
+   "value": "desktop",
+   "window": [
+    14046842,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_008",
+   "type": "txn_field:DeviceInfo",
+   "entity": "txn=3519778",
+   "value": "Windows",
+   "window": [
+    14046842,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=11839",
+   "value": 1746,
+   "window": [
+    0,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=11839|addr1",
+   "value": 585,
+   "window": [
+    0,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=11839",
+   "value": 30,
+   "window": [
+    0,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=11839",
+   "value": 25,
+   "window": [
+    0,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=11839",
+   "value": 24,
+   "window": [
+    0,
+    14046842
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=11839",
+   "value": 0.0307,
+   "window": [
+    0,
+    12232442
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0119,
+   "window": [
+    0,
+    12232442
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0117,
+   "window": [
+    0,
+    12232442
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "prior_fraud_rate",
+   "entity": "card1|device",
+   "value": 0.0526,
+   "window": [
+    0,
+    12232442
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_009",
+   "type": "gang_score",
+   "entity": "card1=11839",
+   "value": 0.307,
+   "window": [
+    0,
+    12232442
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_HAS_IDENTITY",
+   "value": "有设备/身份采集记录（id_01 存在）：训练窗 [0,125)天 内该模式欺诈率 7.44%，为基率 3.51% 的 2.1 倍（触发 112,859 笔，其中欺诈 8,397）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112859,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_DeviceType_desktop",
+   "value": "高危取值 DeviceType=desktop（DeviceType=desktop）：训练窗 [0,125)天 内该模式欺诈率 6.09%，为基率 3.51% 的 1.7 倍（触发 67,488 笔，其中欺诈 4,113）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 67488,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3357308",
+   "value": "案例 #3357308（day 105）：高分假阳（人工洗清，当时模型分 0.16）。金额 $25.00（$10-50），ProductCD=S，visa/debit，邮箱域=缺失，设备=MacOS，card1=11839, addr1=123。实体历史：prior 380 笔、成熟欺诈率 2%；设备 fan-out 22。",
+   "window": [
+    9220795,
+    9220795
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3272773",
+   "value": "案例 #3272773（day 80）：确认欺诈（拒付举报）。金额 $117.00（$100-300），ProductCD=W，visa/debit，邮箱域=缺失，设备=缺失，card1=11839, addr1=512。实体历史：prior 190 笔、成熟欺诈率 2%；设备 fan-out 21。",
+   "window": [
+    7005205,
+    7005205
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3264879",
+   "value": "案例 #3264879（day 77）：确认欺诈（拒付举报）。金额 $24.50（$10-50），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=11839, addr1=512。实体历史：prior 185 笔、成熟欺诈率 2%；设备 fan-out 21。",
+   "window": [
+    6752203,
+    6752203
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=2988261",
+   "value": "案例 #2988261（day 0）：确认欺诈（拒付举报）。金额 $160.50（$100-300），ProductCD=W，visa/debit，邮箱域=aol.com，设备=缺失，card1=11839, addr1=420。实体历史：prior 0 笔、无成熟标签；设备 fan-out 1。",
+   "window": [
+    129512,
+    129512
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=R",
+   "value": 0.0363,
+   "window": [
+    0,
+    12232442
+   ],
+   "support_n": 32229,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=gmail.com",
+   "value": 0.0441,
+   "window": [
+    0,
+    12232442
+   ],
+   "support_n": 182910,
+   "label_based": true
+  }
+ ]
+}

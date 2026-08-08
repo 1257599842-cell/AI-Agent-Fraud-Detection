@@ -1,0 +1,316 @@
+{
+ "txn_id": 3492272,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.05266981187130303,
+ "p_true": 0.05266981187130303,
+ "p_injected": false,
+ "prompt_version": "v3-strength-ceiling",
+ "report": {
+  "txn_id": 3492272,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额 $226，ProductCD=W，visa/credit 卡，addr1=204。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "实体 card1=7702 形态干净：6 笔历史，地区/邮箱扇出各为 1、设备扇出 0，gang_score=0.0，无团伙或速度滥用迹象。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "ProductCD=W 历史欺诈率 2.06%，低于全体基率 3.5%；visa 3.47% 约等基率——两者均不构成升级信号。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "唯一升高信号为 card6=credit 规则（欺诈率 6.65%，约基率 1.9 倍），但这是聚合规则，单独不足以定性本笔。",
+    "evidence_ids": [
+     "RULE_000",
+     "TXN_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "相似确认欺诈案例普遍伴随高设备扇出（7、35）或大量历史，而本实体扇出接近 0、gang_score 为 0，与确认欺诈画像不吻合；被洗清的高分假阳同样是高扇出/高历史，与本笔亦不同——本笔更接近'安静的正常实体'。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "GRAPH_004",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT p=0.0527 偏低，与本次核实结论（实体干净、基率偏低、仅 card6=credit 轻度升高）方向一致，无明显冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "STAT_000",
+     "RULE_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=7702"
+   ],
+   "evidence_ids": [
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005"
+   ],
+   "rationale": "gang_score=0.0，地区/邮箱扇出各 1、设备扇出 0，无团伙形态证据。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "实体形态干净（无扇出、无团伙分）、W/visa 基率不高、GBDT 分低且经核实自洽；唯一升高信号 card6=credit 为弱聚合规则，不足以支撑拦截或挂起。$226 金额下，为单一弱信号付出误拦或复核成本不划算，放行期望成本最低。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3492272（$226，W/visa/credit）经独立核实风险较低。关联实体 card1=7702 历史干净：仅 6 笔、扇出接近 0、gang_score=0，无团伙迹象。ProductCD=W 与 visa 的历史欺诈率不高于基率，唯一升高信号是 card6=credit 规则（1.9 倍基率），但属聚合弱信号。相似确认欺诈案例普遍伴随高设备扇出，与本笔明显不同。上游 GBDT p=0.0527 偏低，与证据一致无冲突。综合判断放行，期望成本最优。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10335,
+  "output": 2355,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1105,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3492272",
+   "value": 226.0,
+   "window": [
+    13222322,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3492272",
+   "value": "W",
+   "window": [
+    13222322,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3492272",
+   "value": 7702,
+   "window": [
+    13222322,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3492272",
+   "value": "visa",
+   "window": [
+    13222322,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3492272",
+   "value": "credit",
+   "window": [
+    13222322,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3492272",
+   "value": 204.0,
+   "window": [
+    13222322,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=7702",
+   "value": 6,
+   "window": [
+    0,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=7702|addr1",
+   "value": 6,
+   "window": [
+    0,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=7702",
+   "value": 1,
+   "window": [
+    0,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=7702",
+   "value": 1,
+   "window": [
+    0,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=7702",
+   "value": 0,
+   "window": [
+    0,
+    13222322
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "gang_score",
+   "entity": "card1=7702",
+   "value": 0.0,
+   "window": [
+    0,
+    11407922
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0206,
+   "window": [
+    0,
+    11407922
+   ],
+   "support_n": 326417,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "card4=visa",
+   "value": 0.0347,
+   "window": [
+    0,
+    11407922
+   ],
+   "support_n": 292278,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3430798",
+   "value": "案例 #3430798（day 129）：确认欺诈（拒付举报）。金额 $280.00（$100-300），ProductCD=W，visa/credit，邮箱域=icloud.com，设备=缺失，card1=15333, addr1=123。实体历史：prior 4 笔、成熟欺诈率 0%；设备 fan-out 7。",
+   "window": [
+    11291839,
+    11291839
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3429421",
+   "value": "案例 #3429421（day 129）：高分假阳（人工洗清，当时模型分 0.23）。金额 $280.00（$100-300），ProductCD=W，visa/credit，邮箱域=gmail.com，设备=缺失，card1=7861, addr1=272。实体历史：prior 68 笔、成熟欺诈率 15%；设备 fan-out 19。",
+   "window": [
+    11233187,
+    11233187
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3428727",
+   "value": "案例 #3428727（day 128）：确认欺诈（拒付举报）。金额 $160.95（$100-300），ProductCD=W，visa/credit，邮箱域=缺失，设备=缺失，card1=2455, addr1=264。实体历史：prior 139 笔、成熟欺诈率 0%；设备 fan-out 35。",
+   "window": [
+    11219114,
+    11219114
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3428624",
+   "value": "案例 #3428624（day 128）：确认欺诈（拒付举报）。金额 $171.00（$100-300），ProductCD=W，visa/credit，邮箱域=缺失，设备=缺失，card1=7153, addr1=225。实体历史：prior 4 笔、成熟欺诈率 0%；设备 fan-out 2。",
+   "window": [
+    11217088,
+    11217088
+   ],
+   "label_based": true
+  }
+ ]
+}

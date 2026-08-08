@@ -1,0 +1,416 @@
+{
+ "txn_id": 3523094,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.00912604014416624,
+ "report": {
+  "txn_id": 3523094,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "小额交易（$100），即便误判损失有限，拦截成本不划算。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "持卡实体历史清白且成熟：card1=8256 有31笔历史交易、成熟欺诈率0%、gang_score=0，扇出温和（5地区/4邮箱/4设备），符合正常用户而非团伙。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005",
+     "GRAPH_008",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "各类别特征欺诈率均接近或低于基率（~3.5%）：ProductCD=R 3.62%、comcast.net 3.06%、visa 3.48%，无显著上抬。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "命中的‘高危’规则均为弱lift（1.7–2.1x）且触发面极广（6万–11万笔），属泛化特征而非强欺诈信号。",
+    "evidence_ids": [
+     "RULE_000",
+     "RULE_001",
+     "RULE_002"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "相似确认欺诈案例多为薄历史+匿名/免费邮箱（anonymous.com/gmail，prior 1-5笔）；本笔为31笔清白历史+真实ISP邮箱，更贴近被洗清的高分假阳案例#3452930的结构。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003",
+     "TXN_006",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "上游GBDT分p=0.0091（极低）与独立证据一致，无冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "STAT_000",
+     "TXN_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=8256"
+   ],
+   "evidence_ids": [
+    "GRAPH_008",
+    "GRAPH_005",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004"
+   ],
+   "rationale": "gang_score=0，实体成熟欺诈率0%，扇出温和且无团伙形态，无团伙关联证据。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "小额$100，持卡实体清白成熟（31笔历史、0%欺诈、gang_score=0），类别欺诈率均在基率附近，命中规则为弱lift泛化特征，GBDT低分与证据一致。放行的期望成本最低，无需人工复核或拦截。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易3523094为一笔$100的visa信用卡Retail交易，来自desktop/Windows与comcast.net邮箱。持卡实体card1=8256历史清白：31笔历史交易、成熟欺诈率0%、gang_score=0、扇出温和，无团伙迹象。各类别特征欺诈率均接近或低于~3.5%基率，命中的‘高危’规则仅为弱lift的泛化特征。相似确认欺诈案例多用匿名/免费邮箱且历史薄，本笔更接近被人工洗清的假阳结构。上游GBDT分0.0091与独立证据一致。综合判断风险低，建议放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10969,
+  "output": 2017,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1053,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3523094",
+   "value": 100.0,
+   "window": [
+    14134710,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3523094",
+   "value": "R",
+   "window": [
+    14134710,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3523094",
+   "value": 8256,
+   "window": [
+    14134710,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3523094",
+   "value": "visa",
+   "window": [
+    14134710,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3523094",
+   "value": "credit",
+   "window": [
+    14134710,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3523094",
+   "value": 181.0,
+   "window": [
+    14134710,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3523094",
+   "value": "comcast.net",
+   "window": [
+    14134710,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_007",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3523094",
+   "value": "desktop",
+   "window": [
+    14134710,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_008",
+   "type": "txn_field:DeviceInfo",
+   "entity": "txn=3523094",
+   "value": "Windows",
+   "window": [
+    14134710,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=8256",
+   "value": 31,
+   "window": [
+    0,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=8256|addr1",
+   "value": 11,
+   "window": [
+    0,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=8256",
+   "value": 5,
+   "window": [
+    0,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=8256",
+   "value": 4,
+   "window": [
+    0,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=8256",
+   "value": 4,
+   "window": [
+    0,
+    14134710
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=8256",
+   "value": 0.0,
+   "window": [
+    0,
+    12320310
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    12320310
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|device",
+   "value": 0.0,
+   "window": [
+    0,
+    12320310
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=8256",
+   "value": 0.0,
+   "window": [
+    0,
+    12320310
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_HAS_IDENTITY",
+   "value": "有设备/身份采集记录（id_01 存在）：训练窗 [0,125)天 内该模式欺诈率 7.44%，为基率 3.51% 的 2.1 倍（触发 112,859 笔，其中欺诈 8,397）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112859,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_002",
+   "type": "rule",
+   "entity": "rule=R_DeviceType_desktop",
+   "value": "高危取值 DeviceType=desktop（DeviceType=desktop）：训练窗 [0,125)天 内该模式欺诈率 6.09%，为基率 3.51% 的 1.7 倍（触发 67,488 笔，其中欺诈 4,113）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 67488,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3452930",
+   "value": "案例 #3452930（day 137）：高分假阳（人工洗清，当时模型分 0.17）。金额 $200.00（$100-300），ProductCD=R，visa/credit，邮箱域=aol.com，设备=Windows，card1=6335, addr1=325。实体历史：prior 9 笔、成熟欺诈率 0%；设备 fan-out 6。",
+   "window": [
+    11996109,
+    11996109
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3447082",
+   "value": "案例 #3447082（day 135）：确认欺诈（拒付举报）。金额 $125.00（$100-300），ProductCD=R，visa/credit，邮箱域=anonymous.com，设备=Windows，card1=16373, addr1=512。实体历史：prior 4 笔、成熟欺诈率 0%；设备 fan-out 0。",
+   "window": [
+    11818362,
+    11818362
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3383015",
+   "value": "案例 #3383015（day 114）：确认欺诈（拒付举报）。金额 $100.00（$100-300），ProductCD=R，visa/credit，邮箱域=anonymous.com，设备=Windows，card1=3421, addr1=348。实体历史：prior 1 笔、成熟欺诈率 0%；设备 fan-out 7。",
+   "window": [
+    9954213,
+    9954213
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3243166",
+   "value": "案例 #3243166（day 69）：确认欺诈（拒付举报）。金额 $175.00（$100-300），ProductCD=R，visa/credit，邮箱域=gmail.com，设备=Windows，card1=1409, addr1=272。实体历史：prior 5 笔、成熟欺诈率 0%；设备 fan-out 5。",
+   "window": [
+    6129915,
+    6129915
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=R",
+   "value": 0.0362,
+   "window": [
+    0,
+    12320310
+   ],
+   "support_n": 32364,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=comcast.net",
+   "value": 0.0306,
+   "window": [
+    0,
+    12320310
+   ],
+   "support_n": 6542,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=visa",
+   "value": 0.0348,
+   "window": [
+    0,
+    12320310
+   ],
+   "support_n": 310461,
+   "label_based": true
+  }
+ ]
+}

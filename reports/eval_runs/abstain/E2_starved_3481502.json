@@ -1,0 +1,214 @@
+{
+ "txn_id": 3481502,
+ "arm": "E2_starved",
+ "mode": "llm",
+ "p": 0.0004871697627698235,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 2,
+ "report": {
+  "txn_id": 3481502,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $25.95，属小额交易。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "金额极小，即使为欺诈损失也很有限，拦截性价比低。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "产品类型为 W，历史欺诈率 2.05%，低于全体基率约 3.5%。",
+    "evidence_ids": [
+     "TXN_001",
+     "STAT_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "邮箱域 anonymous.com 历史欺诈率 2.31%，低于全体基率；虽为匿名域但并非高危信号。",
+    "evidence_ids": [
+     "TXN_006",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "支付卡为 visa/debit，两者历史欺诈率分别为 3.46%/2.39%，均在基率附近或以下。",
+    "evidence_ids": [
+     "TXN_003",
+     "TXN_004",
+     "STAT_002",
+     "STAT_003"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "实体图无任何历史记录（无交易史、无扇出、无成熟标签），未见团伙关联证据。",
+    "evidence_ids": [],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "未命中任何风控规则，相似案例检索无返回，无结构性风险信号。",
+    "evidence_ids": [],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "各关键字段欺诈率均处基率水平或以下，与上游低分 p=0.0005 方向一致，无矛盾。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "STAT_002",
+     "STAT_003"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "所有可核实字段的历史欺诈率均处于或低于全体基率，无规则命中、无相似欺诈案例、无团伙扇出证据。金额仅 $25.95，即便误放损失也极小，远低于挂起复核后可能的收益。上游低分与独立证据方向一致，无冲突，故放行。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3481502 为一笔 $25.95 的 visa 借记卡 W 类小额交易，邮箱域为 anonymous.com。独立核实显示各关键字段的历史欺诈率（2.05%–3.46%）均处于或低于全体基率约 3.5%，实体无任何历史与扇出记录，未命中风控规则，亦无相似欺诈案例。证据方向与上游 GBDT 低分 p=0.0005 一致，不存在冲突。综合判断风险低、金额小，建议放行。"
+ },
+ "schema_violations": [
+  "key_findings[5]: evidence_ids 缺失或为空（断言必须给证据）",
+  "key_findings[6]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 7,
+ "cost_usd": 0.0862,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3481502",
+   "value": 25.95,
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3481502",
+   "value": "W",
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3481502",
+   "value": 12839,
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3481502",
+   "value": "visa",
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3481502",
+   "value": "debit",
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3481502",
+   "value": 264.0,
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3481502",
+   "value": "anonymous.com",
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0205,
+   "window": [
+    0,
+    11113596
+   ],
+   "support_n": 318461,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=anonymous.com",
+   "value": 0.0231,
+   "window": [
+    0,
+    11113596
+   ],
+   "support_n": 28109,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=visa",
+   "value": 0.0346,
+   "window": [
+    0,
+    11113596
+   ],
+   "support_n": 285907,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_003",
+   "type": "fraud_rate",
+   "entity": "card6=debit",
+   "value": 0.0239,
+   "window": [
+    0,
+    11113596
+   ],
+   "support_n": 323315,
+   "label_based": true
+  }
+ ]
+}

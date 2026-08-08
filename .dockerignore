@@ -1,0 +1,8 @@
+data/
+.venv/
+reports/
+notebooks/
+__pycache__/
+*.pyc
+.git/
+.DS_Store

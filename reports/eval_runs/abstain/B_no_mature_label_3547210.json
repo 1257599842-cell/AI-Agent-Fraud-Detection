@@ -1,0 +1,311 @@
+{
+ "txn_id": 3547210,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.013784988591366043,
+ "p_true": 0.013784988591366043,
+ "p_injected": false,
+ "prompt_version": "v3-strength-ceiling",
+ "report": {
+  "txn_id": 3547210,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $257.95，中等偏小，ProductCD=W、visa/debit 为常见正常消费画像。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "邮箱域 anonymous.com 历史欺诈率 2.32%、ProductCD=W 为 2.08%，均低于全体基率约 3.5%，未见类别层面的风险抬升。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "TXN_006",
+     "TXN_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "实体 card1=1797 有 3 笔历史交易，地区/邮箱/设备 fan-out 均为 1 或 0，gang_score=0.0，无团伙关联迹象。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "未命中任何风控规则；4 条相似案例中 3 条为人工洗清的高分假阳，唯一确认欺诈案例（#3450072）的实体为 prior=0、fan-out=2，与本笔 prior=3、fan-out≈1 的画像不符，本笔更贴近被洗清的良性样本。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003",
+     "GRAPH_000",
+     "GRAPH_002"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 风险分 p=0.0138 偏低，与独立收集的证据（低于基率的类别欺诈率、无团伙信号、有正常历史）一致，无冲突。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "GRAPH_005",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=1797"
+   ],
+   "evidence_ids": [
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_005"
+   ],
+   "rationale": "实体扇出全部为 0 或 1，gang_score=0.0，无成熟欺诈标签，缺乏任何团伙形态证据。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "多路独立证据一致指向低风险：两项关键类别欺诈率均低于基率，实体无扇出与团伙信号且有正常历史，未命中规则，相似案例主体为被洗清假阳。欺诈概率低、金额中等偏小，拦截的期望成本（约 $25 误拦）高于放行的期望损失，放行为最省钱选择。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3547210（$257.95，ProductCD=W，visa/debit，邮箱域 anonymous.com）经独立核实为低风险。关键类别历史欺诈率（邮箱 2.32%、ProductCD 2.08%）均低于约 3.5% 的全体基率；实体 card1=1797 有 3 笔正常历史、扇出均为 0/1、gang_score=0，无团伙关联。未命中任何风控规则，相似案例中多数为人工洗清的高分假阳，唯一确认欺诈案例画像（prior=0）与本笔不符。证据与上游 GBDT 低分（0.0138）一致，无冲突。建议放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 11189,
+  "output": 1895,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1033,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3547210",
+   "value": 257.95,
+   "window": [
+    14843149,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3547210",
+   "value": "W",
+   "window": [
+    14843149,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3547210",
+   "value": 1797,
+   "window": [
+    14843149,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3547210",
+   "value": "visa",
+   "window": [
+    14843149,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3547210",
+   "value": "debit",
+   "window": [
+    14843149,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3547210",
+   "value": 123.0,
+   "window": [
+    14843149,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3547210",
+   "value": "anonymous.com",
+   "window": [
+    14843149,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=1797",
+   "value": 3,
+   "window": [
+    0,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=1797|addr1",
+   "value": 3,
+   "window": [
+    0,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=1797",
+   "value": 1,
+   "window": [
+    0,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=1797",
+   "value": 1,
+   "window": [
+    0,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=1797",
+   "value": 0,
+   "window": [
+    0,
+    14843149
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "gang_score",
+   "entity": "card1=1797",
+   "value": 0.0,
+   "window": [
+    0,
+    13028749
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3460822",
+   "value": "案例 #3460822（day 140）：高分假阳（人工洗清，当时模型分 0.16）。金额 $134.95（$100-300），ProductCD=W，visa/debit，邮箱域=anonymous.com，设备=缺失，card1=9485, addr1=315。实体历史：prior 391 笔、成熟欺诈率 0%；设备 fan-out 8。",
+   "window": [
+    12248303,
+    12248303
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3452551",
+   "value": "案例 #3452551（day 137）：高分假阳（人工洗清，当时模型分 0.25）。金额 $146.00（$100-300），ProductCD=W，visa/debit，邮箱域=anonymous.com，设备=缺失，card1=8931, addr1=324。实体历史：prior 7 笔、成熟欺诈率 0%；设备 fan-out 0。",
+   "window": [
+    11988050,
+    11988050
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3450072",
+   "value": "案例 #3450072（day 136）：确认欺诈（拒付举报）。金额 $141.00（$100-300），ProductCD=W，visa/debit，邮箱域=anonymous.com，设备=缺失，card1=17363, addr1=441。实体历史：prior 0 笔、无成熟标签；设备 fan-out 2。",
+   "window": [
+    11911673,
+    11911673
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3394328",
+   "value": "案例 #3394328（day 118）：高分假阳（人工洗清，当时模型分 0.22）。金额 $117.00（$100-300），ProductCD=W，visa/debit，邮箱域=anonymous.com，设备=缺失，card1=17188, addr1=122。实体历史：prior 303 笔、成熟欺诈率 31%；设备 fan-out 60。",
+   "window": [
+    10282160,
+    10282160
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=anonymous.com",
+   "value": 0.0232,
+   "window": [
+    0,
+    13028749
+   ],
+   "support_n": 31489,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0208,
+   "window": [
+    0,
+    13028749
+   ],
+   "support_n": 366377,
+   "label_based": true
+  }
+ ],
+ "arm": "B_no_mature_label"
+}

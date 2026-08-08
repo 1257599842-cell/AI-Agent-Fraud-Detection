@@ -1,0 +1,326 @@
+{
+ "txn_id": 3483896,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.003992197627826563,
+ "p_true": 0.003992197627826563,
+ "p_injected": false,
+ "prompt_version": "v3-strength-ceiling",
+ "report": {
+  "txn_id": 3483896,
+  "risk_level": "medium",
+  "key_findings": [
+   {
+    "finding": "交易金额 $117，ProductCD=W，mastercard/debit，邮箱域 comcast.net，addr1=330。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006",
+     "TXN_005"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "本笔为全新实体首现：card1=14865 及 card1+addr1 组合历史交易数均为 0，命中规则 R_NEW_ENTITY，该模式历史欺诈率 7.78%，约为基率 3.51% 的 2.2 倍——这是与低 GBDT 分数相矛盾的升高风险信号。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_001",
+     "RULE_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 风险分 p=0.0040 明显偏低，但与新实体规则给出的 7.78% 抬升欺诈率相冲突；独立核实倾向认为绝对风险高于分数所示但仍属中低区间。",
+    "evidence_ids": [
+     "RULE_000",
+     "GRAPH_000",
+     "GRAPH_001"
+    ],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "无团伙/批量作案证据：gang_score=0，地区/邮箱/设备扇出均为 0。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "存在一笔近乎同画像的确认欺诈案例 CASE_001（同为 $117、W、mastercard、comcast.net、addr1=330），但其 card1 不同且设备扇出高达 59，与本笔（扇出 0）非同一实体或团伙；相似不等于同案。",
+    "evidence_ids": [
+     "CASE_001",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "相似案例两类并存：CASE_000/CASE_001/CASE_003 为确认欺诈，CASE_002 为被人工洗清的高分假阳（同为 W/mastercard/debit、中额、设备缺失），说明该画像既可为欺诈也可为正常，不能单凭画像定案。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [],
+   "evidence_ids": [
+    "GRAPH_005",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004"
+   ],
+   "rationale": "gang_score=0 且所有扇出（地区/邮箱/设备）均为 0，无实体欺诈史与批量关联，无团伙证据。"
+  },
+  "disposition": "hold",
+  "disposition_rationale": "证据互相矛盾：GBDT 分极低（0.0040），但新实体规则抬升欺诈率至 7.78%（2.2×基率），且存在近似画像的确认欺诈案例，同时也有被洗清的假阳。金额 $117 属中额，7.8% 量级概率不足以支撑 decline（拒错代价约 $25），也不足以放心 approve。无团伙证据故不 escalate。存疑地带下，$5 人工复核成本最低——犹豫时留下而非放过。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3483896（$117，ProductCD=W，mastercard/debit，comcast.net，addr1=330）是一个全新实体首现，命中新实体规则（历史欺诈率 7.78%，约基率 2.2 倍），这与上游给出的极低 GBDT 分 0.0040 相冲突——核实后认为其绝对风险高于分数所示，属中风险。无任何团伙信号（gang_score=0、扇出全 0），排除批量欺诈。相似案例中既有几乎同画像的确认欺诈（CASE_001），也有被人工洗清的高分假阳（CASE_002），画像本身不能定案；且 CASE_001 实体与本笔不同、非同案。综合金额中等与矛盾信号，建议挂起人工复核（$5），既不轻易放过也不贸然拦截。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10548,
+  "output": 2301,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1103,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3483896",
+   "value": 117.0,
+   "window": [
+    13020044,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3483896",
+   "value": "W",
+   "window": [
+    13020044,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3483896",
+   "value": 14865,
+   "window": [
+    13020044,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3483896",
+   "value": "mastercard",
+   "window": [
+    13020044,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3483896",
+   "value": "debit",
+   "window": [
+    13020044,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3483896",
+   "value": 330.0,
+   "window": [
+    13020044,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3483896",
+   "value": "comcast.net",
+   "window": [
+    13020044,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=14865",
+   "value": 0,
+   "window": [
+    0,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=14865|addr1",
+   "value": 0,
+   "window": [
+    0,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=14865",
+   "value": 0,
+   "window": [
+    0,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=14865",
+   "value": 0,
+   "window": [
+    0,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=14865",
+   "value": 0,
+   "window": [
+    0,
+    13020044
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "gang_score",
+   "entity": "card1=14865",
+   "value": 0.0,
+   "window": [
+    0,
+    11205644
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0205,
+   "window": [
+    0,
+    11205644
+   ],
+   "support_n": 320616,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=comcast.net",
+   "value": 0.0241,
+   "window": [
+    0,
+    11205644
+   ],
+   "support_n": 6101,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_NEW_ENTITY",
+   "value": "新实体首现（card1+addr1 无历史）（card1_addr1_prior_cnt=0）：训练窗 [0,125)天 内该模式欺诈率 7.78%，为基率 3.51% 的 2.2 倍（触发 82,512 笔，其中欺诈 6,417）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 82512,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3315291",
+   "value": "案例 #3315291（day 92）：确认欺诈（拒付举报）。金额 $201.00（$100-300），ProductCD=W，visa/debit，邮箱域=comcast.net，设备=缺失，card1=4030, addr1=126。实体历史：prior 442 笔、成熟欺诈率 3%；设备 fan-out 16。",
+   "window": [
+    8089929,
+    8089929
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3158291",
+   "value": "案例 #3158291（day 41）：确认欺诈（拒付举报）。金额 $117.00（$100-300），ProductCD=W，mastercard/credit，邮箱域=comcast.net，设备=缺失，card1=15066, addr1=330。实体历史：prior 133 笔、成熟欺诈率 0%；设备 fan-out 59。",
+   "window": [
+    3701910,
+    3701910
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3427101",
+   "value": "案例 #3427101（day 128）：高分假阳（人工洗清，当时模型分 0.15）。金额 $107.95（$100-300），ProductCD=W，mastercard/debit，邮箱域=hotmail.com，设备=缺失，card1=10029, addr1=315。实体历史：prior 26 笔、成熟欺诈率 0%；设备 fan-out 0。",
+   "window": [
+    11147461,
+    11147461
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3426408",
+   "value": "案例 #3426408（day 127）：确认欺诈（拒付举报）。金额 $186.00（$100-300），ProductCD=W，mastercard/debit，邮箱域=yahoo.com，设备=缺失，card1=5033, addr1=476。实体历史：prior 22 笔、成熟欺诈率 78%；设备 fan-out 10。",
+   "window": [
+    11132224,
+    11132224
+   ],
+   "label_based": true
+  }
+ ],
+ "arm": "A_no_history"
+}

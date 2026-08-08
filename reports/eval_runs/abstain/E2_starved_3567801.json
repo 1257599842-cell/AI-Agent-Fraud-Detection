@@ -1,0 +1,173 @@
+{
+ "txn_id": 3567801,
+ "arm": "E2_starved",
+ "mode": "llm",
+ "p": 0.00245470691972722,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 2,
+ "report": {
+  "txn_id": 3567801,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额仅 $34.00，属小额交易，即便放错单笔最大损失也很有限。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "ProductCD=W 的历史欺诈率为 2.05%，低于全体基率约 3.5%，非高危类别。",
+    "evidence_ids": [
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card4=visa（3.44%）与 card6=debit（2.39%）的历史欺诈率均在或低于基率水平，无明显加成风险。",
+    "evidence_ids": [
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "关联实体无任何历史交易、扇出或成熟标签，缺乏团伙关联证据。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "本笔未命中任何风控规则，相似案例检索亦无返回，无结构化风险线索。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 风险分 p=0.0025（低）与本次独立核实结果一致：小额、类别欺诈率不高、无规则命中、无团伙信号，未发现与低分冲突的证据。",
+    "evidence_ids": [
+     "TXN_000",
+     "STAT_000",
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "金额极小（$34），关键类别欺诈率均在基率或以下，无规则命中、无相似欺诈案例、无实体历史与扇出，无任何指向欺诈的证据。独立核实与上游低分一致。在期望成本框架下，无风险信号的小额交易挂起复核（$5）不划算，放行为成本最优。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3567801 为一笔 $34 的 Visa 借记卡 W 类交易。三项关键类别的历史欺诈率（W 2.05%、visa 3.44%、debit 2.39%）均在或低于全体约 3.5% 的基率，无明显风险加成；关联实体无任何历史与扇出，无从判断团伙关联；未命中任何风控规则，相似案例检索为空。独立核实结论与上游 GBDT 低分（p=0.0025）一致，未发现冲突证据。综合小额与全面缺乏风险信号，判定为低风险并放行。"
+ },
+ "schema_violations": [
+  "key_findings[3]: evidence_ids 缺失或为空（断言必须给证据）",
+  "key_findings[4]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "cost_usd": 0.0847,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3567801",
+   "value": 34.0,
+   "window": [
+    15508082,
+    15508082
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3567801",
+   "value": "W",
+   "window": [
+    15508082,
+    15508082
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3567801",
+   "value": 10112,
+   "window": [
+    15508082,
+    15508082
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3567801",
+   "value": "visa",
+   "window": [
+    15508082,
+    15508082
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3567801",
+   "value": "debit",
+   "window": [
+    15508082,
+    15508082
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3567801",
+   "value": 204.0,
+   "window": [
+    15508082,
+    15508082
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0205,
+   "window": [
+    0,
+    13693682
+   ],
+   "support_n": 386018,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "card4=visa",
+   "value": 0.0344,
+   "window": [
+    0,
+    13693682
+   ],
+   "support_n": 339830,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card6=debit",
+   "value": 0.0239,
+   "window": [
+    0,
+    13693682
+   ],
+   "support_n": 388412,
+   "label_based": true
+  }
+ ]
+}

@@ -1,0 +1,350 @@
+{
+ "txn_id": 3562875,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.95,
+ "p_true": 0.00031453535586547685,
+ "p_injected": true,
+ "prompt_version": "v2-lenient-fix",
+ "report": {
+  "txn_id": 3562875,
+  "risk_level": "medium",
+  "key_findings": [
+   {
+    "finding": "上游 GBDT 风险分 0.95 与实体级证据严重冲突：card1=2803 是成熟卡（5994 笔历史），成熟欺诈率仅 1.21%，低于全体基率 ~3.5%，gang_score 仅 0.121，不支持高风险结论。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005",
+     "GRAPH_008"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "所有类别历史欺诈率均在基率或以下：ProductCD=W 2.06%、att.net 0.66%、visa 3.45%，无一提示高风险。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "STAT_002"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "扇出中等（63 地区/32 邮箱/59 设备），但相对 5994 笔历史属正常量级；card1|addr1 与 card1|email 组合历史欺诈率均为 0。",
+    "evidence_ids": [
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_006",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "相似案例呈两类混合：card1=2803 出现在 3 例确认欺诈中，但这些欺诈案例邮箱/设备均缺失，而本笔有真实邮箱域 att.net；被人工洗清的高分假阳（CASE_001）也属同一卡画像。案例证据不能单向定性。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003",
+     "TXN_006"
+    ],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "命中风控规则 0 条；金额小（$107.95），损失敞口有限。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "confirmed"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=2803"
+   ],
+   "evidence_ids": [
+    "GRAPH_008",
+    "GRAPH_005",
+    "GRAPH_006",
+    "GRAPH_007"
+   ],
+   "rationale": "gang_score 仅 0.121，成熟欺诈率 1.21% 低于基率，组合欺诈率为 0，不构成团伙关联证据。"
+  },
+  "disposition": "hold",
+  "disposition_rationale": "GBDT 分 0.95 与实体级证据（成熟低欺诈卡、低团伙分、类别欺诈率全在基率以下、命中规则 0 条）明确冲突，但同卡在历史上确有确认欺诈案例，存在无法用现有证据消解的存疑点。金额仅 $107.95，敞口小，不足以支撑 decline（拦错代价约 $25 与 $108 敞口不匹配高确信）。存疑而非放心，按『犹豫时留下』，$5 人工复核为成本最优。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "本笔 $107.95 交易上游模型分高达 0.95，但独立核实后证据大多指向低风险：card1=2803 为成熟卡（近 6000 笔历史、成熟欺诈率 1.21%、团伙分 0.121），各类别历史欺诈率均在 ~3.5% 基率或以下，命中规则 0 条。模型分与证据显著冲突，我不采信该高分为定论。唯一反向线索是同卡历史出现过 3 例确认欺诈，但那些案例邮箱/设备缺失、与本笔（有真实 att.net 邮箱）画像不同，且同画像也有被洗清的高分假阳，案例无法单向定性。综合看这是一个存疑但敞口小的中间地带：不宜直接放行（模型冲突未解），也不值得拒绝（金额小），故挂起 $5 人工复核最省钱。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10160,
+  "output": 2317,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1087,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3562875",
+   "value": 107.95,
+   "window": [
+    15293964,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3562875",
+   "value": "W",
+   "window": [
+    15293964,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3562875",
+   "value": 2803,
+   "window": [
+    15293964,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3562875",
+   "value": "visa",
+   "window": [
+    15293964,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3562875",
+   "value": "debit",
+   "window": [
+    15293964,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3562875",
+   "value": 387.0,
+   "window": [
+    15293964,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3562875",
+   "value": "att.net",
+   "window": [
+    15293964,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=2803",
+   "value": 5994,
+   "window": [
+    0,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=2803|addr1",
+   "value": 61,
+   "window": [
+    0,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=2803",
+   "value": 63,
+   "window": [
+    0,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=2803",
+   "value": 32,
+   "window": [
+    0,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=2803",
+   "value": 59,
+   "window": [
+    0,
+    15293964
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=2803",
+   "value": 0.0121,
+   "window": [
+    0,
+    13479564
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    13479564
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0,
+   "window": [
+    0,
+    13479564
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=2803",
+   "value": 0.121,
+   "window": [
+    0,
+    13479564
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0206,
+   "window": [
+    0,
+    13479564
+   ],
+   "support_n": 381453,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=att.net",
+   "value": 0.0066,
+   "window": [
+    0,
+    13479564
+   ],
+   "support_n": 3467,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=visa",
+   "value": 0.0345,
+   "window": [
+    0,
+    13479564
+   ],
+   "support_n": 336186,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3448288",
+   "value": "案例 #3448288（day 136）：确认欺诈（拒付举报）。金额 $209.95（$100-300），ProductCD=W，visa/debit，邮箱域=缺失，设备=缺失，card1=2803, addr1=204。实体历史：prior 368 笔、成熟欺诈率 3%；设备 fan-out 50。",
+   "window": [
+    11845989,
+    11845989
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3357460",
+   "value": "案例 #3357460（day 105）：高分假阳（人工洗清，当时模型分 0.33）。金额 $275.00（$100-300），ProductCD=W，visa/debit，邮箱域=yahoo.com，设备=缺失，card1=2803, addr1=204。实体历史：prior 290 笔、成熟欺诈率 4%；设备 fan-out 49。",
+   "window": [
+    9222747,
+    9222747
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3133062",
+   "value": "案例 #3133062（day 33）：确认欺诈（拒付举报）。金额 $221.99（$100-300），ProductCD=W，visa/debit，邮箱域=yahoo.com，设备=缺失，card1=2803, addr1=264。实体历史：prior 85 笔、成熟欺诈率 0%；设备 fan-out 42。",
+   "window": [
+    3007515,
+    3007515
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3343222",
+   "value": "案例 #3343222（day 101）：确认欺诈（拒付举报）。金额 $77.00（$50-100），ProductCD=W，visa/debit，邮箱域=cox.net，设备=缺失，card1=2803, addr1=337。实体历史：prior 561 笔、成熟欺诈率 0%；设备 fan-out 49。",
+   "window": [
+    8812904,
+    8812904
+   ],
+   "label_based": true
+  }
+ ],
+ "arm": "A_flip"
+}

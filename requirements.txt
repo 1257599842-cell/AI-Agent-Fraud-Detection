@@ -1,0 +1,29 @@
+# ── AI Fraud Investigation Copilot · 依赖清单 ──
+# 用法：source .venv/bin/activate && pip install -r requirements.txt
+#
+# 分阶段装，避免一次性引入未用到的重依赖。
+# 当前阶段（搭骨架 + 数据加载 + EDA）只需下面这些：
+
+# 数据处理
+pandas
+numpy
+pyarrow            # 高效读写 parquet（大表加速）
+
+# EDA / 可视化
+jupyterlab
+matplotlib
+seaborn
+
+# 基础建模工具（特征处理、评估指标、校准曲线）——EDA 也会用到
+scikit-learn
+
+# 风险评分主模型（arm64 Mac 的 wheel 自带 libomp，无需 brew install libomp）
+lightgbm
+
+# ── 以下留到对应阶段再解除注释安装（见 CLAUDE.md）──
+# fastapi         # serving 层：打分端点 + 调查端点
+# uvicorn         # FastAPI 运行器
+# 详细版本锁定（pip freeze）留到依赖稳定后再做。
+fastapi
+uvicorn
+duckdb

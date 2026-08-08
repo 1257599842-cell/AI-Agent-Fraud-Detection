@@ -1,0 +1,220 @@
+{
+ "txn_id": 3480336,
+ "mode": "degraded",
+ "degraded_reason": "BadRequestError",
+ "p": 0.0069865005437379155,
+ "report": {
+  "txn_id": 3480336,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "GBDT 风险分 p=0.0070（决策区间校准已验，raw 可当概率用）",
+    "evidence_ids": [
+     "STAT_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "命中规则：高危取值 ProductCD=C（ProductCD=C）：训练窗 [0,125)天 内该模式欺诈率 11.27%，为基率 3.51% 的 3.2 倍（触发 51,857 笔，其中欺诈 5,844）。",
+    "evidence_ids": [
+     "RULE_000"
+    ],
+    "assertion_strength": "confirmed"
+   }
+  ],
+  "gang_association": {
+   "suspected": true,
+   "entities": [
+    "card1=3154"
+   ],
+   "evidence_ids": [
+    "GRAPH_005",
+    "GRAPH_006",
+    "GRAPH_007"
+   ],
+   "rationale": "gang_score=0.56（fan-out×成熟欺诈率，时间因果）"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "四档期望成本 argmin（降级模式：LLM 不可用，处置由确定性成本框架直接给出）",
+  "confidence": "low",
+  "evidence_insufficient": false,
+  "summary": "[降级模式：BadRequestError] LLM 不可用，本报告由 GBDT 分数 + 规则模板生成。风险分 0.01，命中规则 1 条，处置建议 approve。拦截能力不受影响；LLM 恢复后可补充叙事性调查。"
+ },
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 0,
+ "api_calls": 0,
+ "tokens": {
+  "input": 0,
+  "output": 0
+ },
+ "cost_usd": 0.0,
+ "facts": [
+  {
+   "fact_id": "STAT_000",
+   "type": "model_score",
+   "entity": "txn=3480336",
+   "value": 0.007,
+   "window": [
+    12868166,
+    12868166
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_ProductCD_C",
+   "value": "高危取值 ProductCD=C（ProductCD=C）：训练窗 [0,125)天 内该模式欺诈率 11.27%，为基率 3.51% 的 3.2 倍（触发 51,857 笔，其中欺诈 5,844）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 51857,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3414841",
+   "value": "案例 #3414841（day 124）：高分假阳（人工洗清，当时模型分 0.65）。金额 $30.86（$10-50），ProductCD=C，mastercard/debit，邮箱域=gmail.com，设备=Windows，card1=3154。实体历史：prior 0 笔、无成熟标签；设备 fan-out 354。",
+   "window": [
+    10802808,
+    10802808
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3414834",
+   "value": "案例 #3414834（day 124）：高分假阳（人工洗清，当时模型分 0.46）。金额 $30.86（$10-50），ProductCD=C，mastercard/debit，邮箱域=gmail.com，设备=Windows，card1=3154。实体历史：prior 0 笔、无成熟标签；设备 fan-out 354。",
+   "window": [
+    10802687,
+    10802687
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3393234",
+   "value": "案例 #3393234（day 117）：高分假阳（人工洗清，当时模型分 0.45）。金额 $30.33（$10-50），ProductCD=C，mastercard/debit，邮箱域=gmail.com，设备=Windows，card1=3154。实体历史：prior 0 笔、无成熟标签；设备 fan-out 347。",
+   "window": [
+    10262756,
+    10262756
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3352121",
+   "value": "案例 #3352121（day 103）：确认欺诈（拒付举报）。金额 $35.77（$10-50），ProductCD=C，mastercard/debit，邮箱域=gmail.com，设备=Hisense F23 Build/NRD90M，card1=3154。实体历史：prior 0 笔、无成熟标签；设备 fan-out 324。",
+   "window": [
+    9064464,
+    9064464
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=3154",
+   "value": 4011,
+   "window": [
+    0,
+    12868166
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=3154|addr1",
+   "value": 7,
+   "window": [
+    0,
+    12868166
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=3154",
+   "value": 30,
+   "window": [
+    0,
+    12868166
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=3154",
+   "value": 19,
+   "window": [
+    0,
+    12868166
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=3154",
+   "value": 375,
+   "window": [
+    0,
+    12868166
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=3154",
+   "value": 0.0559,
+   "window": [
+    0,
+    11053766
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    11053766
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0916,
+   "window": [
+    0,
+    11053766
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=3154",
+   "value": 0.559,
+   "window": [
+    0,
+    11053766
+   ],
+   "label_based": true
+  }
+ ]
+}

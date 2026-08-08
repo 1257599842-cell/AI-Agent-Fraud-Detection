@@ -1,0 +1,16 @@
+# 数据：原始 + 处理后，绝不提交（上百 MB，且含敏感交易数据）
+data/
+
+# Kaggle 凭证
+kaggle.json
+.kaggle/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# 系统
+.DS_Store

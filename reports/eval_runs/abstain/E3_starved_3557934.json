@@ -1,0 +1,116 @@
+{
+ "txn_id": 3557934,
+ "arm": "E3_starved",
+ "mode": "llm",
+ "p": 0.0018562300193428886,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 3,
+ "report": null,
+ "schema_violations": [
+  "JSON 解析失败: 未找到 JSON 对象"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 8,
+ "cost_usd": 0.0843,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3557934",
+   "value": 100.0,
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3557934",
+   "value": "R",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3557934",
+   "value": 17400,
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3557934",
+   "value": "visa",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3557934",
+   "value": "debit",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3557934",
+   "value": 123.0,
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3557934",
+   "value": "yahoo.com",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_007",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3557934",
+   "value": "desktop",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_008",
+   "type": "txn_field:DeviceInfo",
+   "entity": "txn=3557934",
+   "value": "Windows",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  }
+ ]
+}

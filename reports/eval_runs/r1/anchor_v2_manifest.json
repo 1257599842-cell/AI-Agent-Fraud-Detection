@@ -1,0 +1,199 @@
+[
+ {
+  "txn_id": 3481803,
+  "idx": 4,
+  "arm": "C_dispute",
+  "why": "DISPUTE：citation 拆出后用 v2 裁",
+  "templates": [],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3481840,
+  "idx": 4,
+  "arm": "C_drift",
+  "why": "金标漂移方向（rubric+标注者合并效应）",
+  "templates": [],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3484095,
+  "idx": 5,
+  "arm": "C_minority",
+  "why": "旧少数类（机械不可判，需 v2 下重裁）",
+  "templates": [
+   "T1_人群先验冒充实体"
+  ],
+  "prev_gold": [
+   false,
+   true
+  ]
+ },
+ {
+  "txn_id": 3490572,
+  "idx": 1,
+  "arm": "C_drift",
+  "why": "金标漂移方向（rubric+标注者合并效应）",
+  "templates": [],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3508739,
+  "idx": 5,
+  "arm": "A_template",
+  "template": "T2_薄证据强断言",
+  "n_cand": 16,
+  "templates": [
+   "T2_薄证据强断言"
+  ],
+  "prev_gold": null
+ },
+ {
+  "txn_id": 3510638,
+  "idx": 0,
+  "arm": "C_drift",
+  "why": "金标漂移方向（rubric+标注者合并效应）",
+  "templates": [],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3511656,
+  "idx": 2,
+  "arm": "A_template",
+  "template": "T1_人群先验冒充实体",
+  "n_cand": 57,
+  "templates": [
+   "T1_人群先验冒充实体"
+  ],
+  "prev_gold": null
+ },
+ {
+  "txn_id": 3516609,
+  "idx": 1,
+  "arm": "C_drift",
+  "why": "金标漂移方向（rubric+标注者合并效应）",
+  "templates": [],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3529881,
+  "idx": 3,
+  "arm": "C_dispute",
+  "why": "DISPUTE：citation 拆出后用 v2 裁",
+  "templates": [
+   "T3_解释掉正信号"
+  ],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3531514,
+  "idx": 3,
+  "arm": "C_drift",
+  "why": "金标漂移方向（rubric+标注者合并效应）",
+  "templates": [],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3534425,
+  "idx": 5,
+  "arm": "A_template",
+  "template": "T3_解释掉正信号",
+  "n_cand": 18,
+  "templates": [
+   "T3_解释掉正信号"
+  ],
+  "prev_gold": null
+ },
+ {
+  "txn_id": 3537070,
+  "idx": 4,
+  "arm": "C_drift",
+  "why": "金标漂移方向（rubric+标注者合并效应）",
+  "templates": [
+   "T3_解释掉正信号"
+  ],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3547972,
+  "idx": 6,
+  "arm": "C_drift",
+  "why": "金标漂移方向（rubric+标注者合并效应）",
+  "templates": [
+   "T2_薄证据强断言"
+  ],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3551044,
+  "idx": 2,
+  "arm": "C_minority",
+  "why": "旧少数类（机械不可判，需 v2 下重裁）",
+  "templates": [
+   "T3_解释掉正信号"
+  ],
+  "prev_gold": [
+   false,
+   false
+  ]
+ },
+ {
+  "txn_id": 3552038,
+  "idx": 0,
+  "arm": "A_template",
+  "template": "T4_机制断言无机制证据",
+  "n_cand": 8,
+  "templates": [
+   "T4_机制断言无机制证据"
+  ],
+  "prev_gold": null
+ },
+ {
+  "txn_id": 3563867,
+  "idx": 1,
+  "arm": "C_dispute",
+  "why": "DISPUTE：citation 拆出后用 v2 裁",
+  "templates": [],
+  "prev_gold": [
+   true,
+   false
+  ]
+ },
+ {
+  "txn_id": 3568967,
+  "idx": 0,
+  "arm": "C_drift",
+  "why": "金标漂移方向（rubric+标注者合并效应）",
+  "templates": [],
+  "prev_gold": [
+   true,
+   false
+  ]
+ }
+]

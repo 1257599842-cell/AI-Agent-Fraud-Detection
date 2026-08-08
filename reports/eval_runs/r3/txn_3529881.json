@@ -1,0 +1,347 @@
+{
+ "txn_id": 3529881,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.0015214493126835343,
+ "prompt_version": "v2-lenient-fix",
+ "report": {
+  "txn_id": 3529881,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "Card1=2157 is a long-established, high-volume entity with 807 prior transactions, 661 of them on this same addr1, indicating a stable legitimate cardholder-address pairing rather than a burst pattern.",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_001",
+     "TXN_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "Mature (21-day-settled) fraud rates for the entity are all at or below the ~3.5% base rate: card1 1.15%, card1|addr1 1.05%, and card1|email 0.0%.",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_006",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "No gang signature: gang_score is low (0.115) and fan-out is modest relative to volume (31 addr1 / 17 email / 11 device across 807 txns).",
+    "evidence_ids": [
+     "GRAPH_008",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "Categorical attributes carry no elevated risk: ProductCD=W 2.09%, aol.com 2.23%, visa 3.48%, all at/below the 3.5% base rate; amount is modest ($226).",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "STAT_002",
+     "TXN_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "No risk rules fired, and 3 of 4 similar cases on this same card1 were high-score false positives manually cleared; the single confirmed-fraud analog (CASE_000) differed by having missing email/device, whereas this txn has an established email with 0% card1|email fraud.",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "The independent evidence corroborates rather than conflicts with the low upstream GBDT score (p=0.0015).",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_008",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "Established high-volume entity, mature fraud rates below base, no gang signature, no rules fired, benign categoricals, and similar-case precedent leaning toward false positives. Independent evidence supports the low GBDT score. Fraud probability is low and amount is modest, so approving is the lowest-expected-cost action.",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "Transaction 3529881 ($226, ProductCD=W, visa/debit, aol.com) runs on card1=2157, a stable high-volume entity with 807 priors and 661 on the same address. All mature fraud rates are below the ~3.5% base rate (card1 1.15%, card1|email 0.0%), gang_score is low (0.115), fan-out is modest for the volume, and no rules fired. Categorical attributes are benign. Similar historical cases on this card were predominantly cleared false positives; the one confirmed-fraud analog lacked email/device, unlike this present-email transaction. The independent evidence corroborates the low upstream score, so this is a low-risk transaction and is approved."
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10975,
+  "output": 1997,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1048,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3529881",
+   "value": 226.0,
+   "window": [
+    14323198,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3529881",
+   "value": "W",
+   "window": [
+    14323198,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3529881",
+   "value": 2157,
+   "window": [
+    14323198,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3529881",
+   "value": "visa",
+   "window": [
+    14323198,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3529881",
+   "value": "debit",
+   "window": [
+    14323198,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3529881",
+   "value": 272.0,
+   "window": [
+    14323198,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3529881",
+   "value": "aol.com",
+   "window": [
+    14323198,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=2157",
+   "value": 807,
+   "window": [
+    0,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=2157|addr1",
+   "value": 661,
+   "window": [
+    0,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=2157",
+   "value": 31,
+   "window": [
+    0,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=2157",
+   "value": 17,
+   "window": [
+    0,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=2157",
+   "value": 11,
+   "window": [
+    0,
+    14323198
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=2157",
+   "value": 0.0115,
+   "window": [
+    0,
+    12508798
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0105,
+   "window": [
+    0,
+    12508798
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0,
+   "window": [
+    0,
+    12508798
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=2157",
+   "value": 0.115,
+   "window": [
+    0,
+    12508798
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3464518",
+   "value": "案例 #3464518（day 142）：确认欺诈（拒付举报）。金额 $107.95（$100-300），ProductCD=W，visa/debit，邮箱域=缺失，设备=缺失，card1=2157, addr1=220。实体历史：prior 2 笔、成熟欺诈率 0%；设备 fan-out 11。",
+   "window": [
+    12358419,
+    12358419
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3378408",
+   "value": "案例 #3378408（day 112）：高分假阳（人工洗清，当时模型分 0.24）。金额 $280.00（$100-300），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=2157, addr1=512。实体历史：prior 5 笔、无成熟标签；设备 fan-out 10。",
+   "window": [
+    9828377,
+    9828377
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3378405",
+   "value": "案例 #3378405（day 112）：高分假阳（人工洗清，当时模型分 0.15）。金额 $265.00（$100-300），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=2157, addr1=512。实体历史：prior 4 笔、无成熟标签；设备 fan-out 10。",
+   "window": [
+    9828298,
+    9828298
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3378325",
+   "value": "案例 #3378325（day 112）：高分假阳（人工洗清，当时模型分 0.18）。金额 $280.00（$100-300），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=2157, addr1=512。实体历史：prior 3 笔、无成熟标签；设备 fan-out 10。",
+   "window": [
+    9827163,
+    9827163
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0209,
+   "window": [
+    0,
+    12508798
+   ],
+   "support_n": 353155,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=aol.com",
+   "value": 0.0223,
+   "window": [
+    0,
+    12508798
+   ],
+   "support_n": 23044,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=visa",
+   "value": 0.0348,
+   "window": [
+    0,
+    12508798
+   ],
+   "support_n": 313909,
+   "label_based": true
+  }
+ ]
+}

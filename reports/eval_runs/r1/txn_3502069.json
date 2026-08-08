@@ -1,0 +1,383 @@
+{
+ "txn_id": 3502069,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.7569325627009801,
+ "report": {
+  "txn_id": 3502069,
+  "risk_level": "medium",
+  "key_findings": [
+   {
+    "finding": "交易金额极小（$16.72），远低于误拦成本 $25，拦错的期望损失高于放错。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "上游 GBDT 风险分 p=0.7569 主要由群体级高危类别驱动（ProductCD=C 欺诈率 11.36%、新实体首现 7.78%、card6=credit、desktop），而非本实体的特异性证据，属可核实但非结论性线索。",
+    "evidence_ids": [
+     "STAT_000",
+     "RULE_000",
+     "RULE_001",
+     "RULE_003",
+     "RULE_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "本实体图特征干净，与团伙欺诈画像相悖：gang_score=0.0，邮箱扇出仅 2、设备扇出仅 2，无成熟欺诈标签历史。这与风险分构成显著冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "相似案例中 4 条有 3 条为人工洗清的高分假阳（CASE_000/002/003），画像与本笔高度一致（小额、ProductCD=C、mastercard/credit、gmail、Windows）；唯一确认欺诈案例（CASE_001）设备扇出达 104，本笔扇出仅 2，欺诈模式不匹配。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_002",
+     "CASE_003",
+     "CASE_001",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "卡与邮箱基础属性接近或等于全体基率（mastercard 3.52%、gmail 4.42%），不构成额外风险信号。",
+    "evidence_ids": [
+     "STAT_002",
+     "STAT_001"
+    ],
+    "assertion_strength": "confirmed"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=15974"
+   ],
+   "evidence_ids": [
+    "GRAPH_005",
+    "GRAPH_003",
+    "GRAPH_004"
+   ],
+   "rationale": "gang_score=0.0，邮箱/设备扇出均仅为 2，无团伙批量形态；与确认欺诈案例的高扇出（104）画像截然不同，无团伙关联证据。"
+  },
+  "disposition": "hold",
+  "disposition_rationale": "存在真实的群体级风险信号（ProductCD=C 3.2 倍基率、新实体）与上游高分，但实体图证据干净且高度匹配多起被洗清的假阳画像，两方冲突。金额极小使拒绝（误拦 $25）不划算，直接放行又与显著风险信号相悖；$5 人工复核在此中间地带成本最低、最稳妥。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3502069 为一笔 $16.72 的小额 ProductCD=C（mastercard/credit、gmail、Windows桌面）交易。上游 GBDT 给出 p=0.7569 的高分，但独立核实后发现该分数几乎完全由群体级高危类别驱动（ProductCD=C 欺诈率 11.36%、新实体首现等），而非本实体的特异性证据。实体图特征反而很干净：gang_score=0，邮箱与设备扇出均仅为 2，无成熟欺诈史，无团伙关联。相似历史案例中 4 条有 3 条是人工洗清的高分假阳，画像与本笔几乎一致；唯一确认欺诈的案例其设备扇出高达 104，与本笔的低扇出模式明显不同。综合看，本笔属'长得像欺诈但更可能是假阳'的中间地带，且金额过小不值得直接拒绝。建议挂起人工复核（$5），既规避误拦成本又不盲目放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "api_calls": 3,
+ "tokens": {
+  "input": 11185,
+  "output": 2079,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1079,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3502069",
+   "value": 16.723,
+   "window": [
+    13473579,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3502069",
+   "value": "C",
+   "window": [
+    13473579,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3502069",
+   "value": 15974,
+   "window": [
+    13473579,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3502069",
+   "value": "mastercard",
+   "window": [
+    13473579,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3502069",
+   "value": "credit",
+   "window": [
+    13473579,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3502069",
+   "value": "gmail.com",
+   "window": [
+    13473579,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3502069",
+   "value": "desktop",
+   "window": [
+    13473579,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_007",
+   "type": "txn_field:DeviceInfo",
+   "entity": "txn=3502069",
+   "value": "Windows",
+   "window": [
+    13473579,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=15974",
+   "value": 8,
+   "window": [
+    0,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=15974|addr1",
+   "value": 0,
+   "window": [
+    0,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=15974",
+   "value": 0,
+   "window": [
+    0,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=15974",
+   "value": 2,
+   "window": [
+    0,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=15974",
+   "value": 2,
+   "window": [
+    0,
+    13473579
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "gang_score",
+   "entity": "card1=15974",
+   "value": 0.0,
+   "window": [
+    0,
+    11659179
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_ProductCD_C",
+   "value": "高危取值 ProductCD=C（ProductCD=C）：训练窗 [0,125)天 内该模式欺诈率 11.27%，为基率 3.51% 的 3.2 倍（触发 51,857 笔，其中欺诈 5,844）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 51857,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_NEW_ENTITY",
+   "value": "新实体首现（card1+addr1 无历史）（card1_addr1_prior_cnt=0）：训练窗 [0,125)天 内该模式欺诈率 7.78%，为基率 3.51% 的 2.2 倍（触发 82,512 笔，其中欺诈 6,417）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 82512,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_002",
+   "type": "rule",
+   "entity": "rule=R_HAS_IDENTITY",
+   "value": "有设备/身份采集记录（id_01 存在）：训练窗 [0,125)天 内该模式欺诈率 7.44%，为基率 3.51% 的 2.1 倍（触发 112,859 笔，其中欺诈 8,397）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112859,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_003",
+   "type": "rule",
+   "entity": "rule=R_card6_credit",
+   "value": "高危取值 card6=credit（card6=credit）：训练窗 [0,125)天 内该模式欺诈率 6.65%，为基率 3.51% 的 1.9 倍（触发 112,717 笔，其中欺诈 7,501）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112717,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_004",
+   "type": "rule",
+   "entity": "rule=R_DeviceType_desktop",
+   "value": "高危取值 DeviceType=desktop（DeviceType=desktop）：训练窗 [0,125)天 内该模式欺诈率 6.09%，为基率 3.51% 的 1.7 倍（触发 67,488 笔，其中欺诈 4,113）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 67488,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3436284",
+   "value": "案例 #3436284（day 131）：高分假阳（人工洗清，当时模型分 0.20）。金额 $37.01（$10-50），ProductCD=C，mastercard/credit，邮箱域=gmail.com，设备=Windows，card1=14276。实体历史：prior 0 笔、无成熟标签；设备 fan-out 105。",
+   "window": [
+    11462232,
+    11462232
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3434608",
+   "value": "案例 #3434608（day 130）：确认欺诈（拒付举报）。金额 $22.81（$10-50），ProductCD=C，mastercard/credit，邮箱域=gmail.com，设备=Windows，card1=14276。实体历史：prior 0 笔、无成熟标签；设备 fan-out 104。",
+   "window": [
+    11397334,
+    11397334
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3425724",
+   "value": "案例 #3425724（day 127）：高分假阳（人工洗清，当时模型分 0.18）。金额 $24.29（$10-50），ProductCD=C，mastercard/credit，邮箱域=gmail.com，设备=Windows，card1=15944。实体历史：prior 0 笔、无成熟标签；设备 fan-out 24。",
+   "window": [
+    11120168,
+    11120168
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3424174",
+   "value": "案例 #3424174（day 126）：高分假阳（人工洗清，当时模型分 0.41）。金额 $14.02（$10-50），ProductCD=C，mastercard/credit，邮箱域=gmail.com，设备=Windows，card1=16746。实体历史：prior 0 笔、无成熟标签；设备 fan-out 35。",
+   "window": [
+    11053686,
+    11053686
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=C",
+   "value": 0.1136,
+   "window": [
+    0,
+    11659179
+   ],
+   "support_n": 54597,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=gmail.com",
+   "value": 0.0442,
+   "window": [
+    0,
+    11659179
+   ],
+   "support_n": 176242,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_002",
+   "type": "fraud_rate",
+   "entity": "card4=mastercard",
+   "value": 0.0352,
+   "window": [
+    0,
+    11659179
+   ],
+   "support_n": 145556,
+   "label_based": true
+  }
+ ]
+}

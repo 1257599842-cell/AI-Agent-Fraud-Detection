@@ -1,0 +1,396 @@
+{
+ "txn_id": 3537557,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.10170642673562563,
+ "prompt_version": "v2-lenient-fix",
+ "report": {
+  "txn_id": 3537557,
+  "risk_level": "medium",
+  "key_findings": [
+   {
+    "finding": "Transaction is very low value ($16.23), limiting maximum loss exposure even if fraudulent.",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "Category-level signals are elevated: ProductCD=C (~11.4% fraud, ~3.2x base), outlook.com (~9.0%, ~2.7x), and mobile device (~9.9%, ~2.8x). These broadly corroborate the GBDT score of 0.1017 rather than conflicting with it.",
+    "evidence_ids": [
+     "TXN_001",
+     "STAT_000",
+     "RULE_000",
+     "TXN_005",
+     "STAT_001",
+     "RULE_002",
+     "TXN_006",
+     "RULE_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card1=15885 shows high device fan-out (587) and a moderate gang_score (0.396), but its own prior fraud rate (3.96%) is near the ~3.5% base rate, so the entity is not itself a confirmed high-fraud node.",
+    "evidence_ids": [
+     "GRAPH_004",
+     "GRAPH_007",
+     "GRAPH_005",
+     "GRAPH_006"
+    ],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "Similar-case comparison is discriminating: the two CONFIRMED-fraud cases on this card1 used Windows devices with ~$38-40 amounts, while the two WASHED false-positives used mobile Android devices with ~$3-4 amounts. This transaction is mobile + very small amount, matching the false-positive cluster more closely than the fraud cluster.",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "CASE_003"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card1+addr1 is a first-seen entity combination (prior_cnt=0), a mild risk uplift (~2.2x base), but addr1 field is missing so the pattern is weakly grounded.",
+    "evidence_ids": [
+     "GRAPH_001",
+     "RULE_003"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": true,
+   "entities": [
+    "card1=15885"
+   ],
+   "evidence_ids": [
+    "GRAPH_004",
+    "GRAPH_007",
+    "GRAPH_005"
+   ],
+   "rationale": "card1=15885 has large device fan-out (587) and a moderate gang_score (0.396), suggesting possible shared/coordinated use. However, the entity's own mature prior fraud rate (3.96%) is near base rate, so there is no strong confirmed fraud-ring signal justifying escalation on this transaction."
+  },
+  "disposition": "approve",
+  "disposition_rationale": "Amount is only $16.23, so expected fraud loss (~$1.6 at the ~10% category-level probability) is well below the $5 hold cost and far below the $25 mis-block cost of decline. The device+amount profile matches the washed false-positive cluster (mobile Android, tiny amount) rather than the confirmed-fraud cluster (Windows, ~$38). Entity gang signals are moderate but the entity's own prior fraud rate is near base, so escalation is not justified. Cheapest correct action here is to approve.",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "Transaction 3537557 is a $16.23 ProductCD=C / visa-debit / outlook.com / mobile (Huawei) payment on card1=15885. Category-level signals (ProductCD=C, outlook, mobile) are all 2.7-3.2x base rate, consistent with — not contradicting — the GBDT score of 0.1017. The card shows high device fan-out and a moderate gang_score, but its own mature fraud rate (~4%) is near base, so it is not a confirmed fraud ring. Critically, the two confirmed-fraud precedents on this card used Windows devices at ~$38-40, whereas the two human-washed false positives used mobile devices at ~$3-4; this transaction's mobile-device + tiny-amount profile aligns with the false-positive cluster. Given the trivial dollar exposure, approve is the lowest-expected-cost disposition; gang signals are noted but do not rise to escalation."
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 10768,
+  "output": 2384,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1134,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3537557",
+   "value": 16.231,
+   "window": [
+    14541234,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3537557",
+   "value": "C",
+   "window": [
+    14541234,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3537557",
+   "value": 15885,
+   "window": [
+    14541234,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3537557",
+   "value": "visa",
+   "window": [
+    14541234,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3537557",
+   "value": "debit",
+   "window": [
+    14541234,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3537557",
+   "value": "outlook.com",
+   "window": [
+    14541234,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3537557",
+   "value": "mobile",
+   "window": [
+    14541234,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_007",
+   "type": "txn_field:DeviceInfo",
+   "entity": "txn=3537557",
+   "value": "CRO-L03 Build/HUAWEICRO-L03",
+   "window": [
+    14541234,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=15885",
+   "value": 9744,
+   "window": [
+    0,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=15885|addr1",
+   "value": 0,
+   "window": [
+    0,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=15885",
+   "value": 31,
+   "window": [
+    0,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=15885",
+   "value": 21,
+   "window": [
+    0,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=15885",
+   "value": 587,
+   "window": [
+    0,
+    14541234
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=15885",
+   "value": 0.0396,
+   "window": [
+    0,
+    12726834
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0557,
+   "window": [
+    0,
+    12726834
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "gang_score",
+   "entity": "card1=15885",
+   "value": 0.396,
+   "window": [
+    0,
+    12726834
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=C",
+   "value": 0.1139,
+   "window": [
+    0,
+    12726834
+   ],
+   "support_n": 57858,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=outlook.com",
+   "value": 0.0904,
+   "window": [
+    0,
+    12726834
+   ],
+   "support_n": 4204,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_ProductCD_C",
+   "value": "高危取值 ProductCD=C（ProductCD=C）：训练窗 [0,125)天 内该模式欺诈率 11.27%，为基率 3.51% 的 3.2 倍（触发 51,857 笔，其中欺诈 5,844）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 51857,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_001",
+   "type": "rule",
+   "entity": "rule=R_DeviceType_mobile",
+   "value": "高危取值 DeviceType=mobile（DeviceType=mobile）：训练窗 [0,125)天 内该模式欺诈率 9.88%，为基率 3.51% 的 2.8 倍（触发 42,771 笔，其中欺诈 4,226）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 42771,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_002",
+   "type": "rule",
+   "entity": "rule=R_P_emaildomain_outlook_com",
+   "value": "高危取值 P_emaildomain=outlook.com（P_emaildomain=outlook.com）：训练窗 [0,125)天 内该模式欺诈率 9.35%，为基率 3.51% 的 2.7 倍（触发 3,699 笔，其中欺诈 346）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 3699,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_003",
+   "type": "rule",
+   "entity": "rule=R_NEW_ENTITY",
+   "value": "新实体首现（card1+addr1 无历史）（card1_addr1_prior_cnt=0）：训练窗 [0,125)天 内该模式欺诈率 7.78%，为基率 3.51% 的 2.2 倍（触发 82,512 笔，其中欺诈 6,417）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 82512,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_004",
+   "type": "rule",
+   "entity": "rule=R_HAS_IDENTITY",
+   "value": "有设备/身份采集记录（id_01 存在）：训练窗 [0,125)天 内该模式欺诈率 7.44%，为基率 3.51% 的 2.1 倍（触发 112,859 笔，其中欺诈 8,397）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 112859,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3269334",
+   "value": "案例 #3269334（day 78）：确认欺诈（拒付举报）。金额 $37.70（$10-50），ProductCD=C，visa/debit，邮箱域=outlook.com，设备=Windows，card1=15885。实体历史：prior 0 笔、无成熟标签；设备 fan-out 392。",
+   "window": [
+    6895256,
+    6895256
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3117473",
+   "value": "案例 #3117473（day 28）：确认欺诈（拒付举报）。金额 $39.94（$10-50），ProductCD=C，visa/debit，邮箱域=outlook.com，设备=Windows，card1=15885。实体历史：prior 0 笔、无成熟标签；设备 fan-out 234。",
+   "window": [
+    2585639,
+    2585639
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3442484",
+   "value": "案例 #3442484（day 133）：高分假阳（人工洗清，当时模型分 0.36）。金额 $3.46（$1-10），ProductCD=C，visa/debit，邮箱域=outlook.com，设备=LG-D680 Build/KOT49I，card1=15885。实体历史：prior 0 笔、无成熟标签；设备 fan-out 527。",
+   "window": [
+    11648717,
+    11648717
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3435597",
+   "value": "案例 #3435597（day 131）：高分假阳（人工洗清，当时模型分 0.15）。金额 $4.14（$1-10），ProductCD=C，visa/debit，邮箱域=outlook.com，设备=LG-D680 Build/KOT49I，card1=15885。实体历史：prior 0 笔、无成熟标签；设备 fan-out 524。",
+   "window": [
+    11422424,
+    11422424
+   ],
+   "label_based": true
+  }
+ ]
+}

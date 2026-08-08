@@ -1,0 +1,152 @@
+{
+ "txn_id": 3481502,
+ "arm": "E3_starved",
+ "mode": "llm",
+ "p": 0.0004871697627698235,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 3,
+ "report": {
+  "txn_id": 3481502,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $25.95，属小额交易，即使欺诈潜在损失也有限。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "支付类别 ProductCD=W，卡为 visa/debit（借记卡）。",
+    "evidence_ids": [
+     "TXN_001",
+     "TXN_003",
+     "TXN_004"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "邮箱域为 anonymous.com（掩码/未知域），但成熟窗内无该域历史样本，无法据此判定其风险高低。",
+    "evidence_ids": [
+     "TXN_006"
+    ],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "关联实体无任何历史记录：无历史交易、无扇出、无成熟标签，因此无团伙关联证据。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "ProductCD=W、card4=visa、card6=debit、P_emaildomain=anonymous.com 在成熟窗内均无历史欺诈率样本，无法提供正向或负向风险信号。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "未命中任何风控规则，相似案例检索无返回，无规则/案例侧的欺诈信号。",
+    "evidence_ids": [],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 风险分 p=0.0005（极低）与本次收集到的证据不冲突：所有证据源均无欺诈信号，但也无独立证据可主动佐证其安全性，属于低信号一致。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "所有证据源（实体图、历史欺诈率、风控规则、相似案例）均无返回，无任何欺诈或团伙信号；交易金额仅 $25.95，潜在损失小。在无任何风险指标的情况下，$5 复核不划算，放行的期望成本最低。此处放行是基于'未见任何风险信号且金额小'的结论，而非因不确定而默认放过。",
+  "confidence": "medium",
+  "evidence_insufficient": true,
+  "summary": "交易 3481502 为一笔 $25.95 的小额 visa 借记卡交易（ProductCD=W），邮箱域为 anonymous.com。调查中实体图无任何历史、扇出或标签，所有相关字段在成熟窗内均无历史欺诈率样本，未命中任何风控规则，相似案例检索也无返回——即证据整体缺失，无任何正向欺诈信号，也无团伙关联迹象。这与上游 GBDT 的极低风险分 p=0.0005 方向一致，未发现冲突。鉴于金额小且无任何风险指标，处置为放行；但需注意本次证据不足，判断更多来自'未见风险'而非'证明安全'，故置信度设为中等。"
+ },
+ "schema_violations": [
+  "key_findings[3]: evidence_ids 缺失或为空（断言必须给证据）",
+  "key_findings[4]: evidence_ids 缺失或为空（断言必须给证据）",
+  "key_findings[5]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 7,
+ "cost_usd": 0.1095,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3481502",
+   "value": 25.95,
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3481502",
+   "value": "W",
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3481502",
+   "value": 12839,
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3481502",
+   "value": "visa",
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3481502",
+   "value": "debit",
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3481502",
+   "value": 264.0,
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3481502",
+   "value": "anonymous.com",
+   "window": [
+    12927996,
+    12927996
+   ],
+   "label_based": false
+  }
+ ]
+}

@@ -1,0 +1,326 @@
+{
+ "txn_id": 3557934,
+ "arm": "E1_starved",
+ "mode": "llm",
+ "p": 0.0018562300193428886,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 1,
+ "report": {
+  "txn_id": 3557934,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $100，ProductCD=R，visa/debit 卡，desktop/Windows 设备，yahoo.com 邮箱。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006",
+     "TXN_007",
+     "TXN_008"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "card1=17400 有 1407 笔历史交易，是成熟高频实体，其历史欺诈率 2.05%，低于全体基率约 3.5%。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "该卡扇出（21 地区 / 23 邮箱 / 14 设备）相对 1407 笔交易属正常范围，gang_score 仅 0.205，无团伙形态特征。",
+    "evidence_ids": [
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_009"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "本笔关联的邮箱路径（0.35%）与设备路径（0.0%）历史欺诈率均显著低于基率，具体路径干净。",
+    "evidence_ids": [
+     "GRAPH_007",
+     "GRAPH_008"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "ProductCD=R 历史欺诈率 3.64%（略高于基率）、yahoo.com 2.29%（低于基率），类别层面无明显风险升高。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "未命中任何风控规则，且无相似历史案例返回，无独立风险信号，与 GBDT 低分（p=0.0019）一致、无冲突。",
+    "evidence_ids": [],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=17400"
+   ],
+   "evidence_ids": [
+    "GRAPH_009",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_008"
+   ],
+   "rationale": "gang_score 0.205 偏低，扇出规模与 1407 笔历史交易相称，设备/邮箱路径欺诈率极低，无团伙批量欺诈特征。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "多路证据一致指向低风险：成熟高频实体、路径欺诈率低于基率、无规则命中、无团伙信号，且与上游低分不冲突。金额仅 $100，即便偶有噪声也不值得付出复核成本；放行是有证据支撑的结论而非默认值。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3557934 为一笔 $100 的 visa/debit desktop 交易。关联卡 card1=17400 是有 1407 笔历史的成熟实体，其整体欺诈率（2.05%）及本笔关联的邮箱路径（0.35%）、设备路径（0.0%）均低于全体基率约 3.5%；扇出规模与交易量相称，gang_score 仅 0.205，无团伙形态。类别层面 ProductCD=R 略高、yahoo.com 偏低，整体无风险升高。未命中任何风控规则，也无相似案例。多路独立证据与 GBDT 低分（p=0.0019）一致，无冲突，判定为低风险，放行。"
+ },
+ "schema_violations": [
+  "key_findings[5]: evidence_ids 缺失或为空（断言必须给证据）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "cost_usd": 0.0991,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3557934",
+   "value": 100.0,
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3557934",
+   "value": "R",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3557934",
+   "value": 17400,
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3557934",
+   "value": "visa",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3557934",
+   "value": "debit",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3557934",
+   "value": 123.0,
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3557934",
+   "value": "yahoo.com",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_007",
+   "type": "txn_field:DeviceType",
+   "entity": "txn=3557934",
+   "value": "desktop",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_008",
+   "type": "txn_field:DeviceInfo",
+   "entity": "txn=3557934",
+   "value": "Windows",
+   "window": [
+    15167740,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=17400",
+   "value": 1407,
+   "window": [
+    0,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=17400|addr1",
+   "value": 1000,
+   "window": [
+    0,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=17400",
+   "value": 21,
+   "window": [
+    0,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=17400",
+   "value": 23,
+   "window": [
+    0,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=17400",
+   "value": 14,
+   "window": [
+    0,
+    15167740
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=17400",
+   "value": 0.0205,
+   "window": [
+    0,
+    13353340
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0294,
+   "window": [
+    0,
+    13353340
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0035,
+   "window": [
+    0,
+    13353340
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "prior_fraud_rate",
+   "entity": "card1|device",
+   "value": 0.0,
+   "window": [
+    0,
+    13353340
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_009",
+   "type": "gang_score",
+   "entity": "card1=17400",
+   "value": 0.205,
+   "window": [
+    0,
+    13353340
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=R",
+   "value": 0.0364,
+   "window": [
+    0,
+    13353340
+   ],
+   "support_n": 33743,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=yahoo.com",
+   "value": 0.0229,
+   "window": [
+    0,
+    13353340
+   ],
+   "support_n": 87364,
+   "label_based": true
+  }
+ ]
+}

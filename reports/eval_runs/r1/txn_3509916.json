@@ -1,0 +1,329 @@
+{
+ "txn_id": 3509916,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.0721583783468883,
+ "report": {
+  "txn_id": 3509916,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额极小（$39），即便放行为欺诈，单笔损失也低于误拦成本（$25），拦截性价比低。",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "关联卡 card1=9071 无团伙特征：历史交易 4 笔、成熟欺诈率 0%、gang_score=0、扇出很低（地区1/邮箱2/设备0）。无实体级欺诈证据。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004",
+     "GRAPH_005",
+     "GRAPH_007"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "ProductCD=W 历史欺诈率 2.07%，低于全体基率约 3.5%，为降风险因子。",
+    "evidence_ids": [
+     "TXN_001",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "唯一升风险信号为邮箱域 hotmail.com（欺诈率 5.26%，约基率 1.5 倍），命中高危取值规则，但 lift 较弱，不足以单独定性。",
+    "evidence_ids": [
+     "TXN_006",
+     "STAT_001",
+     "RULE_000"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "GBDT 风险分 p=0.0722 与基率相近；独立证据（低金额、实体清洁、W 低于基率）与该分数无实质冲突，分数主要由 hotmail 域这类弱信号驱动，不构成欺诈结论。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "最相似历史案例 #3426993（$39/W/mastercard-debit，几乎同画像）为人工洗清的高分假阳；对照的确认欺诈案 #3194446 画像相近但同样实体历史清洁，说明该画像本身对欺诈区分力弱，不宜据相似性拔高风险。",
+    "evidence_ids": [
+     "CASE_003",
+     "CASE_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "无团伙证据（gang_score=0、实体成熟欺诈率0%、扇出低），ProductCD低于基率，唯一升风险的hotmail域信号很弱。金额仅$39，误拦成本($25)与挂起复核成本($5)相对期望欺诈损失都不划算——按期望成本框架，小额+低风险应放行。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3509916 为一笔 $39 的 ProductCD=W、mastercard 借记小额交易。关联卡 card1=9071 历史干净（4笔、0%成熟欺诈率、gang_score=0、扇出极低），无任何团伙关联迹象。ProductCD=W 欺诈率(2.07%)低于基率，唯一升风险因子是 hotmail.com 邮箱域(5.26%，约1.5倍基率)但信号偏弱。GBDT 分 0.0722 接近基率，与独立证据不冲突。相似案例既有洗清的假阳也有确认欺诈，画像区分力弱。综合判断为低风险，且金额小到不值得拦截或复核，建议放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 8927,
+  "output": 2031,
+  "api_calls": 3
+ },
+ "cost_usd": 0.0954,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3509916",
+   "value": 39.0,
+   "window": [
+    13732151,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3509916",
+   "value": "W",
+   "window": [
+    13732151,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3509916",
+   "value": 9071,
+   "window": [
+    13732151,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3509916",
+   "value": "mastercard",
+   "window": [
+    13732151,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3509916",
+   "value": "debit",
+   "window": [
+    13732151,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3509916",
+   "value": 269.0,
+   "window": [
+    13732151,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3509916",
+   "value": "hotmail.com",
+   "window": [
+    13732151,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=9071",
+   "value": 4,
+   "window": [
+    0,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=9071|addr1",
+   "value": 4,
+   "window": [
+    0,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=9071",
+   "value": 1,
+   "window": [
+    0,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=9071",
+   "value": 2,
+   "window": [
+    0,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=9071",
+   "value": 0,
+   "window": [
+    0,
+    13732151
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=9071",
+   "value": 0.0,
+   "window": [
+    0,
+    11917751
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0,
+   "window": [
+    0,
+    11917751
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "gang_score",
+   "entity": "card1=9071",
+   "value": 0.0,
+   "window": [
+    0,
+    11917751
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0207,
+   "window": [
+    0,
+    11917751
+   ],
+   "support_n": 338756,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=hotmail.com",
+   "value": 0.0526,
+   "window": [
+    0,
+    11917751
+   ],
+   "support_n": 36513,
+   "label_based": true
+  },
+  {
+   "fact_id": "RULE_000",
+   "type": "rule",
+   "entity": "rule=R_P_emaildomain_hotmail_com",
+   "value": "高危取值 P_emaildomain=hotmail.com（P_emaildomain=hotmail.com）：训练窗 [0,125)天 内该模式欺诈率 5.32%，为基率 3.51% 的 1.5 倍（触发 34,076 笔，其中欺诈 1,813）。",
+   "window": [
+    86400,
+    10886394
+   ],
+   "support_n": 34076,
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3194446",
+   "value": "案例 #3194446（day 54）：确认欺诈（拒付举报）。金额 $34.00（$10-50），ProductCD=W，mastercard/debit，邮箱域=hotmail.com，设备=缺失，card1=9364, addr1=123。实体历史：prior 21 笔、成熟欺诈率 0%；设备 fan-out 1。",
+   "window": [
+    4764498,
+    4764498
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3434315",
+   "value": "案例 #3434315（day 130）：高分假阳（人工洗清，当时模型分 0.26）。金额 $29.00（$10-50），ProductCD=W，mastercard/credit，邮箱域=hotmail.com，设备=缺失，card1=12583, addr1=330。实体历史：prior 28 笔、成熟欺诈率 70%；设备 fan-out 6。",
+   "window": [
+    11391962,
+    11391962
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3427101",
+   "value": "案例 #3427101（day 128）：高分假阳（人工洗清，当时模型分 0.15）。金额 $107.95（$100-300），ProductCD=W，mastercard/debit，邮箱域=hotmail.com，设备=缺失，card1=10029, addr1=315。实体历史：prior 26 笔、成熟欺诈率 0%；设备 fan-out 0。",
+   "window": [
+    11147461,
+    11147461
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3426993",
+   "value": "案例 #3426993（day 127）：高分假阳（人工洗清，当时模型分 0.14）。金额 $39.00（$10-50），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=12257, addr1=110。实体历史：prior 14 笔、成熟欺诈率 0%；设备 fan-out 0。",
+   "window": [
+    11144841,
+    11144841
+   ],
+   "label_based": true
+  }
+ ]
+}

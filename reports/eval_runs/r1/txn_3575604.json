@@ -1,0 +1,311 @@
+{
+ "txn_id": 3575604,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.0547499623822843,
+ "report": {
+  "txn_id": 3575604,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "小额交易 $77，ProductCD=W，mastercard/debit——常见低风险组合。ProductCD=W 历史欺诈率 2.05%，低于全体基率 3.5%；mastercard 3.43% 接近基率。类别属性无风险抬升。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "STAT_000",
+     "STAT_001"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "card1=7826 为高频卡（2990 笔历史），成熟欺诈率仅 2.53%，接近/低于基率；gang_score=0.253 偏低；fan-out（地区26/邮箱27/设备24）相对 2990 笔量级属低扩散，符合正常高频卡形态而非团伙批量作案。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_005",
+     "GRAPH_007",
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "3 条确认欺诈案例虽同 card1=7826，但均落在 addr1=387（其一 ProductCD=H），与本笔 addr1=325 不同；本笔 card1+addr1(325) 组合有 1120 笔历史、组合欺诈率 4.59%（仅略高于基率）。欺诈聚集在另一地区组合，本笔地区非高危聚集点。",
+    "evidence_ids": [
+     "CASE_000",
+     "CASE_001",
+     "CASE_002",
+     "TXN_005",
+     "GRAPH_001",
+     "GRAPH_006"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 风险分 p=0.0547（低）与独立证据方向一致：类别基率、实体成熟欺诈率、gang_score 均不支持高风险，无冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_007",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [
+    "card1=7826"
+   ],
+   "evidence_ids": [
+    "GRAPH_007",
+    "GRAPH_002",
+    "GRAPH_003",
+    "GRAPH_004",
+    "GRAPH_006"
+   ],
+   "rationale": "gang_score=0.253 偏低，fan-out 相对 2990 笔历史属正常扩散而非批量团伙特征，实体成熟欺诈率 2.53% 未超基率。确认欺诈案例聚集在另一 addr1=387，本笔 addr1=325 组合欺诈率仅 4.59%。无充分团伙证据。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "金额小（$77），类别与实体欺诈率均接近或低于基率，GBDT 低分与证据一致，且确认欺诈聚集于不同地区组合。欺诈概率低，拦截误伤成本（$25）与复核成本（$5）均不划算，放行期望成本最低。",
+  "confidence": "medium",
+  "evidence_insufficient": false,
+  "summary": "交易 3575604 为一笔 $77 的 mastercard/debit、ProductCD=W 交易。类别历史欺诈率（W=2.05%、mastercard=3.43%）不高于基率；card1=7826 虽出现在 3 条确认欺诈案例中，但那些欺诈聚集在 addr1=387，而本笔位于 addr1=325（1120 笔历史、组合欺诈率仅 4.59%）。实体成熟欺诈率 2.53%、gang_score 0.253、fan-out 相对海量历史属正常扩散，均不支持团伙作案。独立证据与上游低分 p=0.0547 方向一致，判定为低风险，建议放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 6,
+ "api_calls": 3,
+ "tokens": {
+  "input": 9547,
+  "output": 2131,
+  "api_calls": 3
+ },
+ "cost_usd": 0.101,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3575604",
+   "value": 77.0,
+   "window": [
+    15770484,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3575604",
+   "value": "W",
+   "window": [
+    15770484,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3575604",
+   "value": 7826,
+   "window": [
+    15770484,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3575604",
+   "value": "mastercard",
+   "window": [
+    15770484,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3575604",
+   "value": "debit",
+   "window": [
+    15770484,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3575604",
+   "value": 325.0,
+   "window": [
+    15770484,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=7826",
+   "value": 2990,
+   "window": [
+    0,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=7826|addr1",
+   "value": 1120,
+   "window": [
+    0,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=7826",
+   "value": 26,
+   "window": [
+    0,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=7826",
+   "value": 27,
+   "window": [
+    0,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=7826",
+   "value": 24,
+   "window": [
+    0,
+    15770484
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=7826",
+   "value": 0.0253,
+   "window": [
+    0,
+    13956084
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0459,
+   "window": [
+    0,
+    13956084
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "gang_score",
+   "entity": "card1=7826",
+   "value": 0.253,
+   "window": [
+    0,
+    13956084
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3294062",
+   "value": "案例 #3294062（day 87）：确认欺诈（拒付举报）。金额 $29.50（$10-50），ProductCD=W，mastercard/debit，邮箱域=缺失，设备=缺失，card1=7826, addr1=325。实体历史：prior 546 笔、成熟欺诈率 1%；设备 fan-out 17。",
+   "window": [
+    7619738,
+    7619738
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=2998397",
+   "value": "案例 #2998397（day 2）：确认欺诈（拒付举报）。金额 $117.00（$100-300），ProductCD=W，mastercard/debit，邮箱域=gmail.com，设备=缺失，card1=7826, addr1=387。实体历史：prior 16 笔、无成熟标签；设备 fan-out 1。",
+   "window": [
+    336739,
+    336739
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3467140",
+   "value": "案例 #3467140（day 143）：确认欺诈（拒付举报）。金额 $25.00（$10-50），ProductCD=H，mastercard/debit，邮箱域=anonymous.com，设备=Windows，card1=7826, addr1=387。实体历史：prior 630 笔、成熟欺诈率 2%；设备 fan-out 20。",
+   "window": [
+    12483504,
+    12483504
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3466402",
+   "value": "案例 #3466402（day 142）：高分假阳（人工洗清，当时模型分 0.23）。金额 $59.00（$50-100），ProductCD=W，mastercard/debit，邮箱域=yahoo.com，设备=缺失，card1=10960, addr1=441。实体历史：prior 75 笔、成熟欺诈率 0%；设备 fan-out 10。",
+   "window": [
+    12440228,
+    12440228
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0205,
+   "window": [
+    0,
+    13956084
+   ],
+   "support_n": 392893,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "card4=mastercard",
+   "value": 0.0343,
+   "window": [
+    0,
+    13956084
+   ],
+   "support_n": 169369,
+   "label_based": true
+  }
+ ]
+}

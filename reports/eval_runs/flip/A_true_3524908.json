@@ -1,0 +1,343 @@
+{
+ "txn_id": 3524908,
+ "mode": "llm",
+ "model": "claude-opus-4-8",
+ "p": 0.0023280564358153888,
+ "p_true": 0.0023280564358153888,
+ "p_injected": false,
+ "prompt_version": "v2-lenient-fix",
+ "report": {
+  "txn_id": 3524908,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "小额交易（$59.95），ProductCD=W，visa/debit，aol.com 邮箱——典型的日常消费画像。",
+    "evidence_ids": [
+     "TXN_000",
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "card1=9175 是高度成熟稳定的实体：1044 笔历史交易，其中 870 笔绑定同一 addr1，非一次性/爆发型卡。",
+    "evidence_ids": [
+     "GRAPH_000",
+     "GRAPH_001"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "扇出正常：1044 笔交易仅关联 20 个地区、16 个邮箱、11 个设备，无批量团伙式扇出特征。",
+    "evidence_ids": [
+     "GRAPH_002",
+     "GRAPH_003",
+     "GRAPH_004"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "实体成熟欺诈率 2.29%，低于全体基率 ~3.5%；gang_score 仅 0.229，团伙信号弱。card1|email 组合略高（4.96%）但为唯一偏高信号且支持量有限。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_007",
+     "GRAPH_008"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "类别基率均低于全体基率：ProductCD=W 为 2.08%，aol.com 为 2.22%，无类别级风险抬升。",
+    "evidence_ids": [
+     "STAT_000",
+     "STAT_001"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "未命中任何风控规则。相似案例虽含 3 笔确认欺诈，但那些欺诈案例伴随高设备扇出（28/16）或极高实体欺诈率（79%）等特征，本笔均不具备，画像更贴近被洗清的高分假阳类。",
+    "evidence_ids": [
+     "CASE_001",
+     "CASE_002",
+     "GRAPH_004",
+     "GRAPH_005"
+    ],
+    "assertion_strength": "tentative"
+   },
+   {
+    "finding": "独立核实结论与上游 GBDT 低分（p=0.0023）一致，无冲突。",
+    "evidence_ids": [
+     "GRAPH_005",
+     "GRAPH_008",
+     "STAT_000"
+    ],
+    "assertion_strength": "supported"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "多项独立证据一致指向低风险：实体成熟稳定（1044 笔、870 笔同址）、扇出正常、实体与类别欺诈率均低于基率、gang_score 低、无规则命中。金额仅 $59.95，即便存疑其潜在损失也很小，而拦截成本更高。证据充分且互相印证，不属于'不确定'情形，故放行而非挂起。",
+  "confidence": "high",
+  "evidence_insufficient": false,
+  "summary": "交易 3524908 为一笔 $59.95 的常规消费（ProductCD=W，visa 借记卡，aol.com）。发卡实体 card1=9175 历史极为成熟稳定（1044 笔交易，870 笔绑定同一地址），扇出正常、gang_score 低（0.229）、实体成熟欺诈率 2.29% 低于 ~3.5% 基率，相关类别基率亦偏低，且未命中任何规则。相似案例中的确认欺诈均带有本笔缺失的高危特征（高设备扇出或极高实体欺诈率），本笔更接近被人工洗清的假阳画像。独立核实与 GBDT 低分（p=0.0023）一致，无矛盾。综合判定为低风险，予以放行。"
+ },
+ "raw_text": null,
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 5,
+ "api_calls": 3,
+ "tokens": {
+  "input": 9937,
+  "output": 2090,
+  "api_calls": 3
+ },
+ "cost_usd": 0.1019,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3524908",
+   "value": 59.95,
+   "window": [
+    14169279,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3524908",
+   "value": "W",
+   "window": [
+    14169279,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3524908",
+   "value": 9175,
+   "window": [
+    14169279,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3524908",
+   "value": "visa",
+   "window": [
+    14169279,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3524908",
+   "value": "debit",
+   "window": [
+    14169279,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3524908",
+   "value": 126.0,
+   "window": [
+    14169279,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3524908",
+   "value": "aol.com",
+   "window": [
+    14169279,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=9175",
+   "value": 1044,
+   "window": [
+    0,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=9175|addr1",
+   "value": 870,
+   "window": [
+    0,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=9175",
+   "value": 20,
+   "window": [
+    0,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=9175",
+   "value": 16,
+   "window": [
+    0,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=9175",
+   "value": 11,
+   "window": [
+    0,
+    14169279
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=9175",
+   "value": 0.0229,
+   "window": [
+    0,
+    12354879
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0223,
+   "window": [
+    0,
+    12354879
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "prior_fraud_rate",
+   "entity": "card1|email",
+   "value": 0.0496,
+   "window": [
+    0,
+    12354879
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_008",
+   "type": "gang_score",
+   "entity": "card1=9175",
+   "value": 0.229,
+   "window": [
+    0,
+    12354879
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3456832",
+   "value": "案例 #3456832（day 139）：确认欺诈（拒付举报）。金额 $97.00（$50-100），ProductCD=W，visa/debit，邮箱域=aol.com，设备=缺失，card1=7664, addr1=387。实体历史：prior 17 笔、成熟欺诈率 0%；设备 fan-out 28。",
+   "window": [
+    12109671,
+    12109671
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3436437",
+   "value": "案例 #3436437（day 131）：确认欺诈（拒付举报）。金额 $59.00（$50-100），ProductCD=W，visa/debit，邮箱域=aol.com，设备=缺失，card1=7207, addr1=441。实体历史：prior 31 笔、成熟欺诈率 79%；设备 fan-out 16。",
+   "window": [
+    11465436,
+    11465436
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3361122",
+   "value": "案例 #3361122（day 106）：高分假阳（人工洗清，当时模型分 0.20）。金额 $68.50（$50-100），ProductCD=W，visa/debit，邮箱域=aol.com，设备=缺失，card1=10023, addr1=272。实体历史：prior 12 笔、成熟欺诈率 0%；设备 fan-out 16。",
+   "window": [
+    9320852,
+    9320852
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3239638",
+   "value": "案例 #3239638（day 68）：确认欺诈（拒付举报）。金额 $59.00（$50-100），ProductCD=W，visa/debit，邮箱域=aol.com，设备=缺失，card1=11207, addr1=325。实体历史：prior 549 笔、成熟欺诈率 1%；设备 fan-out 28。",
+   "window": [
+    6033865,
+    6033865
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_000",
+   "type": "fraud_rate",
+   "entity": "ProductCD=W",
+   "value": 0.0208,
+   "window": [
+    0,
+    12354879
+   ],
+   "support_n": 350079,
+   "label_based": true
+  },
+  {
+   "fact_id": "STAT_001",
+   "type": "fraud_rate",
+   "entity": "P_emaildomain=aol.com",
+   "value": 0.0222,
+   "window": [
+    0,
+    12354879
+   ],
+   "support_n": 22851,
+   "label_based": true
+  }
+ ],
+ "arm": "A_true"
+}

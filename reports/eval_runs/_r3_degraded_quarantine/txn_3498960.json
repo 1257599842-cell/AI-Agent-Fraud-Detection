@@ -1,0 +1,179 @@
+{
+ "txn_id": 3498960,
+ "mode": "degraded",
+ "degraded_reason": "BadRequestError",
+ "p": 0.008034430637102222,
+ "report": {
+  "txn_id": 3498960,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "GBDT 风险分 p=0.0080（决策区间校准已验，raw 可当概率用）",
+    "evidence_ids": [
+     "STAT_000"
+    ],
+    "assertion_strength": "confirmed"
+   }
+  ],
+  "gang_association": null,
+  "disposition": "approve",
+  "disposition_rationale": "四档期望成本 argmin（降级模式：LLM 不可用，处置由确定性成本框架直接给出）",
+  "confidence": "low",
+  "evidence_insufficient": true,
+  "summary": "[降级模式：BadRequestError] LLM 不可用，本报告由 GBDT 分数 + 规则模板生成。风险分 0.01，命中规则 0 条，处置建议 approve。拦截能力不受影响；LLM 恢复后可补充叙事性调查。"
+ },
+ "schema_violations": [],
+ "time_audit_violations": [],
+ "tool_calls": 0,
+ "api_calls": 0,
+ "tokens": {
+  "input": 0,
+  "output": 0
+ },
+ "cost_usd": 0.0,
+ "facts": [
+  {
+   "fact_id": "STAT_000",
+   "type": "model_score",
+   "entity": "txn=3498960",
+   "value": 0.008,
+   "window": [
+    13391429,
+    13391429
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "CASE_000",
+   "type": "case",
+   "entity": "case=3387860",
+   "value": "案例 #3387860（day 115）：高分假阳（人工洗清，当时模型分 0.21）。金额 $59.00（$50-100），ProductCD=W，visa/debit，邮箱域=缺失，设备=缺失，card1=12839, addr1=264。实体历史：prior 2340 笔、成熟欺诈率 1%；设备 fan-out 29。",
+   "window": [
+    10105191,
+    10105191
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_001",
+   "type": "case",
+   "entity": "case=3383025",
+   "value": "案例 #3383025（day 114）：高分假阳（人工洗清，当时模型分 0.15）。金额 $59.00（$50-100），ProductCD=W，visa/debit，邮箱域=缺失，设备=缺失，card1=12839, addr1=264。实体历史：prior 2304 笔、成熟欺诈率 1%；设备 fan-out 29。",
+   "window": [
+    9954846,
+    9954846
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_002",
+   "type": "case",
+   "entity": "case=3377306",
+   "value": "案例 #3377306（day 112）：确认欺诈（拒付举报）。金额 $44.00（$10-50），ProductCD=W，visa/debit，邮箱域=gmail.com，设备=缺失，card1=12839, addr1=264。实体历史：prior 2267 笔、成熟欺诈率 1%；设备 fan-out 27。",
+   "window": [
+    9802757,
+    9802757
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "CASE_003",
+   "type": "case",
+   "entity": "case=3382800",
+   "value": "案例 #3382800（day 114）：高分假阳（人工洗清，当时模型分 0.47）。金额 $90.81（$50-100），ProductCD=C，visa/debit，邮箱域=gmail.com，设备=SM-J327T1 Build/NRD90M，card1=12839。实体历史：prior 0 笔、无成熟标签；设备 fan-out 28。",
+   "window": [
+    9944132,
+    9944132
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_000",
+   "type": "prior_cnt",
+   "entity": "card1=12839",
+   "value": 4387,
+   "window": [
+    0,
+    13391429
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_001",
+   "type": "prior_cnt",
+   "entity": "card1=12839|addr1",
+   "value": 3017,
+   "window": [
+    0,
+    13391429
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_002",
+   "type": "fanout_addr1",
+   "entity": "card1=12839",
+   "value": 45,
+   "window": [
+    0,
+    13391429
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_003",
+   "type": "fanout_email",
+   "entity": "card1=12839",
+   "value": 25,
+   "window": [
+    0,
+    13391429
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_004",
+   "type": "fanout_device",
+   "entity": "card1=12839",
+   "value": 32,
+   "window": [
+    0,
+    13391429
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "GRAPH_005",
+   "type": "prior_fraud_rate",
+   "entity": "card1=12839",
+   "value": 0.0161,
+   "window": [
+    0,
+    11577029
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_006",
+   "type": "prior_fraud_rate",
+   "entity": "card1|addr1",
+   "value": 0.0121,
+   "window": [
+    0,
+    11577029
+   ],
+   "label_based": true
+  },
+  {
+   "fact_id": "GRAPH_007",
+   "type": "gang_score",
+   "entity": "card1=12839",
+   "value": 0.161,
+   "window": [
+    0,
+    11577029
+   ],
+   "label_based": true
+  }
+ ]
+}

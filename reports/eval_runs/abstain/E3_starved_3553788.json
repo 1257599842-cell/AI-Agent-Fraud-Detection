@@ -1,0 +1,167 @@
+{
+ "txn_id": 3553788,
+ "arm": "E3_starved",
+ "mode": "llm",
+ "p": 0.0017014570990033161,
+ "prompt_version": "v3-strength-ceiling",
+ "starve_level": 3,
+ "report": {
+  "txn_id": 3553788,
+  "risk_level": "low",
+  "key_findings": [
+   {
+    "finding": "交易金额为 $29.50，属小额交易",
+    "evidence_ids": [
+     "TXN_000"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "支付画像为 ProductCD=W、visa、debit、邮箱 rocketmail.com、addr1=441.0，均为常规字段值",
+    "evidence_ids": [
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_005",
+     "TXN_006"
+    ],
+    "assertion_strength": "confirmed"
+   },
+   {
+    "finding": "关联实体图无任何历史交易、无扇出、无成熟欺诈标签，因此无团伙关联证据",
+    "evidence_ids": [
+     "GRAPH"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "各字段（ProductCD/card4/card6/邮箱/addr1）在成熟窗内均无历史样本，无法用基准欺诈率独立核实上游分数",
+    "evidence_ids": [
+     "TXN_001",
+     "TXN_003",
+     "TXN_004",
+     "TXN_006",
+     "TXN_005"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "未命中任何风控规则，相似案例检索为空，无直接欺诈信号",
+    "evidence_ids": [
+     "RULES"
+    ],
+    "assertion_strength": "supported"
+   },
+   {
+    "finding": "上游 GBDT 低分(p=0.0017)未被任何证据反驳，但也缺乏独立佐证；本环境证据稀疏，判断主要依赖金额小与无不利信号",
+    "evidence_ids": [
+     "TXN_000",
+     "GRAPH",
+     "RULES"
+    ],
+    "assertion_strength": "tentative"
+   }
+  ],
+  "gang_association": {
+   "suspected": false,
+   "entities": [],
+   "evidence_ids": [
+    "GRAPH"
+   ],
+   "rationale": "实体图完全为空（无交易史、无扇出、无成熟标签），无任何团伙形态证据支持团伙关联。"
+  },
+  "disposition": "approve",
+  "disposition_rationale": "金额极小($29.50)，即使放行错误最大损失约 $29.50；无任何不利信号（无规则命中、无相似欺诈案例、无实体欺诈史/扇出），且上游低分未被反驳。期望成本上，放行优于挂起复核($5)与拒绝($25 误拦风险)。",
+  "confidence": "medium",
+  "evidence_insufficient": true,
+  "summary": "交易 3553788 为一笔 $29.50 的小额 visa 借记交易(ProductCD=W, rocketmail.com)。实体图无任何历史与扇出，各字段历史欺诈率无样本，未命中风控规则，相似案例检索为空——本环境证据高度稀疏。没有任何不利或团伙信号，上游 GBDT 低分(p=0.0017)未被反驳但也无独立佐证。鉴于金额极小、放行最大损失有限且无风险信号，建议放行；但因证据不足，判断置信度仅为中等。"
+ },
+ "schema_violations": [
+  "key_findings[2]: 引用了本次调查未返回的证据 ID 'GRAPH'（编造）",
+  "key_findings[4]: 引用了本次调查未返回的证据 ID 'RULES'（编造）",
+  "key_findings[5]: 引用了本次调查未返回的证据 ID 'GRAPH'（编造）",
+  "key_findings[5]: 引用了本次调查未返回的证据 ID 'RULES'（编造）"
+ ],
+ "time_audit_violations": [],
+ "tool_calls": 8,
+ "cost_usd": 0.1109,
+ "facts": [
+  {
+   "fact_id": "TXN_000",
+   "type": "txn_field:TransactionAmt",
+   "entity": "txn=3553788",
+   "value": 29.5,
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_001",
+   "type": "txn_field:ProductCD",
+   "entity": "txn=3553788",
+   "value": "W",
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_002",
+   "type": "txn_field:card1",
+   "entity": "txn=3553788",
+   "value": 15813,
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_003",
+   "type": "txn_field:card4",
+   "entity": "txn=3553788",
+   "value": "visa",
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_004",
+   "type": "txn_field:card6",
+   "entity": "txn=3553788",
+   "value": "debit",
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_005",
+   "type": "txn_field:addr1",
+   "entity": "txn=3553788",
+   "value": 441.0,
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  },
+  {
+   "fact_id": "TXN_006",
+   "type": "txn_field:P_emaildomain",
+   "entity": "txn=3553788",
+   "value": "rocketmail.com",
+   "window": [
+    15024568,
+    15024568
+   ],
+   "label_based": false
+  }
+ ]
+}
