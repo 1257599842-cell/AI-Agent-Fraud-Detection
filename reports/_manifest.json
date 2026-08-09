@@ -105,7 +105,7 @@
   "generator_verified": true
  },
  "baseline_metrics.md": {
-  "sha256_machine_only": "49703a317f416968e20f68195dd4fd522e65cb72dbc310786e3b364355e73810",
+  "sha256_machine_only": "dd3ca56241fc30e6d985cbc028407e0d0bcadff709b3f703f94e08a972a7caa5",
   "tier": "heavy",
   "command": "python -m src.model.train_baseline",
   "has_human_block": false,
@@ -217,7 +217,7 @@
   "generator_verified": true
  },
  "small_amount_floor.md": {
-  "sha256_machine_only": "953e79a1ed3720ad674a35955d36f7f0cf224f2dd73f13a173dc83aa8859a9b2",
+  "sha256_machine_only": "ad84dcd9aab8184953984da94a5813a429d3a2f4bb034dea7f065ba2679fbf1e",
   "tier": "cheap",
   "command": "python -m src.model.small_amount_floor",
   "has_human_block": false,

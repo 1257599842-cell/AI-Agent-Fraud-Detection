@@ -20,7 +20,7 @@ scikit-learn
 # 风险评分主模型（arm64 Mac 的 wheel 自带 libomp，无需 brew install libomp）
 lightgbm
 
-# ── 以下留到对应阶段再解除注释安装（见 CLAUDE.md）──
+# ── 以下留到对应阶段再解除注释安装 ──
 # fastapi         # serving 层：打分端点 + 调查端点
 # uvicorn         # FastAPI 运行器
 # 详细版本锁定（pip freeze）留到依赖稳定后再做。

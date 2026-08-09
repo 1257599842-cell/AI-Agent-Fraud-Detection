@@ -4,7 +4,7 @@
   POST /investigate  —— 贵通道：跑 Agent 调查，返回结构化报告 + 硬层验收 + 成本。
   GET  /healthz      —— 存活与资源加载状态。
 
-设计取舍（照 CLAUDE.md「够用就行」，不在工具链上抠）：
+设计取舍（工程层「够用就行」，不在工具链上抠）：
   * 资源（59 万行元数据 + 知识库 + 应然档）**只在启动时加载一次**，请求期零 IO。
   * `/score` 与 `/investigate` 的分工就是 ⑧ 闸门本身：便宜模型挡在贵 LLM 前面。
     `/score` 会直接告诉调用方「这笔要不要进 Agent」（`should_investigate`）。

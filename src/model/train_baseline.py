@@ -1,6 +1,6 @@
 """LightGBM baseline —— 硬点② 时间切分 + 自然分布。
 
-严格按项目负责人 2026-06-30 拍板的"已定建模口径"（见 PROGRESS.md）：
+严格按 2026-06-30 确定的"已定建模口径"：
   - 时间切分：test 固定 [t0, 末]=[146,181]；train = day < (t0 - embargo)。
       embargo=0  → train [0,145]（简单切，第一组数）
       embargo=21 → train [0,124]，空窗 [125,145] 丢弃（模拟标签延迟）
@@ -153,7 +153,7 @@ def main() -> None:
 def _write_md(results: list[dict]) -> None:
     r0, r21 = results
     L = ["# Baseline 指标 — LightGBM 自然分布 + 时间切分（硬点②）\n",
-         "口径见 PROGRESS.md「已定建模口径」。test 固定 [146,181]，自然分布，原生类别/缺失。\n",
+         "口径：时间切分 + 21 天 embargo。test 固定 [146,181]，自然分布，原生类别/缺失。\n",
          "## 两轮对比（embargo 0 vs 21 天）\n",
          "> Δ = embargo效应（后−前）。AUC/precision/recall 负=变差；ECE/Brier 正=变差。\n",
          "| 指标 | 无 embargo | +21天 embargo | Δ(embargo效应) |",
