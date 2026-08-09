@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DOCS = ["README.md", "MODEL_CARD.md"]   # 答案库与背诵卡不随仓库发布
+DOCS = ["README.md", "MODEL_CARD.md"]   # 仅核对随仓库发布的对外文档
 # 抓「有意义的数值」：带小数点/百分号的，或带千分位的，或 3 位以上整数。
 # **千分位首组可以只有 1–3 位**：初版写 `\d{3,}(?:,\d{3})*`，
 # 于是 `1,774` 从 `774` 才开始匹配，报出一个根本不存在的「774 消失了」。
