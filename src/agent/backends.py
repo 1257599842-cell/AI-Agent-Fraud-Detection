@@ -47,7 +47,7 @@ class DataBackedTools(InvestigationTools):
         self.txn_id = int(txn_id)
         self.row = res.meta.loc[self.txn_id]
         self.as_of = int(self.row["TransactionDT"])
-        # 成本假设升为一等公民事实（总指挥拍板「往严统一」）：让依赖它们的推理
+        # 成本假设升为一等公民事实（项目负责人拍板「往严统一」）：让依赖它们的推理
         # 也能落到审计链上，而不是硬层认、软层不认。window=(0,0)=先于全部数据即已知。
         from src.agent.disposition import BASE
         self.policy = policy_facts(registry, BASE)

@@ -2,7 +2,7 @@
 
 ## Context
 
-ML 统计核心已定稿（防守点①②③④⑤⑥⑩，全部真实 delta）。Agent 层是最后三个防守点（⑦eval / ⑧成本 / ⑨兜底）的载体。owner 提交了五组拍板初稿，本次会话以专家审阅通过，**修订 5 处**后定稿。本文件 = 开工前的最终决策登记表；批准即拍板。**本次不动工**，动工按文末施工顺序另起。
+ML 统计核心已定稿（硬点①②③④⑤⑥⑩，全部真实 delta）。Agent 层是最后三个硬点（⑦eval / ⑧成本 / ⑨兜底）的载体。owner 提交了五组拍板初稿，本次会话以专家审阅通过，**修订 5 处**后定稿。本文件 = 开工前的最终决策登记表；批准即拍板。**本次不动工**，动工按文末施工顺序另起。
 
 ## 审阅修订（5 处，已并入下方登记表）
 
@@ -21,7 +21,7 @@ ML 统计核心已定稿（防守点①②③④⑤⑥⑩，全部真实 delta�
 - **1.4 检索粒度**：一案一条、一规则一 chunk。**案例检索主通道 = 结构化相似**（同组合键/金额档/ProductCD），作为 `retrieve_rules_and_cases` 内部实现；向量检索用于规则（文本主场）+ 案例卡粗排。案例入库前渲染成模板化自然语言案例卡，embedding 吃卡不吃原始行。
 
 ### 第二组 · 工具层
-- **2.1 工具集锁死四个**：query_transaction / query_entity_graph / query_historical_stats（卡时间边界）/ retrieve_rules_and_cases。不加假工具；缺口话术 =「接入范式同构 + 每种新数据源的坑我在 IEEE-CIS 上踩过一遍」（不说"本质变化不大"）。query_similar_transactions 不单列，并入 1.4 检索后端。
+- **2.1 工具集锁死四个**：query_transaction / query_entity_graph / query_historical_stats（卡时间边界）/ retrieve_rules_and_cases。不加假工具；缺口表述 =「接入范式同构 + 每种新数据源的坑我在 IEEE-CIS 上踩过一遍」（不说"本质变化不大"）。query_similar_transactions 不单列，并入 1.4 检索后端。
 - **2.2 返回格式（焊点级）**：结构化 JSON + fact_id 唯一 + 报告强制 evidence_ids 引用 + 每个事实带 window/as-of（时间边界可审计）。
 - **2.3 调用上限**：8 次/单，超则强制收尾（兼 ⑧ 素材）。
 
@@ -31,7 +31,7 @@ ML 统计核心已定稿（防守点①②③④⑤⑥⑩，全部真实 delta�
   - 放行 E = p·金额；拒绝 E = (1−p)·c_FP
   - 挂起 E = c_review + p·漏检率_人·金额 + (1−p)·误拦率_人·c_FP
   - 上报 E = c_report + 更低残余 − P(团伙)×未来暴露（图特征估计）
-  - p = **raw** GBDT 概率（③ 决策区间验证背书）。成本参数全部做敏感性扫描 + (p,金额,团伙证据) 空间四档分区图（新展品）。
+  - p = **raw** GBDT 概率（③ 决策区间验证背书）。成本参数全部做敏感性扫描 + (p,金额,团伙证据) 空间四档分区图（新示例）。
   - Agent 可凭 evidence_insufficient/明示 rationale 偏离公式，偏离由一致性第一层捕获。
 
 ### 第四组 · Eval（⑦，叙事领衔）

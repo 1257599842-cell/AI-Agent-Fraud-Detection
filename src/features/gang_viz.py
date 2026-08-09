@@ -1,8 +1,8 @@
-"""团伙结构可视化（②④ 两张皮的展品）—— card1 fan-out 到多设备的 ego 图。
+"""团伙结构可视化（②④ 两张皮的示例）—— card1 fan-out 到多设备的 ego 图。
 
 从图特征找出的高分团伙 card1，画"一张卡扇出到多个设备、多笔小额欺诈"的星形图：
 中心=card1，外圈=它触达的各设备，边=该(卡,设备)上的交易，欺诈设备标红、大小∝交易数。
-这是面试能拍在桌上的展品，比 AUC 更有说服力。
+这是对外说明能拍在桌上的示例，比 AUC 更有说服力。
 
 用法：python -m src.features.gang_viz
 产出：reports/figures/11_gang_egographs.png

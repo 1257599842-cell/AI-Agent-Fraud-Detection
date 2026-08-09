@@ -1,6 +1,6 @@
-"""LightGBM baseline —— 防守点② 时间切分 + 自然分布。
+"""LightGBM baseline —— 硬点② 时间切分 + 自然分布。
 
-严格按网页版 2026-06-30 拍板的"已定建模口径"（见 PROGRESS.md）：
+严格按项目负责人 2026-06-30 拍板的"已定建模口径"（见 PROGRESS.md）：
   - 时间切分：test 固定 [t0, 末]=[146,181]；train = day < (t0 - embargo)。
       embargo=0  → train [0,145]（简单切，第一组数）
       embargo=21 → train [0,124]，空窗 [125,145] 丢弃（模拟标签延迟）
@@ -152,7 +152,7 @@ def main() -> None:
 
 def _write_md(results: list[dict]) -> None:
     r0, r21 = results
-    L = ["# Baseline 指标 — LightGBM 自然分布 + 时间切分（防守点②）\n",
+    L = ["# Baseline 指标 — LightGBM 自然分布 + 时间切分（硬点②）\n",
          "口径见 PROGRESS.md「已定建模口径」。test 固定 [146,181]，自然分布，原生类别/缺失。\n",
          "## 两轮对比（embargo 0 vs 21 天）\n",
          "> Δ = embargo效应（后−前）。AUC/precision/recall 负=变差；ECE/Brier 正=变差。\n",
@@ -169,7 +169,7 @@ def _write_md(results: list[dict]) -> None:
     L += ["",
           f"- 训练量：无 embargo n_train={r0['n_train']:,}；+21天 n_train={r21['n_train']:,}（少 {r0['n_train']-r21['n_train']:,}）。",
           f"- 训练期欺诈率 {r0['fraud_rate_train']:.3%} vs 测试期 {r0['fraud_rate_test']:.3%}（聚合近乎持平、略降；"
-          f"EDA 看到的漂移是周度波动/分布型，非测试窗的单调抬升 —— 需带回网页版重定调）。",
+          f"EDA 看到的漂移是周度波动/分布型，非测试窗的单调抬升 —— 需带回项目负责人重定调）。",
           f"- test 样本 {r0['n_test']:,}。",
           "",
           "## 填入 README ▢",
@@ -179,7 +179,7 @@ def _write_md(results: list[dict]) -> None:
           "",
           "> 校准意外：全局 ECE 仅 {:.4f}（很低）—— LightGBM logloss 训练全局已较准。但 3.4% 基率下等宽 ECE".format(r0['ece']),
           "> 被 p≈0 的易负样本主导，**决策区间（top1~2%）的校准仍需用可靠性图单独验**。embargo 使 ECE {:.4f}→{:.4f}".format(r0['ece'], r21['ece']),
-          "> 变差，支持近窗重校准。防守点③口径改为「决策区间验证校准 + 漂移后近窗重校准」，待网页版确认。"]
+          "> 变差，支持近窗重校准。硬点③口径改为「决策区间验证校准 + 漂移后近窗重校准」，待项目负责人确认。"]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
     write_report(OUT_MD, "\n".join(L))
 

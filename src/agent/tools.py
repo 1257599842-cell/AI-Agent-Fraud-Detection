@@ -76,7 +76,7 @@ class ToolResult:
         return {"tool": self.tool, "facts": [f.to_dict() for f in self.facts], "note": self.note}
 
 
-# ============ policy_param：把成本假设升为一等公民事实（总指挥 2026-07-31 拍板）============
+# ============ policy_param：把成本假设升为一等公民事实（项目负责人 2026-07-31 拍板）============
 #
 # **这条改动的来历**：owner 人工核验 17 条时发现的一个架构级不一致——
 # Agent 的 system prompt 本身写着成本参数（误拦 $25 / 复核 $5 / 上报 $40），

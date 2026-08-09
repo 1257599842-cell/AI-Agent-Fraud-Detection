@@ -17,3 +17,11 @@ venv/
 
 # 面试答案库：本地保留，不入公开仓库
 INTERVIEW.md
+
+# 内部工作文件：本地保留，不随仓库发布
+# 移出理由见 MODEL_CARD §12（结论实质已由 §12.5「已作废的结论」对外承接）
+CLAUDE.md
+AGENTS.md
+PROGRESS.md
+REHEARSAL.md
+会话全程记录_W5_Agent层与eval.md

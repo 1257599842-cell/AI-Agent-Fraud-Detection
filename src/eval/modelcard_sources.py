@@ -78,7 +78,7 @@ def main():
             continue
         # 出处不限于 .md：`demo_data.json` 之类也是合法来源，
         # 只要它在 reports/ 下、且能读出数字。初版只认 .md，
-        # 把总指挥已正确标注的一行判成「覆盖不全」——**校验器比被校验的更严是假警**。
+        # 把项目负责人已正确标注的一行判成「覆盖不全」——**校验器比被校验的更严是假警**。
         named = re.findall(r"`?(?:reports/)?([a-z0-9_/]+\.(?:md|json))`?", line)
         cands = [(name, _covers(pool, need)) for name, pool in pools.items()]
         best = max(c for _, c in cands)

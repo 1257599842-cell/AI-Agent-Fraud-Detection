@@ -15,7 +15,7 @@
 
 eval 集：200 = 4 层×50（高分真欺诈/高分假阳/中分模糊/低分正常），取 test 窗；
   每层再切 dev/holdout 25/25——prompt 迭代只看 dev，最终 delta 报 holdout
-  （防 eval 集过拟合 = 防守点② 思想在 eval 层的翻版）。
+  （防 eval 集过拟合 = 硬点② 思想在 eval 层的翻版）。
 
 盲标协议（owner 提醒一）：--export-anchor 生成的标注表与 judge prompt 出自同一
   RUBRIC（人机同卷），且不含任何 judge 判定；owner 独立标完后 --agreement 比对，
@@ -580,7 +580,7 @@ def agreement(tag):
     out.write_text(json.dumps([{"txn_id": k[0], "idx": k[1],
                                 "human": human[k], "judge": j[k]} for k in dis],
                               ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"  分歧 {len(dis)} 条 → {out.relative_to(PROJECT_ROOT)}（面试素材）")
+    print(f"  分歧 {len(dis)} 条 → {out.relative_to(PROJECT_ROOT)}（对外说明素材）")
 
 
 # ================================================================ pilot
@@ -1028,7 +1028,7 @@ def _grounding_md(tag, cls, n, withnum, ungrounded, derived, r_all, r_sub, n_all
          "## 附二：对账器的两处修正，为什么**不是**放宽规则\n",
          "round 3 的报告里出现了 2 个新的未匹配数字。修补它们时有一个明显的诱惑："
          "**加一条宽规则就能让 true_ungrounded 归零**。那样做等于用规则把编造洗白，"
-         "而「编造率 0%」正是本项目要写进简历的硬数字之一——它一旦是"
+         "而「编造率 0%」正是本项目要写进对外材料的硬数字之一——它一旦是"
          "「规则调到刚好归零」得来的，就一文不值。所以两处修正都必须能说清楚"
          "**为什么它们不增加规则的宽度**：\n",
          "**修正一：复合两条已具名规则，不新增规则。**",
@@ -1098,7 +1098,7 @@ def _rubric_v2_for_human():
 
 
 # 已由 round2 逐条人核确认为**纯 citation-gap**的条目：值在整单证据池里有据、只是没挂
-# 在该 finding 上。按总指挥裁决，这类一律机械判定、**不进人工队列**（缺陷归硬层引用
+# 在该 finding 上。按项目负责人裁决，这类一律机械判定、**不进人工队列**（缺陷归硬层引用
 # 完整率，不归 reasoning_valid = 记账科目变更）。
 # ⚠️ 注意它们为何列在这里而不是由 classify_grounding 自动排除：这几条的 gap 在**属性**
 # 层（"超高扇出"），不在数字层——数字口径下它们都是 fully_cited。属性接地不可机械判定
@@ -1107,7 +1107,7 @@ KNOWN_CITATION_GAP = {(3521213, 2)}
 
 
 def export_relabel_anchor(tag, n_drift=8):
-    """round3 **缩表**盲标表（总指挥 2026-07-30 §7 裁决）：约 18 条，估时 1.5–2h。
+    """round3 **缩表**盲标表（项目负责人 2026-07-30 §7 裁决）：约 18 条，估时 1.5–2h。
 
     **为什么从 53 条砍到 18 条**：53 条切成三臂后每个子估计 n≤24，一天的标注时间换不回
     任何**可报的比率**。所以口径从"率"改成"**存在性与方向**"——这与层2「报排序不报点值」
@@ -1118,7 +1118,7 @@ def export_relabel_anchor(tag, n_drift=8):
 
     三部分（**表内臂别不可见、按 txn 排序**，否则会被区别对待）：
       必标 ~5：旧少数类里**机械不可判的**（排除 KNOWN_CITATION_GAP）+ DISPUTE 3 条
-               （总指挥 §4：citation 拆出去后用 v2 当尺子裁）；
+               （项目负责人 §4：citation 拆出去后用 v2 当尺子裁）；
       必标 n_drift=8：旧 rv=Y 随机抽 → **金标漂移方向**。这是唯一的结构性问题：
                若漂移大，全部 r1 口径数字失效；若近零，41/35/17 可作为"跨模型对齐度"保留；
       可选 4：T1–T4 各 1 条，给代码模板筛子一个 sanity 读数
@@ -1328,7 +1328,7 @@ _TAX = {
 def _defect_taxonomy(tag, gold, man, runs):
     """把 owner 的逐条批注聚成**缺陷分类学**并单独成文。
 
-    定位（总指挥 2026-07-31）：① 之后证据与推理层是 Agent 的全部职责，
+    定位（项目负责人 2026-07-31）：① 之后证据与推理层是 Agent 的全部职责，
     这份分类学因此从「prompt 输入」升级为「**Agent 唯一职责上的人工核验缺陷清单**」——
     它是本项目里**唯一由人直接产出的证据**（其余锚均为 Opus 4.8 生成）。
     n=17，**一律不报比率**，只报计数、形态与原文。

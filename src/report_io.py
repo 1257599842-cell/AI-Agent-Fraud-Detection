@@ -62,6 +62,11 @@ FROZEN = {
     "reports/eval_runs/r1/anchor_enrich.md": (
         "2026-07-28",
         "富集盲标表：用于算 judge-flag 精确率。重生成会让「独立盲标」不再独立。"),
+    "reports/kaggle_submission.md": (
+        "2026-08-01",
+        "记录一次**已发生的外部提交**（提交号 55152570 / 2026-08-01）。"
+        "重跑 `--submit` 会向 Kaggle 真的再交一次，而旧那次的榜单快照无法重建——"
+        "它是事件记录，不是可重算的产物。"),
     "reports/eval_runs/round2_rubric_draft.md": (
         "2026-07-29",
         "评分前的 rubric 草案：它证明「评分标准先于评分确定」。"

@@ -26,6 +26,7 @@
 
 import hashlib
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -53,20 +54,20 @@ GENERATORS = {
     "graph_eda.md": (["src.features.graph_eda"], "cheap"),
     "sql_vs_pandas_reconciliation.md": (["src.features.build_duckdb"], "cheap"),
     "disposition.md": (["src.agent.disposition"], "cheap"),
-    "agent_round4_metrics.md": (["src.eval.round4_metrics"], "cheap"),
+    "agent_round4_metrics.md": (["src.eval.round4_metrics", "--score", "r3", "r4"], "cheap"),
     # round4_preregistration.md **不在此表**：冻结件的唯一真源是 report_io.FROZEN，
     # 登记两处必然有一天对不上（本轮就撞了一次）。
     "agent_v4_paired.md": (["src.eval.v4_paired"], "cheap"),
-    "agent_flip_experiment.md": (["src.eval.flip_experiment"], "cheap"),
-    "kaggle_submission.md": (["src.model.kaggle_submit"], "cheap"),
+    "agent_flip_experiment.md": (["src.eval.flip_experiment", "--score"], "cheap"),
     # ↓ 需真实图特征的 60 天版本：靠环境变量切换，命令里必须带上，否则重跑的是 21 天
     "graph_vs_tabular_e60.md": (["GRAPH_FILE=data/processed/graph_features_e60.parquet",
                                  "src.model.graph_vs_tabular"], "heavy"),
     # ↓ 由归档离线重算，**零 API 花费且确定性**（已实测逐字节相同）→ cheap
     "agent_pipeline.md": (["src.agent.pipeline", "--report-only"], "cheap"),
     "agent_abstention.md": (["src.eval.abstention_test", "--score"], "cheap"),
-    "agent_grounding.md": (["src.eval.agent_eval", "grounding", "r1"], "cheap"),
-    "agent_defect_taxonomy.md": (["src.eval.agent_eval", "taxonomy", "r1"], "cheap"),
+    "agent_grounding.md": (["src.eval.agent_eval", "--grounding", "r1"], "cheap"),
+    # 缺陷分类由 --score 顺带产出（无独立子命令）
+    "agent_defect_taxonomy.md": (["src.eval.agent_eval", "--relabel-score", "r1"], "cheap"),
     "rules_vs_model.md": (["src.model.rules_vs_model"], "cheap"),
     "small_amount_floor.md": (["src.model.small_amount_floor"], "cheap"),
     "stepup.md": (["src.model.stepup"], "cheap"),
@@ -243,14 +244,25 @@ def verify_rerun():
         p = REPORTS / name
         if not p.exists():
             continue
-        before = p.read_bytes()
-        r = subprocess.run([sys.executable, "-m", *argv], cwd=ROOT,
-                           capture_output=True, text=True, timeout=900)
+        before, mtime_before = p.read_bytes(), p.stat().st_mtime_ns
+        env = dict(os.environ)
+        for e in argv:
+            if "=" in e and not e.startswith("-"):
+                k, v = e.split("=", 1)
+                env[k] = str(ROOT / v)
+        r = subprocess.run([sys.executable, "-m", *[a for a in argv if "=" not in a]],
+                           cwd=ROOT, capture_output=True, text=True, timeout=900, env=env)
         after = p.read_bytes() if p.exists() else b""
+        touched = p.exists() and p.stat().st_mtime_ns != mtime_before
         if after != before:
             p.write_bytes(before)                   # 只在真被改动时才还原，不做无谓写入
         if r.returncode != 0:
             fail.append((name, f"生成器退出码 {r.returncode}"))
+        elif not touched:
+            # **假放行修复**：`agent_eval grounding r1`（漏了 --）退出码 0、
+            # 只打印用法、**什么都不写**，而内容比对当然说「相同」。
+            # 「内容没变」与「根本没被写」必须分开判——后者是登记的命令是错的。
+            fail.append((name, "生成器退出码 0 但**没有写这个文件** —— 登记的命令多半是错的"))
         elif after != before:
             fail.append((name, "重新生成后内容不同 —— 非确定性或已被手编"))
         else:

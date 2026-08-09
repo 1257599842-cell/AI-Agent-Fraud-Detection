@@ -174,7 +174,7 @@ def train_and_cache():
 
 
 def make_figure(a_med):
-    """展品：(p, 金额) 平面 × 团伙证据三档 的四档分区图——①代价敏感、③已验概率、⑥图特征在一张图上。"""
+    """示例：(p, 金额) 平面 × 团伙证据三档 的四档分区图——①代价敏感、③已验概率、⑥图特征在一张图上。"""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -325,7 +325,7 @@ def _write_md(model_m, zone, a_med, n, g, dist_rows, src, med_amt_esc, examples,
           "结论：四档份额随参数**连续、单调**变化（框架稳、参数留业务标定）；k_future=0 时上报档"
           "退化并入挂起/拒绝（=修订2 防住的「四档塌三档」的直接演示）。",
           "",
-          "## 展品",
+          "## 示例",
           "- 图 12（`figures/12_disposition_regions.png`）：(p, 金额) 平面 × 团伙证据三档的四档分区——"
           "①代价敏感阈值的四动作推广 + ③已验 raw 概率 + ⑥图特征的成本语义，一张图三条线。"]
     write_report(MD_OUT, "\n".join(L))

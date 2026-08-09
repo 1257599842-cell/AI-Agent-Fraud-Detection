@@ -2,9 +2,9 @@
 
 只做"看数据"，不建模、不造特征。产出：
   reports/figures/*.png   四组图
-  reports/eda_summary.md  数字小结（可直接贴回网页版总指挥判读）
+  reports/eda_summary.md  数字小结（可直接贴回项目负责人项目负责人判读）
 
-每一块都对应一个面试防守点（见 CLAUDE.md 第六节）：
+每一块都对应一个设计约束点（见 CLAUDE.md 第六节）：
   - 缺失分布            → 数据质量 / 特征取舍
   - 按时间的欺诈率       → ②时间切分、⑩概念漂移
   - 金额分布            → 特征信号
@@ -47,7 +47,7 @@ def main() -> None:
 
     n = len(df)
     n_fraud = int(df["isFraud"].sum())
-    say("# EDA 小结 — IEEE-CIS（可带回网页版总指挥判读）\n")
+    say("# EDA 小结 — IEEE-CIS（可带回项目负责人项目负责人判读）\n")
     say(f"- 形状：{n:,} 行 × {df.shape[1]} 列；欺诈率 {n_fraud/n:.4%}（{n_fraud:,} / {n:,}，≈1:{round(n/n_fraud)}）。")
     # identity 覆盖率此前只在 load_data 里 print、从未落进报告，
     # 于是 MODEL_CARD 的 24.42% 成了一个**没有出处的 [实测]**。补进机器区。
@@ -149,7 +149,7 @@ def main() -> None:
             f"（n={int(em['count'].iloc[0]):,}）；邮箱域区分度明显，可做特征。")
     say("")
 
-    say("## 给网页版的一句话")
+    say("## 给项目负责人的一句话")
     say("数据干净、半年连续、欺诈率 3.5% 极端不平衡且随时间漂移；类别字段（ProductCD/卡类型/邮箱域）"
         "和金额都有区分信号。下一步可定时间切分点、确认不平衡处理口径与评估指标。")
 

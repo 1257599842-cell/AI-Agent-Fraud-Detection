@@ -16,12 +16,12 @@
  "agent_defect_taxonomy.md": {
   "sha256_machine_only": "0bca0894da270d978a48279bb6a949824d2ed6a32c4eb93f22a7e64be2c9c08b",
   "tier": "cheap",
-  "command": "python -m src.eval.agent_eval taxonomy r1",
+  "command": "python -m src.eval.agent_eval --relabel-score r1",
   "has_human_block": false,
   "generator_verified": true
  },
  "agent_disposition_sensitivity.md": {
-  "sha256_machine_only": "4395cdb38712cc7bac35d904f18f6935112037cfe9c5f79d3149a2712a8f7e8f",
+  "sha256_machine_only": "bb8322ce74b75378cdcc24755b0e3425533cda43ed3456751e1920d4aa3ab7d5",
   "tier": "cheap",
   "command": "python -m src.eval.disposition_sensitivity r1",
   "has_human_block": false,
@@ -37,12 +37,12 @@
  "agent_flip_experiment.md": {
   "sha256_machine_only": "42ec57a1b7463d89c2323a9f44f42ce00f54fa213db74559df539018fcb9d0ec",
   "tier": "cheap",
-  "command": "python -m src.eval.flip_experiment",
+  "command": "python -m src.eval.flip_experiment --score",
   "has_human_block": false,
   "generator_verified": true
  },
  "agent_gang_validity.md": {
-  "sha256_machine_only": "890f41582c8a621d4db82d57e177bf5d9e9c6f9aa11d9e9bf64fca41e87a1f38",
+  "sha256_machine_only": "39bebaee76d36d36c20796f60d467e7c668dbd46ea09be6c6f4e922678424ffc",
   "tier": "cheap",
   "command": "python -m src.eval.gang_validity",
   "has_human_block": false,
@@ -56,9 +56,9 @@
   "generator_verified": true
  },
  "agent_grounding.md": {
-  "sha256_machine_only": "12354fdacdcb1c2ef7dfb2a4f3a43cb3b4ae7322f98bdb8ea595ccc10e7df452",
+  "sha256_machine_only": "36807c12a78b02e78afcb409091ee781c8c586b54cd13509672361b8a883c973",
   "tier": "cheap",
-  "command": "python -m src.eval.agent_eval grounding r1",
+  "command": "python -m src.eval.agent_eval --grounding r1",
   "has_human_block": false,
   "generator_verified": true
  },
@@ -77,21 +77,21 @@
   "generator_verified": true
  },
  "agent_round3_metrics.md": {
-  "sha256_machine_only": "e568b9bf5a3666e8b2cdb96bd2b766809d1ef84e539a6f76df8f402da7051dc7",
+  "sha256_machine_only": "be13dee0beb4b0d5a7d37e4fb64509c9718a57ac2cfbdfda33c4b6a12fa05ec8",
   "tier": "cheap",
   "command": "python -m src.eval.round3_metrics r1 r3",
   "has_human_block": false,
   "generator_verified": true
  },
  "agent_round4_metrics.md": {
-  "sha256_machine_only": "5bf8a3b0fb94bec37382fc587ea83e6f58e9156f857e22d3a77679962c48ba55",
+  "sha256_machine_only": "5322d77f0b87ade0f9d12b509c41162180af3365f5def8d99d6113fd08ce1e58",
   "tier": "cheap",
-  "command": "python -m src.eval.round4_metrics",
+  "command": "python -m src.eval.round4_metrics --score r3 r4",
   "has_human_block": false,
   "generator_verified": true
  },
  "agent_selfcheck.md": {
-  "sha256_machine_only": "6c635fb04972b651288206ab56530662a9942e3ce170af32272540bddd5ef94c",
+  "sha256_machine_only": "db6a33035a0e59ad2d57fae31c8edf58679392de30c463cdeaf394cef83e1a56",
   "tier": "cheap",
   "command": "python -m src.eval.self_awareness r1",
   "has_human_block": false,
@@ -105,7 +105,7 @@
   "generator_verified": true
  },
  "baseline_metrics.md": {
-  "sha256_machine_only": "e38b2429c8e07292c1efe1313ea1861b5f2929780a3645c5b3a53511dee04c3c",
+  "sha256_machine_only": "49703a317f416968e20f68195dd4fd522e65cb72dbc310786e3b364355e73810",
   "tier": "heavy",
   "command": "python -m src.model.train_baseline",
   "has_human_block": false,
@@ -119,42 +119,42 @@
   "generator_verified": true
  },
  "calibration.md": {
-  "sha256_machine_only": "b760c060986d8fad0fed24cc175c06926c0fab54b978d20a5710b2b9d71e08e5",
+  "sha256_machine_only": "743a2cb01ad19dffb11e317cf67e21b8e50fd0e58f952bc1edda0b32391a0aa5",
   "tier": "heavy",
   "command": "python -m src.model.calibration",
   "has_human_block": true,
   "generator_verified": true
  },
  "cost_sensitive.md": {
-  "sha256_machine_only": "f34c5f8485e105db466e4bfa21c1ff60fd939f6d05cd0dd3fddb70acbe6247a0",
+  "sha256_machine_only": "48cef46dca11aaf5c796270b1cf63143caf696304c023b6af47861bee35ecee4",
   "tier": "heavy",
   "command": "python -m src.model.cost_sensitive",
   "has_human_block": false,
   "generator_verified": true
  },
  "disposition.md": {
-  "sha256_machine_only": "e0b05980bb74cdb5d83d42d1ee2f0cfa0fcd13ede6113455baff7b64b84ed83b",
+  "sha256_machine_only": "68e628adf0dc56b641135d4ee24b0569c15cff133ffa066a07b0e8d5c15a47e7",
   "tier": "cheap",
   "command": "python -m src.agent.disposition",
   "has_human_block": false,
   "generator_verified": true
  },
  "drift_monitor.md": {
-  "sha256_machine_only": "4e74cdf6b4ace26bef22677afed31f982d195a24f485c3e1d06ffd0084bfa3fb",
+  "sha256_machine_only": "0f40a3780e9fa06da93a8c33846863b923f388cc6eceaea8e80500cc9a730237",
   "tier": "heavy",
   "command": "python -m src.eval.drift_monitor",
   "has_human_block": true,
   "generator_verified": true
  },
  "eda_summary.md": {
-  "sha256_machine_only": "ef7165421e1a85590ada6e38fa1b60efd435a28b04fce7388c2e712c20b2716c",
+  "sha256_machine_only": "3a888cb9235b692743326e7a4f22e44c7c72e8811983350f31d3fc60671b5273",
   "tier": "heavy",
   "command": "python -m notebooks.eda",
   "has_human_block": false,
   "generator_verified": true
  },
  "embargo_decomposition.md": {
-  "sha256_machine_only": "7163095c735d692cf043e05ac791dedd4b4964c9af0b1ee4747f153a85f4cddc",
+  "sha256_machine_only": "9dfc8e0a86ebbceaf4b881b7334a90c39c923b8615c8ba5e0ae861863ae46ee8",
   "tier": "heavy",
   "command": "python -m src.model.embargo_control",
   "has_human_block": true,
@@ -182,30 +182,23 @@
   "generator_verified": true
  },
  "graph_vs_tabular.md": {
-  "sha256_machine_only": "2e2efd027e95a4ed957cd7c37b48222b83a84e573f4d0d19c1bc7ca9e3023902",
+  "sha256_machine_only": "fa48cf212fbb5b9b432f999b3cfc889f84a6ae873c620a3c33cd5c6d1a44ea21",
   "tier": "heavy",
   "command": "python -m src.model.graph_vs_tabular",
   "has_human_block": true,
   "generator_verified": "[未验证]"
  },
  "graph_vs_tabular_e60.md": {
-  "sha256_machine_only": "afce058c655d762ed7166567737da187fd70eba33867daa6d22bc973aea5a701",
+  "sha256_machine_only": "ca5b95c92a5e820b38a3181074f8e36a6f5fba68ca61b8d4715e1fbd5dd9d55a",
   "tier": "heavy",
   "command": "GRAPH_FILE=data/processed/graph_features_e60.parquet python -m src.model.graph_vs_tabular",
   "has_human_block": false,
   "generator_verified": "[未验证]"
  },
  "imbalance_ablation.md": {
-  "sha256_machine_only": "ef4a0a4d1282f21f5174ee4e0cf09d5046361b8ae5af42cfa3b6e64d55d9a70d",
+  "sha256_machine_only": "33a800ccf334ecc1e37881b7cec58b6c5496314217ca97e532383971e523b7a4",
   "tier": "heavy",
   "command": "python -m src.model.imbalance_ablation",
-  "has_human_block": false,
-  "generator_verified": true
- },
- "kaggle_submission.md": {
-  "sha256_machine_only": "2c8c9c6fb53b835b195df6bdfb77542ca9075835c2951daaf25c788dd4798155",
-  "tier": "cheap",
-  "command": "python -m src.model.kaggle_submit",
   "has_human_block": false,
   "generator_verified": true
  },
@@ -217,14 +210,14 @@
   "generator_verified": true
  },
  "selective_bias.md": {
-  "sha256_machine_only": "3063d951701b38fd5b70b71ae52f81e2d54191430b2f46cbef8a8c82d228fbc2",
+  "sha256_machine_only": "85d69c0cac8bb81e4dd8f1c0412711c503d35a7338b0d05c682afa795ae3b731",
   "tier": "heavy",
   "command": "python -m src.eval.selective_bias",
   "has_human_block": false,
   "generator_verified": true
  },
  "small_amount_floor.md": {
-  "sha256_machine_only": "637797626a2f8a250b528a270338d064dcb766cef254e3f6302c5ece61f4467e",
+  "sha256_machine_only": "953e79a1ed3720ad674a35955d36f7f0cf224f2dd73f13a173dc83aa8859a9b2",
   "tier": "cheap",
   "command": "python -m src.model.small_amount_floor",
   "has_human_block": false,
@@ -238,7 +231,7 @@
   "generator_verified": true
  },
  "stepup.md": {
-  "sha256_machine_only": "3f330e26f95b9f885d8e8d3d60b131ffc471770b4a2fc2dfd20a6a783ab1bfed",
+  "sha256_machine_only": "706c47b348cdd010b88519786e4c7945765d7800317a2c38917489db0503e8f2",
   "tier": "cheap",
   "command": "python -m src.model.stepup",
   "has_human_block": false,
@@ -273,6 +266,12 @@
   "frozen_at": "2026-07-29",
   "tier": "frozen",
   "why": "评分前的 rubric 草案：它证明「评分标准先于评分确定」。事后重写 rubric 再宣布分数，是最典型的移动球门。"
+ },
+ "reports/kaggle_submission.md": {
+  "sha256": "2c8c9c6fb53b835b195df6bdfb77542ca9075835c2951daaf25c788dd4798155",
+  "frozen_at": "2026-08-01",
+  "tier": "frozen",
+  "why": "记录一次**已发生的外部提交**（提交号 55152570 / 2026-08-01）。重跑 `--submit` 会向 Kaggle 真的再交一次，而旧那次的榜单快照无法重建——它是事件记录，不是可重算的产物。"
  },
  "reports/round4_preregistration.md": {
   "sha256": "135ee04e0232000880d90c381c2b953526269f98b984189f1e7e5c78fadf7797",

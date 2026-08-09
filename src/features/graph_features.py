@@ -1,9 +1,9 @@
-"""时间因果图特征（防守点① + ⑥ 素材）。
+"""时间因果图特征（硬点① + ⑥ 素材）。
 
 按 graph_eda 结论：IEEE-CIS 无细粒度设备/账户 ID（addr1=地区、DeviceInfo=OS、邮箱域全公共），
 唯 card1 有特异性 → 用**组合键**造"稀有共享实体"：card1、card1+addr1、card1+邮箱、card1+设备。
 
-两层防泄漏（加固二，图特征版防守点②）：
+两层防泄漏（加固二，图特征版硬点②）：
   - 结构型（prior_count / fan-out）：只用**该交易时间点之前**的边聚合（two-pointer，只看 DT 更早的行）。
   - 标签型（prior_fraud_rate）：邻居 isFraud 只取 DT ≤ t−EMBARGO（拒付延迟，"之前"再往前挪 21 天）。
 
