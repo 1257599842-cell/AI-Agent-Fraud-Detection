@@ -17,6 +17,7 @@
 产出：reports/figures/10_imbalance_reliability.png + reports/imbalance_ablation.md
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import lightgbm as lgb
@@ -146,7 +147,7 @@ def _write_md(models, spw):
         "> 任何动先验的操作——重采样也好、盲目校准也好——都会破坏我整条链依赖的概率质量，这是我全程不碰它们的原因。（③证 blanket 校准伤尾，④证重采样毁校准，同一个故事的两半。）",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

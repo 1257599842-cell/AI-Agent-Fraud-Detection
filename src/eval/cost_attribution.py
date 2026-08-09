@@ -15,6 +15,7 @@ round 3 要修哪个 prompt 病灶，得由**钱**决定。
 用法：python -m src.eval.cost_attribution r1
 """
 
+from src.report_io import write_report
 import json
 import sys
 from pathlib import Path
@@ -234,10 +235,12 @@ def run(tag):
           "死的是需要金额加权排序的（集中度撑不住），活的是纯计数的（不需要加权）。"
           "教训不是「成本归因没用」，是**先问结论需要多强的估计量，再看样本给不给得起**。\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":
-    run(sys.argv[1] if len(sys.argv) > 1 else "r1")
+    from src.eval._cli import require_tags
+    run(require_tags(sys.argv[1:], least=1,
+                     usage="python -m src.eval.cost_attribution r1")[0])

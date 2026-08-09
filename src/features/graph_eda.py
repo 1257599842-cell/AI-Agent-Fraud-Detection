@@ -9,6 +9,7 @@
 产出：控制台报告 + reports/graph_eda.md
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import numpy as np
@@ -81,7 +82,7 @@ def _write_md(stats, overall):
         "- 下一步 `graph_features.py` 按此过滤后再建时间因果图特征。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

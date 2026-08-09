@@ -8,6 +8,7 @@
 产出：reports/figures/08_drift_monitor.png + reports/drift_monitor.md
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import lightgbm as lgb
@@ -114,9 +115,18 @@ def _write_md(wins, base, trigger, n_alarm):
         f"- 末窗 ROC-AUC {last['roc']:.4f} vs 基线 {base:.4f}（Δ {decay:+.4f}）。",
         "- 监控盯**分窗表现衰减**（而非整体欺诈率）：欺诈率列波动明显但聚合稳，印证 ⑩「波动/分布型漂移」。",
         "- 触发器：窗口 ROC-AUC 跌破 基线−δ 即告警「该重训/近窗重校准」——这就是 ③⑩ 那条控制回路的监控端。",
+        # 判读要引用「PR 比 ROC 更敏感」，那就把两者的波动幅度**由机器算出来**，
+        # 免得人写区自己去减——减错了也没人发现。
+        f"- 波动幅度：ROC-AUC {max(w['roc'] for w in wins) - min(w['roc'] for w in wins):.4f}"
+        f"、PR-AUC **{max(w['pr'] for w in wins) - min(w['pr'] for w in wins):.4f}**"
+        f"（PR 区间 [{min(w['pr'] for w in wins):.4f}, {max(w['pr'] for w in wins):.4f}]）。",
+        f"- **PR-AUC 相对基线的最大落差 {wins[0]['pr'] - min(w['pr'] for w in wins):.4f}**"
+        f"（基线 {wins[0]['pr']:.4f} → 最低 {min(w['pr'] for w in wins):.4f}），"
+        f"同期 ROC 落差仅 {wins[0]['roc'] - min(w['roc'] for w in wins):.4f}"
+        f" —— 正类监控该盯 PR。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

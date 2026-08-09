@@ -8,6 +8,7 @@
 产出：控制台对比 + reports/graph_vs_tabular.md
 """
 
+from src.report_io import write_report
 import os
 from pathlib import Path
 
@@ -120,7 +121,7 @@ def _write_md(A, B, graph_cols, ranks, total, imp):
         "- 团伙叙事（喂②风控/④业务安全两张皮）：组合键（card1+邮箱/设备）的 prior_fraud_rate 与 fan-out 是「共享稀有实体」的团伙信号。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

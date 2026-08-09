@@ -15,6 +15,7 @@
 用法：python -m src.eval.v4_paired
 """
 
+from src.report_io import write_report
 import json
 import sys
 from pathlib import Path
@@ -301,7 +302,7 @@ def run():
           "> 本文件只回答一个问题——**改完之后，原来对的东西还对不对**。",
           f"> n={len(common)}，方向与计数为准，不做显著性声称。\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 

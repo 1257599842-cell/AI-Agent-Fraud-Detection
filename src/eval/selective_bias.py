@@ -16,6 +16,7 @@
 产出：reports/figures/09_selective_bias.png + reports/selective_bias.md
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import lightgbm as lgb
@@ -149,7 +150,7 @@ def _write_md(naive, recov, n_fraud_test):
         "- 接 ⑩：这就是回流偏差的来源，探索预算（随机放行抽检）是无偏锚定；delta 记 naive→recovery。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

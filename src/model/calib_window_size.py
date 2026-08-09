@@ -9,6 +9,7 @@
 产出：控制台表 + reports/calib_window_size.md（追加到 ③ 证据链）
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import lightgbm as lgb
@@ -82,7 +83,7 @@ def _write_md(raw, rows):
         "- 无论哪种，都排除了\"样本太少\"这个混淆（与上一轮'等量旧窗对照剥离数据量'同一种严谨动作）。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

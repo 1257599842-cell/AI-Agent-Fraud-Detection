@@ -24,6 +24,7 @@
 用法：python -m src.model.small_amount_floor
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import numpy as np
@@ -191,7 +192,7 @@ def main():
           "- `E_decline = c_fp·(1−p)` **不含金额项**：拒绝一笔 $10,000 与拒绝一笔 $1 同价。"
           "这是建模选择（拒绝的代价只算误伤好客户），**本身值得在面试里主动交代**。\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(ROOT)}")
 

@@ -22,6 +22,7 @@
 用法：python -m src.eval.self_awareness r1
 """
 
+from src.report_io import write_report
 import json
 import sys
 from pathlib import Path
@@ -366,10 +367,12 @@ def run(tag):
           "接着一个更细的对照推翻了我据此下的强结论。**估计量本身会掩盖问题**"
           "（M-H 静默跳过缺格），这与解析层那个静默 bug 是同一类错误的两个位置。"]
 
-    REPORT.write_text("\n".join(x for x in L if x is not None), encoding="utf-8")
+    write_report(REPORT, "\n".join(x for x in L if x is not None))
     print("\n".join(x for x in L if x is not None))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":
-    run(sys.argv[1] if len(sys.argv) > 1 else "r1")
+    from src.eval._cli import require_tags
+    run(require_tags(sys.argv[1:], least=1,
+                     usage="python -m src.eval.self_awareness r1")[0])

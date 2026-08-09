@@ -30,6 +30,7 @@ round 4 **只改 prompt 一处**。`policy_param` 那条改动（把成本假设
   python -m src.eval.round4_metrics --score r3 r4    # 跑后：对比
 """
 
+from src.report_io import write_report
 import json
 import re
 import sys
@@ -293,7 +294,7 @@ def score(a, b):
                  f"**{len(hits)}** 条")
         for x, i, s in hits[:6]:
             L.append(f"  - `{x}#{i}`：«{s[:90]}»")
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 

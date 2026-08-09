@@ -36,6 +36,7 @@ judge：DeepSeek（与被评 Claude 分家，防自评偏差）。需 DEEPSEEK_A
   python -m src.eval.agent_eval --relabel-score r1   # owner 标完后：筛子精确率+金标漂移+三臂
 """
 
+from src.report_io import write_report
 import json
 import os
 import re
@@ -880,9 +881,9 @@ def grounding(tag):
     print(f"\n=== 子集重算：严格 fully_cited（金标 {len(sub_keep)} 条）===")
     r_sub = _three_arm(tag, sub_keep, origin, clean_origins=("orig60",))
 
-    (PROJECT_ROOT / "reports" / "agent_grounding.md").write_text(
-        _grounding_md(tag, cls, n, withnum, ungrounded, derived, r_all, r_sub,
-                      len(all_keep), len(sub_keep)), encoding="utf-8")
+    write_report(PROJECT_ROOT / "reports" / "agent_grounding.md",
+                 _grounding_md(tag, cls, n, withnum, ungrounded, derived, r_all, r_sub,
+                               len(all_keep), len(sub_keep)))
     print(f"\n✅ → reports/agent_grounding.md")
     return rows
 

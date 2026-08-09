@@ -13,6 +13,7 @@ m_e 上报残余率）。参数一动，应然档就动，58% 也跟着动。
 用法：python -m src.eval.disposition_sensitivity r1
 """
 
+from src.report_io import write_report
 import itertools
 import json
 import sys
@@ -255,10 +256,12 @@ def run(tag):
           "> 项目对外定位是「离线决策系统 + 已推演工业化路径」，所以正确讲法是"
           "「我知道结论依赖这些假设，并且量化了依赖程度」，而不是假装参数是已知的。\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":
-    run(sys.argv[1] if len(sys.argv) > 1 else "r1")
+    from src.eval._cli import require_tags
+    run(require_tags(sys.argv[1:], least=1,
+                     usage="python -m src.eval.disposition_sensitivity r1")[0])

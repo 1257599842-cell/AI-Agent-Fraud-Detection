@@ -28,6 +28,7 @@
   python -m src.eval.abstention_test --score   # 出结论（免费）
 """
 
+from src.report_io import write_report
 import json
 import sys
 from pathlib import Path
@@ -390,7 +391,7 @@ def score():
               "既然模型确实会在证据真没有时弃权，就更该把**代码可判的那部分**前移到管道层，",
               "让模型只负责代码判不了的灰区——而不是两边都指望它。\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 

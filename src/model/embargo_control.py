@@ -16,6 +16,7 @@
 产出：控制台分解 + reports/embargo_decomposition.md
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import lightgbm as lgb
@@ -130,7 +131,7 @@ def _write_md(full, emb, ctrl, n_drop, decomp) -> None:
         "  所以这个 gap 主要是「拿不到最新标签」的真实代价，不是「训练数据变少」的假象。白板上能拆给面试官看。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

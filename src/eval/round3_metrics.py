@@ -18,6 +18,7 @@
   python -m src.eval.round3_metrics r1 r3           # 两轮对比（同参数配对）
 """
 
+from src.report_io import write_report
 import json
 import sys
 from pathlib import Path
@@ -256,11 +257,15 @@ def run(tags, matched=False):
               "> 停用条件写死：**一旦处置不再由 Agent 产出，层1 一致率即失效**。"
               "若将来 Agent 重新参与决策，它自动复活。\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    run(args or ["r1"], matched="--matched" in sys.argv)
+    # 曾写作 `run(args or ["r1"])`：裸跑顶上单轮默认，把两轮对比整段覆盖且退出码为 0。
+    from src.eval._cli import require_tags
+    tags = require_tags(sys.argv[1:], least=1,
+                        usage="python -m src.eval.round3_metrics r1 r3   "
+                              "# 两轮对比（committed 报告的口径）")
+    run(tags, matched="--matched" in sys.argv)

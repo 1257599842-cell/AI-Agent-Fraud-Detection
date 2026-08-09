@@ -18,6 +18,7 @@
 产出：reports/figures/06_reliability.png + 07_recalib_drift.png + reports/calibration.md
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import lightgbm as lgb
@@ -194,7 +195,7 @@ def _write_md(results, m_old, m_near, n_test, n_near, n_old):
         "- 关键判断：**先测再决定要不要校准**——本数据 raw 已较准就不 blanket 套；校准是阈值①的前提，只在决策区间真失准时才做。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

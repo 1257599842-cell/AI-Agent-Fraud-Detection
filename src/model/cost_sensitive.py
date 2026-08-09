@@ -14,6 +14,7 @@
 产出：reports/figures/05_cost_curve.png + reports/cost_sensitive.md
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import lightgbm as lgb
@@ -152,7 +153,7 @@ def _write_md(rows, n_fraud, fraud_dollars, n_test):
         "- 注意容量约束：t* 拦截量若超过复核员日容量，则在 t* 与容量之间取约束最优（接 precision@容量 曲线）。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@
 产出：控制台 + reports/graph_feature_ablation.md
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 from src.model.graph_vs_tabular import fit_eval, load
@@ -71,7 +72,7 @@ def _write_md(runs, groups):
            else "结构/velocity 信号。"),
           "- 一句话进 ⑥：图增益的主力是「实体的历史欺诈标签」这类信号，正是 GNN 想学、而我用便宜的时间因果聚合已拿到的部分。"]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

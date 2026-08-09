@@ -18,6 +18,7 @@
 产出：data/processed/agent_rules.json + agent_cases.parquet + reports/agent_knowledge.md
 """
 
+from src.report_io import write_report
 import json
 from pathlib import Path
 
@@ -325,7 +326,7 @@ def _write_report(admitted, rejected, cases, sanity_lines):
     L += ["## 待决项",
           "- 向量粗排层（BGE/Chroma，拍板稿 1.3）本步未装：结构化相似是 1.4 拍板的主通道，"
           "20 条量级规则命中用触发器即可。等步骤4 管道跑通、看检索质量再决定是否为案例卡加向量粗排。"]
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print(f"✅ 报告 → {REPORT.relative_to(PROJECT_ROOT)}")
 
 

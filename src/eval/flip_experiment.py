@@ -29,6 +29,7 @@ Agent 的全部工作就只剩取证与叙事。那么「它的取证会不会�
   python -m src.eval.flip_experiment --score  # 只算指标（免费）
 """
 
+from src.report_io import write_report
 import json
 import re
 import sys
@@ -291,7 +292,7 @@ def score():
           "> 另：`FAKE_HIGH=0.95` 是单点操纵，未做剂量扫描（0.3/0.6/0.9），"
           "所以只能说「在这个强度下没被带跑」。\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 

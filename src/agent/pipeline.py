@@ -17,6 +17,7 @@
 产出：reports/samples/*.json + reports/agent_pipeline.md
 """
 
+from src.report_io import write_report
 import json
 import sys
 from pathlib import Path
@@ -366,7 +367,7 @@ def _write_md(rows):
                  f"| {rep.get('disposition', '—')} |")
     total = sum(r.get("cost_usd", 0) for _, r in rows)
     L += ["", f"演习总成本 ${total:.4f}。报告原文见 `reports/samples/*.json`（含完整 facts 账本，可逐条对账）。"]
-    MD_OUT.write_text("\n".join(L), encoding="utf-8")
+    write_report(MD_OUT, "\n".join(L))
 
 
 def main():

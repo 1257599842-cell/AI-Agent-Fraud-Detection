@@ -14,6 +14,7 @@
   python -m src.features.build_duckdb --reconcile-only
 """
 
+from src.report_io import write_report
 import sys
 from pathlib import Path
 
@@ -143,7 +144,7 @@ def reconcile():
         for c, d in diffs.items():
             L += [f"### `{c}`", d.to_markdown(index=False), ""]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L[:40]))
     print(f"\n{'✅ 对账通过' if all_ok else '❌ 对账未通过'} → {REPORT.relative_to(PROJECT_ROOT)}")
     return all_ok

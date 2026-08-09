@@ -30,6 +30,7 @@ A_med（欺诈中位金额）在 [0,125) 窗算，与规则库同一把尺子。
      reports/figures/12_disposition_regions.png + reports/disposition.md
 """
 
+from src.report_io import write_report
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -327,7 +328,7 @@ def _write_md(model_m, zone, a_med, n, g, dist_rows, src, med_amt_esc, examples,
           "## 展品",
           "- 图 12（`figures/12_disposition_regions.png`）：(p, 金额) 平面 × 团伙证据三档的四档分区——"
           "①代价敏感阈值的四动作推广 + ③已验 raw 概率 + ⑥图特征的成本语义，一张图三条线。"]
-    MD_OUT.write_text("\n".join(L), encoding="utf-8")
+    write_report(MD_OUT, "\n".join(L))
 
 
 if __name__ == "__main__":

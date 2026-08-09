@@ -30,6 +30,7 @@
 用法：python -m src.eval.gang_validity
 """
 
+from src.report_io import write_report
 import sys
 from pathlib import Path
 
@@ -312,7 +313,7 @@ def run(T0=T0):
     L += ["", f"> 局限：单一参照时点 t0={T0}、单一结局窗 {WIN} 天、实体只取 `card1`；"
           "未做多时点重复（会引入同实体重复计数）。\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 
@@ -353,8 +354,8 @@ def compare():
               "**降级为「单窗结果」**，不得作为头条。"]
     L += ["", "> 口径与主报告一致：实体=card1、结构窗 day<t0、标签窗 day<t0−21、"
           f"结局窗 (t0, t0+{WIN}]、比池化欺诈率。\n"]
-    Path(REPORT).with_name("agent_gang_validity_replication.md").write_text(
-        "\n".join(L), encoding="utf-8")
+    write_report(Path(REPORT).with_name("agent_gang_validity_replication.md"),
+                 "\n".join(L))
     print("\n".join(L))
 
 

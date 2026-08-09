@@ -24,6 +24,7 @@
 用法：python -m src.eval.evidence_vs_decision r1 r3
 """
 
+from src.report_io import write_report
 import json
 import sys
 from pathlib import Path
@@ -253,10 +254,12 @@ def run(tags):
           "> 所以把决策交回闭式解、让 Agent 专做取证。**其中团伙判定本身的效度我另做了检验，"
           "在这批数据上没测出来，正确的锚是实体的未来欺诈率，那个我没跑。**」\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 
 
 if __name__ == "__main__":
-    run(sys.argv[1:] or ["r1", "r3"])
+    from src.eval._cli import require_tags
+    run(require_tags(sys.argv[1:], least=2,
+                     usage="python -m src.eval.evidence_vs_decision r1 r3"))

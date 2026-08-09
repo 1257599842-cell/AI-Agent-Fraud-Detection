@@ -41,6 +41,7 @@ IEEE-CIS 没有「加验证后是否通过 / 是否放弃」的记录。
 用法：python -m src.model.stepup
 """
 
+from src.report_io import write_report
 import itertools
 from pathlib import Path
 
@@ -278,7 +279,7 @@ def main():
           "**五档只并列呈现，不覆盖四档。**\n"]
 
     make_figure(a_med, BASE)
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)} + {FIG.relative_to(PROJECT_ROOT)}")
 

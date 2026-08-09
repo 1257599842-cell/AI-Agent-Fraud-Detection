@@ -15,6 +15,7 @@
 图里标签用英文（matplotlib 默认字体无中文）；中文解读写进 summary.md。
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import matplotlib
@@ -47,7 +48,12 @@ def main() -> None:
     n = len(df)
     n_fraud = int(df["isFraud"].sum())
     say("# EDA 小结 — IEEE-CIS（可带回网页版总指挥判读）\n")
-    say(f"- 形状：{n:,} 行 × {df.shape[1]} 列；欺诈率 {n_fraud/n:.4%}（{n_fraud:,} / {n:,}，≈1:{round(n/n_fraud)}）。\n")
+    say(f"- 形状：{n:,} 行 × {df.shape[1]} 列；欺诈率 {n_fraud/n:.4%}（{n_fraud:,} / {n:,}，≈1:{round(n/n_fraud)}）。")
+    # identity 覆盖率此前只在 load_data 里 print、从未落进报告，
+    # 于是 MODEL_CARD 的 24.42% 成了一个**没有出处的 [实测]**。补进机器区。
+    _idy = [c for c in df.columns if c.startswith("id_") or c in ("DeviceType", "DeviceInfo")]
+    _cov = df[_idy].notna().any(axis=1).mean() if _idy else float("nan")
+    say(f"- identity 覆盖率：**{_cov:.2%}**（{int(_cov * n):,} / {n:,} 笔有 identity 侧字段）。\n")
 
     # ── 1. 缺失分布 ───────────────────────────────────────────────
     miss = df.isna().mean().sort_values(ascending=False)
@@ -148,7 +154,7 @@ def main() -> None:
         "和金额都有区分信号。下一步可定时间切分点、确认不平衡处理口径与评估指标。")
 
     SUMMARY_MD.parent.mkdir(parents=True, exist_ok=True)
-    SUMMARY_MD.write_text("\n".join(lines), encoding="utf-8")
+    write_report(SUMMARY_MD, "\n".join(lines))
     print(f"\n✅ 图已存到 {FIG_DIR.relative_to(PROJECT_ROOT)}/，小结写到 {SUMMARY_MD.relative_to(PROJECT_ROOT)}")
 
 

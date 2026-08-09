@@ -15,6 +15,7 @@
 产出：控制台对比表 + reports/baseline_metrics.md
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import lightgbm as lgb
@@ -180,7 +181,7 @@ def _write_md(results: list[dict]) -> None:
           "> 被 p≈0 的易负样本主导，**决策区间（top1~2%）的校准仍需用可靠性图单独验**。embargo 使 ECE {:.4f}→{:.4f}".format(r0['ece'], r21['ece']),
           "> 变差，支持近窗重校准。防守点③口径改为「决策区间验证校准 + 漂移后近窗重校准」，待网页版确认。"]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(L), encoding="utf-8")
+    write_report(OUT_MD, "\n".join(L))
 
 
 if __name__ == "__main__":

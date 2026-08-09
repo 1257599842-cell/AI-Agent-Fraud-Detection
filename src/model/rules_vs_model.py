@@ -18,6 +18,7 @@
 用法：python -m src.model.rules_vs_model
 """
 
+from src.report_io import write_report
 from pathlib import Path
 
 import numpy as np
@@ -175,7 +176,7 @@ def main():
           "本数据 `TransactionDT` 为相对秒，技术上可算，但需与现有准入门槛走同一套 lift 筛选，"
           "本轮未做。\n"]
 
-    REPORT.write_text("\n".join(L), encoding="utf-8")
+    write_report(REPORT, "\n".join(L))
     print("\n".join(L))
     print(f"\n✅ → {REPORT.relative_to(PROJECT_ROOT)}")
 
