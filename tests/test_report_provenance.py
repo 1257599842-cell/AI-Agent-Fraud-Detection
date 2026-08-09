@@ -24,6 +24,11 @@ REPORTS = ROOT / "reports"
 MANIFEST = REPORTS / "_manifest.json"
 
 
+def sha_full(p):
+    """整文件哈希 —— 冻结件用它（冻结件没有机器区/人写区之分）。"""
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
 def sha(p):
     """**只哈希机器区**——人写区归人，改判读不该让测试变红。
 
@@ -42,20 +47,42 @@ class TestReportProvenance(unittest.TestCase):
         cls.man = json.loads(MANIFEST.read_text(encoding="utf-8"))
 
     def test_every_listed_report_matches_its_hash(self):
-        """任何手工编辑都会在这里现形。"""
+        """任何手工编辑都会在这里现形。**四档各有各的哈希口径**：
+
+        报告 → 只算机器区；冻结件 → 整文件；归档目录 → 目录聚合树哈希。
+        用同一把尺量三种东西，是上一版测试红成一片的原因。
+        """
+        from src.eval.report_manifest import tree_sha
         for name, rec in sorted(self.man.items()):
-            p = REPORTS / name
-            with self.subTest(report=name):
-                self.assertTrue(p.exists(), f"{name} 缺失")
-                self.assertEqual(
-                    sha(p), rec["sha256_machine_only"],
-                    f"\n{name} 与清单不符——它被手编过，或生成器改了没重跑。"
-                    f"\n重生成：{rec['command']}"
-                    f"\n刷新清单：python -m src.eval.report_manifest --update")
+            tier = rec.get("tier")
+            with self.subTest(entry=name, tier=tier):
+                if tier == "archive":
+                    d = ROOT / name.rstrip("/")
+                    self.assertTrue(d.is_dir(), f"{name} 归档目录缺失")
+                    self.assertEqual(tree_sha(d)[0], rec["sha256_tree"],
+                                     f"{name} 归档内容变了——原始返回不该被改动")
+                elif tier == "frozen":
+                    self.assertEqual(sha_full(ROOT / name), rec["sha256"],
+                                     f"{name} 是冻结件，内容变了即毁掉其时间声明")
+                else:
+                    p = REPORTS / name
+                    self.assertTrue(p.exists(), f"{name} 缺失")
+                    self.assertEqual(
+                        sha(p), rec["sha256_machine_only"],
+                        f"\n{name} 与清单不符——它被手编过，或生成器改了没重跑。"
+                        f"\n重生成：{rec['command']}"
+                        f"\n刷新清单：python -m src.eval.report_manifest --update")
 
     def test_every_entry_records_a_runnable_command(self):
-        """出处不是「大概是某个脚本生成的」，得是一条能直接复制运行的命令。"""
+        """出处不是「大概是某个脚本生成的」，得是一条能直接复制运行的命令。
+
+        归档与冻结件例外：它们**本来就不该被重跑**，命令位写的是「为什么不可复现」。
+        """
         for name, rec in sorted(self.man.items()):
+            if rec.get("tier") in ("archive", "frozen"):
+                with self.subTest(entry=name):
+                    self.assertTrue(rec.get("why"), "归档/冻结件必须写明理由")
+                continue
             with self.subTest(report=name):
                 # 允许 `VAR=... python -m ...`：环境变量也是口径的一部分
                 # （e60 那份就是靠 GRAPH_FILE 切换的，命令里不带就重跑成 21 天）
@@ -65,7 +92,9 @@ class TestReportProvenance(unittest.TestCase):
     def test_manifest_and_generator_table_agree(self):
         """清单与 `GENERATORS` 表不得脱节——脱节意味着有报告没人认领。"""
         from src.eval.report_manifest import GENERATORS
-        self.assertEqual(set(self.man), set(GENERATORS) & set(self.man))
+        reports_only = {n for n, r in self.man.items()
+                        if r.get("tier") not in ("archive", "frozen")}
+        self.assertEqual(reports_only, set(GENERATORS) & reports_only)
         missing = [n for n in GENERATORS if not (REPORTS / n).exists()]
         self.assertEqual(missing, [], f"清单登记了但文件不存在：{missing}")
 
@@ -116,3 +145,66 @@ class TestNoSilentCliDefaults(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestFrozenArtifacts(unittest.TestCase):
+    """承载**时间声明**的文件：盲标表 / 预注册 / 评分前 rubric。
+
+    判据一句话：**该文件是否声称写于某时点之前、是否承载「当时不知道结果」。**
+    重写它毁掉的不是内容，是那个声明本身——而声明正是这些数字的全部效力来源。
+
+    此前只有 `chmod 444` 拦着，**是权限位拦住的、不是设计拦住的**；
+    权限位会在 clone / 打包 / 复制时丢失。现在判断在代码里。
+    """
+
+    def test_write_report_refuses_every_frozen_path(self):
+        from src.report_io import FROZEN, FrozenArtifactError, write_report
+        self.assertGreaterEqual(len(FROZEN), 6, "冻结件登记数下降了——是不是被误删？")
+        for rel in FROZEN:
+            with self.subTest(artifact=rel):
+                with self.assertRaises(FrozenArtifactError):
+                    write_report(ROOT / rel, "覆盖尝试")
+
+    def test_every_frozen_entry_says_what_breaks(self):
+        """理由要写「动了会毁掉什么」，不是「别动它」——后者不能让人自己判断。"""
+        from src.report_io import FROZEN
+        for rel, (when, why) in FROZEN.items():
+            with self.subTest(artifact=rel):
+                self.assertRegex(when, r"^20\d\d-\d\d-\d\d$")
+                self.assertGreater(len(why), 25, "理由太短，多半只写了『别动』")
+
+    def test_frozen_files_still_match_recorded_digest(self):
+        from src.report_io import frozen_digests
+        for rel, rec in frozen_digests().items():
+            with self.subTest(artifact=rel):
+                self.assertEqual(sha_full(ROOT / rel), rec["sha256"])
+
+    @classmethod
+    def setUpClass(cls):
+        if MANIFEST.exists():
+            cls.man = json.loads(MANIFEST.read_text(encoding="utf-8"))
+
+
+class TestManifestMetadataIsItselfChecked(unittest.TestCase):
+    """**执法工具自己也要被执法。**
+
+    登记的生成器名曾有 1 处是错的、3 处指向不存在的文件——
+    一个自己没被核实过的检查器比没有检查器更坏：它让人以为已经查过了。
+    """
+
+    def test_no_generator_entry_is_broken(self):
+        from src.eval.report_manifest import validate_generators
+        problems, _ = validate_generators()
+        self.assertEqual(problems, [], f"清单登记的生成器有问题：{problems}")
+
+    def test_unverified_entries_are_labelled_not_blank(self):
+        """无法断言的必须标 `[未验证]`——留空看起来像通过。"""
+        if not MANIFEST.exists():
+            self.skipTest("清单未生成")
+        man = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        for name, rec in man.items():
+            if rec.get("tier") in ("archive", "frozen"):
+                continue
+            with self.subTest(report=name):
+                self.assertIn("generator_verified", rec)
+                self.assertIn(rec["generator_verified"], (True, "[未验证]"))

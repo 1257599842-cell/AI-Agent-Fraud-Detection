@@ -71,8 +71,10 @@ def explain(value, pool):
             # round(20000/1e6, 2) == 0.02 会让任意五位数「解释」掉 0.02，
             # 那是假放行，比假警更危险。
             for div, unit in ((1e3, "k"), (1e4, "万"), (1e6, "M")):
+                # **至少 1 位小数**：0 位时 round(3,556,658/1e6, 0) == 4，
+                # 交易号能把任意个位数「解释」掉——又一次假放行。
                 if abs(m) >= div:
-                    for nd in (0, 1, 2):
+                    for nd in (1, 2):
                         if round(m / div, nd) == value:
                             return f"量级缩写（{unit}，{nd} 位）"
             # 百分数两形态：0.0559 ↔ 5.59。**至少保留 1 位小数**——

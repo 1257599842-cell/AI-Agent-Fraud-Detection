@@ -1,218 +1,332 @@
 {
  "agent_abstention.md": {
   "sha256_machine_only": "a022e2bc683603c361408bfcb1ae160123bb0b54511e52b4274b88261187c0ff",
-  "tier": "api",
+  "tier": "cheap",
   "command": "python -m src.eval.abstention_test --score",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_cost_attribution.md": {
   "sha256_machine_only": "9f8f87828dd1d7c87fb1029df88b14c7d44b1ca992e79069f91756a5dacb6814",
   "tier": "cheap",
   "command": "python -m src.eval.cost_attribution r1",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_defect_taxonomy.md": {
   "sha256_machine_only": "0bca0894da270d978a48279bb6a949824d2ed6a32c4eb93f22a7e64be2c9c08b",
-  "tier": "api",
+  "tier": "cheap",
   "command": "python -m src.eval.agent_eval taxonomy r1",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_disposition_sensitivity.md": {
   "sha256_machine_only": "4395cdb38712cc7bac35d904f18f6935112037cfe9c5f79d3149a2712a8f7e8f",
   "tier": "cheap",
   "command": "python -m src.eval.disposition_sensitivity r1",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_evidence_vs_decision.md": {
   "sha256_machine_only": "59dd213d780a63b2b517029ef4b4d4ef69e13ac7874872af2ce9eadf1ad1a2eb",
   "tier": "cheap",
   "command": "python -m src.eval.evidence_vs_decision r1 r3",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_flip_experiment.md": {
   "sha256_machine_only": "42ec57a1b7463d89c2323a9f44f42ce00f54fa213db74559df539018fcb9d0ec",
   "tier": "cheap",
   "command": "python -m src.eval.flip_experiment",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_gang_validity.md": {
   "sha256_machine_only": "890f41582c8a621d4db82d57e177bf5d9e9c6f9aa11d9e9bf64fca41e87a1f38",
   "tier": "cheap",
   "command": "python -m src.eval.gang_validity",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_gang_validity_replication.md": {
   "sha256_machine_only": "8f762dced61ba1cb6618f905855a9f86790da338cdf867928a8ab269ccad78c0",
   "tier": "cheap",
   "command": "python -m src.eval.gang_validity --compare",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_grounding.md": {
   "sha256_machine_only": "12354fdacdcb1c2ef7dfb2a4f3a43cb3b4ae7322f98bdb8ea595ccc10e7df452",
-  "tier": "api",
+  "tier": "cheap",
   "command": "python -m src.eval.agent_eval grounding r1",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_knowledge.md": {
   "sha256_machine_only": "8916dc9f70a281c1dc14cca1445c67d785320bdc0e53e6767c9684b0e4926a1b",
   "tier": "heavy",
   "command": "python -m src.agent.knowledge",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_pipeline.md": {
-  "sha256_machine_only": "7285c450ceac4d91bba35149a4bde42a27e755d1c521ca28170cb0b1bf28c28a",
-  "tier": "api",
-  "command": "python -m src.agent.pipeline",
-  "has_human_block": false
+  "sha256_machine_only": "558f229f423ebbbf27a8714165fd6df757fd85f44fd1ea2f541dbcc1f723e10f",
+  "tier": "cheap",
+  "command": "python -m src.agent.pipeline --report-only",
+  "has_human_block": true,
+  "generator_verified": true
  },
  "agent_round3_metrics.md": {
   "sha256_machine_only": "e568b9bf5a3666e8b2cdb96bd2b766809d1ef84e539a6f76df8f402da7051dc7",
   "tier": "cheap",
   "command": "python -m src.eval.round3_metrics r1 r3",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_round4_metrics.md": {
   "sha256_machine_only": "5bf8a3b0fb94bec37382fc587ea83e6f58e9156f857e22d3a77679962c48ba55",
   "tier": "cheap",
   "command": "python -m src.eval.round4_metrics",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_selfcheck.md": {
   "sha256_machine_only": "6c635fb04972b651288206ab56530662a9942e3ce170af32272540bddd5ef94c",
   "tier": "cheap",
   "command": "python -m src.eval.self_awareness r1",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "agent_v4_paired.md": {
   "sha256_machine_only": "2b88bcc299010f709c985f85af805b385900bc5f3a8a42240091bff50846e5a8",
   "tier": "cheap",
   "command": "python -m src.eval.v4_paired",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "baseline_metrics.md": {
   "sha256_machine_only": "e38b2429c8e07292c1efe1313ea1861b5f2929780a3645c5b3a53511dee04c3c",
   "tier": "heavy",
   "command": "python -m src.model.train_baseline",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "calib_window_size.md": {
   "sha256_machine_only": "9ae265e0f8d90fce50bbb3225577854c60afca8d843974fa059c726ff2f485aa",
   "tier": "heavy",
   "command": "python -m src.model.calib_window_size",
-  "has_human_block": true
+  "has_human_block": true,
+  "generator_verified": true
  },
  "calibration.md": {
   "sha256_machine_only": "b760c060986d8fad0fed24cc175c06926c0fab54b978d20a5710b2b9d71e08e5",
   "tier": "heavy",
   "command": "python -m src.model.calibration",
-  "has_human_block": true
+  "has_human_block": true,
+  "generator_verified": true
  },
  "cost_sensitive.md": {
   "sha256_machine_only": "f34c5f8485e105db466e4bfa21c1ff60fd939f6d05cd0dd3fddb70acbe6247a0",
   "tier": "heavy",
   "command": "python -m src.model.cost_sensitive",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "disposition.md": {
   "sha256_machine_only": "e0b05980bb74cdb5d83d42d1ee2f0cfa0fcd13ede6113455baff7b64b84ed83b",
   "tier": "cheap",
   "command": "python -m src.agent.disposition",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "drift_monitor.md": {
   "sha256_machine_only": "4e74cdf6b4ace26bef22677afed31f982d195a24f485c3e1d06ffd0084bfa3fb",
   "tier": "heavy",
   "command": "python -m src.eval.drift_monitor",
-  "has_human_block": true
+  "has_human_block": true,
+  "generator_verified": true
  },
  "eda_summary.md": {
   "sha256_machine_only": "ef7165421e1a85590ada6e38fa1b60efd435a28b04fce7388c2e712c20b2716c",
   "tier": "heavy",
   "command": "python -m notebooks.eda",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "embargo_decomposition.md": {
   "sha256_machine_only": "7163095c735d692cf043e05ac791dedd4b4964c9af0b1ee4747f153a85f4cddc",
   "tier": "heavy",
   "command": "python -m src.model.embargo_control",
-  "has_human_block": true
+  "has_human_block": true,
+  "generator_verified": true
  },
  "graph_eda.md": {
   "sha256_machine_only": "9d23d89db5fbeba367b4ba8a6d8311e3981a5cec7e35deefef654adc32ec89e9",
   "tier": "cheap",
   "command": "python -m src.features.graph_eda",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "graph_feature_ablation.md": {
   "sha256_machine_only": "a1d2fdfcd19f4ed96be6bcf57174976b266ae87827d3a770fff95d9078b5b3bb",
   "tier": "heavy",
   "command": "python -m src.model.graph_feature_ablation",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "graph_leak_audit.md": {
   "sha256_machine_only": "3139a707bb7683434c7be959a073d87d5c14ac0907ae9a4a627c88b519387727",
   "tier": "heavy",
   "command": "python -m src.model.graph_leak_audit",
-  "has_human_block": true
+  "has_human_block": true,
+  "generator_verified": true
  },
  "graph_vs_tabular.md": {
   "sha256_machine_only": "2e2efd027e95a4ed957cd7c37b48222b83a84e573f4d0d19c1bc7ca9e3023902",
   "tier": "heavy",
   "command": "python -m src.model.graph_vs_tabular",
-  "has_human_block": true
+  "has_human_block": true,
+  "generator_verified": "[未验证]"
  },
  "graph_vs_tabular_e60.md": {
   "sha256_machine_only": "afce058c655d762ed7166567737da187fd70eba33867daa6d22bc973aea5a701",
   "tier": "heavy",
   "command": "GRAPH_FILE=data/processed/graph_features_e60.parquet python -m src.model.graph_vs_tabular",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": "[未验证]"
  },
  "imbalance_ablation.md": {
   "sha256_machine_only": "ef4a0a4d1282f21f5174ee4e0cf09d5046361b8ae5af42cfa3b6e64d55d9a70d",
   "tier": "heavy",
   "command": "python -m src.model.imbalance_ablation",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "kaggle_submission.md": {
   "sha256_machine_only": "2c8c9c6fb53b835b195df6bdfb77542ca9075835c2951daaf25c788dd4798155",
   "tier": "cheap",
   "command": "python -m src.model.kaggle_submit",
-  "has_human_block": false
- },
- "round4_preregistration.md": {
-  "sha256_machine_only": "135ee04e0232000880d90c381c2b953526269f98b984189f1e7e5c78fadf7797",
-  "tier": "frozen",
-  "command": "python -m src.eval.round4_metrics",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "rules_vs_model.md": {
   "sha256_machine_only": "ed5d443a9fdd927aa3436392c9d06c847a2875bdd65c75755fc490886214ffb9",
   "tier": "cheap",
   "command": "python -m src.model.rules_vs_model",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "selective_bias.md": {
   "sha256_machine_only": "3063d951701b38fd5b70b71ae52f81e2d54191430b2f46cbef8a8c82d228fbc2",
   "tier": "heavy",
   "command": "python -m src.eval.selective_bias",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "small_amount_floor.md": {
   "sha256_machine_only": "637797626a2f8a250b528a270338d064dcb766cef254e3f6302c5ece61f4467e",
   "tier": "cheap",
   "command": "python -m src.model.small_amount_floor",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "sql_vs_pandas_reconciliation.md": {
   "sha256_machine_only": "4a61e335d8a1a6c3ef2ce743da208a8717eb17799633d3fe179c516a5003d657",
   "tier": "cheap",
   "command": "python -m src.features.build_duckdb",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
  },
  "stepup.md": {
   "sha256_machine_only": "3f330e26f95b9f885d8e8d3d60b131ffc471770b4a2fc2dfd20a6a783ab1bfed",
   "tier": "cheap",
   "command": "python -m src.model.stepup",
-  "has_human_block": false
+  "has_human_block": false,
+  "generator_verified": true
+ },
+ "reports/eval_runs/r1/anchor_blind.md": {
+  "sha256": "ec99b8501f2ef7305e9b6468d4600099f407f579e70387753dfde001def10312",
+  "frozen_at": "2026-07-27",
+  "tier": "frozen",
+  "why": "盲标表：标注者当时未看 judge 结果。重生成会带入现在的认知，**毁掉盲态**——而盲态正是 judge-人工一致率这个数的全部效力来源。"
+ },
+ "reports/eval_runs/r1/anchor_enrich.md": {
+  "sha256": "ba0e03a57d501dd6ea9b1359b85920d38d19c5a3ceab7f715842ef2187e65c76",
+  "frozen_at": "2026-07-28",
+  "tier": "frozen",
+  "why": "富集盲标表：用于算 judge-flag 精确率。重生成会让「独立盲标」不再独立。"
+ },
+ "reports/eval_runs/r1/anchor_v2.md": {
+  "sha256": "ed86cbad7e632e2de8dc109b6286e3a55cf5ca4a134c0f8ea4ee00352f8b3603",
+  "frozen_at": "2026-07-31",
+  "tier": "frozen",
+  "why": "round3 缩表盲标：条目所属臂被刻意隐藏。重生成即等于先看了分组，手会对某些条目更紧、对另一些更松，把要测的东西污染掉。"
+ },
+ "reports/eval_runs/r1/anchor_v2_manifest.json": {
+  "sha256": "b479b7f17b9bae6031b61c328f377146a2d880cbe1c420379bb01ea2c5920841",
+  "frozen_at": "2026-07-30",
+  "tier": "frozen",
+  "why": "上表的分臂对照：**标注前打开它就废了那张表**。与 anchor_v2.md 是一对，必须同冻，否则冻了表却漏了答案。"
+ },
+ "reports/eval_runs/round2_rubric_draft.md": {
+  "sha256": "d8f8efa588007bffdec527925e223da35c616775ae0edfbe301075b481ff029c",
+  "frozen_at": "2026-07-29",
+  "tier": "frozen",
+  "why": "评分前的 rubric 草案：它证明「评分标准先于评分确定」。事后重写 rubric 再宣布分数，是最典型的移动球门。"
+ },
+ "reports/round4_preregistration.md": {
+  "sha256": "135ee04e0232000880d90c381c2b953526269f98b984189f1e7e5c78fadf7797",
+  "frozen_at": "2026-07-31",
+  "tier": "frozen",
+  "why": "预注册件：指标在跑之前写死。重写它 = 事后按结果改指标，整个「预注册」的证明力当场归零。"
+ },
+ "reports/eval_runs/abstain/": {
+  "sha256_tree": "56fb5649af05ebf1011055e5bde2a2b3fde5bfc0fec29fb95d806dfa50816649",
+  "n_files": 70,
+  "tier": "archive",
+  "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
+  "why": "剥夺实验原始返回"
+ },
+ "reports/eval_runs/flip/": {
+  "sha256_tree": "106a9eb7d825bded24966bf66f90447d84fc7978d0851531aff348d4bdf861ca",
+  "n_files": 60,
+  "tier": "archive",
+  "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
+  "why": "喂分翻转实验原始返回"
+ },
+ "reports/eval_runs/r1/": {
+  "sha256_tree": "190bae228b26eb3fc82f88056628ffc4e907898ca802b08c186926e7b667a742",
+  "n_files": 109,
+  "tier": "archive",
+  "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
+  "why": "round 1 全量调查原始返回"
+ },
+ "reports/eval_runs/r3/": {
+  "sha256_tree": "48e6b1422f4e1fd0040faff2adb507d198a27cf5fae0161c77515483f38bb6e3",
+  "n_files": 100,
+  "tier": "archive",
+  "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
+  "why": "round 3 全量调查原始返回"
+ },
+ "reports/eval_runs/r4/": {
+  "sha256_tree": "3af13569cc29ca1e0f9ad18eb44b50510620dae91c54e28fb312a83c3153314f",
+  "n_files": 100,
+  "tier": "archive",
+  "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
+  "why": "round 4 全量调查原始返回"
+ },
+ "reports/eval_runs/r4v4/": {
+  "sha256_tree": "8e129e88679fe51d311a49deecb98d7da5e51f4f1a4f850a714432a07e176fe0",
+  "n_files": 18,
+  "tier": "archive",
+  "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
+  "why": "round 4 v4-prompt 配对原始返回"
+ },
+ "reports/samples/": {
+  "sha256_tree": "9a2f0d272d06944f2c25daccc410dff16ebcf3d6c2d1c11dd94b580d3f55cd86",
+  "n_files": 7,
+  "tier": "archive",
+  "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
+  "why": "管道演习的原始返回（agent_pipeline.md 的锚）"
  }
 }

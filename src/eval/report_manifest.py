@@ -26,6 +26,7 @@
 
 import hashlib
 import json
+import pathlib
 import subprocess
 import sys
 from pathlib import Path
@@ -53,20 +54,19 @@ GENERATORS = {
     "sql_vs_pandas_reconciliation.md": (["src.features.build_duckdb"], "cheap"),
     "disposition.md": (["src.agent.disposition"], "cheap"),
     "agent_round4_metrics.md": (["src.eval.round4_metrics"], "cheap"),
-    # **预注册件，文件权限 444 故意只读**：跑完不许回头改指标。
-    # 它绝不进任何自动重跑——重跑它就等于毁掉预注册本身的意义。
-    "round4_preregistration.md": (["src.eval.round4_metrics"], "frozen"),
+    # round4_preregistration.md **不在此表**：冻结件的唯一真源是 report_io.FROZEN，
+    # 登记两处必然有一天对不上（本轮就撞了一次）。
     "agent_v4_paired.md": (["src.eval.v4_paired"], "cheap"),
     "agent_flip_experiment.md": (["src.eval.flip_experiment"], "cheap"),
     "kaggle_submission.md": (["src.model.kaggle_submit"], "cheap"),
     # ↓ 需真实图特征的 60 天版本：靠环境变量切换，命令里必须带上，否则重跑的是 21 天
     "graph_vs_tabular_e60.md": (["GRAPH_FILE=data/processed/graph_features_e60.parquet",
                                  "src.model.graph_vs_tabular"], "heavy"),
-    # ↓ **api 档：重跑要花钱**。出处照记，但不列入任何自动重跑。
-    "agent_pipeline.md": (["src.agent.pipeline"], "api"),
-    "agent_abstention.md": (["src.eval.abstention_test", "--score"], "api"),
-    "agent_grounding.md": (["src.eval.agent_eval", "grounding", "r1"], "api"),
-    "agent_defect_taxonomy.md": (["src.eval.agent_eval", "taxonomy", "r1"], "api"),
+    # ↓ 由归档离线重算，**零 API 花费且确定性**（已实测逐字节相同）→ cheap
+    "agent_pipeline.md": (["src.agent.pipeline", "--report-only"], "cheap"),
+    "agent_abstention.md": (["src.eval.abstention_test", "--score"], "cheap"),
+    "agent_grounding.md": (["src.eval.agent_eval", "grounding", "r1"], "cheap"),
+    "agent_defect_taxonomy.md": (["src.eval.agent_eval", "taxonomy", "r1"], "cheap"),
     "rules_vs_model.md": (["src.model.rules_vs_model"], "cheap"),
     "small_amount_floor.md": (["src.model.small_amount_floor"], "cheap"),
     "stepup.md": (["src.model.stepup"], "cheap"),
@@ -79,6 +79,31 @@ GENERATORS = {
     "agent_disposition_sensitivity.md": (["src.eval.disposition_sensitivity", "r1"], "cheap"),
     "agent_selfcheck.md": (["src.eval.self_awareness", "r1"], "cheap"),
 }
+
+
+# 归档锚：LLM 原始返回。整目录聚合成一个哈希，逐文件记会把清单撑爆。
+ARCHIVES = {
+    "reports/samples": "管道演习的原始返回（agent_pipeline.md 的锚）",
+    "reports/eval_runs/r1": "round 1 全量调查原始返回",
+    "reports/eval_runs/r3": "round 3 全量调查原始返回",
+    "reports/eval_runs/r4": "round 4 全量调查原始返回",
+    "reports/eval_runs/r4v4": "round 4 v4-prompt 配对原始返回",
+    "reports/eval_runs/abstain": "剥夺实验原始返回",
+    "reports/eval_runs/flip": "喂分翻转实验原始返回",
+}
+
+
+def tree_sha(d):
+    """目录聚合哈希：按文件名排序，把「相对路径 + 内容哈希」串起来再哈希。
+
+    这样任何一个归档件被改动 / 增删都会翻，而清单只多一行。
+    """
+    h = hashlib.sha256()
+    files = sorted(p for p in d.rglob("*") if p.is_file())
+    for p in files:
+        h.update(str(p.relative_to(d)).encode("utf-8"))
+        h.update(hashlib.sha256(p.read_bytes()).digest())
+    return h.hexdigest(), len(files)
 
 
 def sha(path):
@@ -104,6 +129,42 @@ def cmd_of(entry):
     return (" ".join(env) + " " if env else "") + "python -m " + " ".join(rest)
 
 
+def validate_generators():
+    """**清单元数据自身也要被执法。**
+
+    来历：我登记的生成器名有 1 处是错的（`eda_summary.md` 写成 `load_data`，实为
+    `notebooks.eda`），另有 3 处登记的文件根本不存在——**执法工具差点带着
+    未经核实的断言上线**。一个自己没被核实过的检查器，比没有检查器更坏：
+    它会让人以为已经查过了。
+
+    校验两件事，都不靠跑（跑一遍要十几分钟）：
+      1. 生成器模块**存在且可导入**；
+      2. 模块源码里**确实出现它所声称的那个输出文件名**（路径断言）。
+    无法断言的一律标 `[未验证]`，**不许留空**——留空看起来像通过。
+    """
+    import importlib.util
+    problems, unverified = [], []
+    for name, (argv, tier) in sorted(GENERATORS.items()):
+        mod = next((a for a in argv if not a.startswith("-") and "=" not in a), None)
+        if mod is None:
+            problems.append((name, "命令里没有模块名"))
+            continue
+        spec = importlib.util.find_spec(mod)
+        if spec is None or not spec.origin:
+            problems.append((name, f"模块不存在或不可导入：{mod}"))
+            continue
+        src = pathlib.Path(spec.origin).read_text(encoding="utf-8")
+        stem = name.removesuffix(".md")
+        # 直接出现全名，或以 f-string 拼接（如 graph_vs_tabular{_gsuffix}.md）
+        if f'"{name}"' in src or f"'{name}'" in src:
+            continue
+        if any(f'"{p}' in src or f'f"{p}' in src for p in (stem.split("_e60")[0],)):
+            unverified.append((name, mod, "文件名由 f-string 拼接，仅前缀匹配"))
+            continue
+        unverified.append((name, mod, "源码里找不到该输出文件名"))
+    return problems, unverified
+
+
 def build():
     out = {}
     for name, (argv, tier) in sorted(GENERATORS.items()):
@@ -113,6 +174,23 @@ def build():
             continue
         out[name] = {"sha256_machine_only": sha(p), "tier": tier,
                      "command": cmd_of(argv), "has_human_block": has_human(p)}
+    _, unver = validate_generators()
+    _unver_names = {n for n, _, _ in unver}
+    for name in out:
+        if name in _unver_names:
+            out[name]["generator_verified"] = "[未验证]"
+        elif not name.endswith("/"):
+            out[name]["generator_verified"] = True
+    out.update(__import__("src.report_io", fromlist=["x"]).frozen_digests())
+    for rel, why in sorted(ARCHIVES.items()):
+        d = ROOT / rel
+        if not d.exists():
+            print(f"⚠️ 归档目录不存在：{rel}")
+            continue
+        digest, n = tree_sha(d)
+        out[rel + "/"] = {"sha256_tree": digest, "n_files": n, "tier": "archive",
+                          "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
+                          "why": why}
     return out
 
 
@@ -122,11 +200,28 @@ def verify():
     want = json.loads(MANIFEST.read_text(encoding="utf-8"))
     bad = []
     for name, rec in sorted(want.items()):
+        # 冻结件的「出处」写的是理由而非命令，取值要按档分派——
+        # 上一版直接读 rec["command"] 当场 KeyError。
+        cmd = rec.get("command") or rec.get("why", "（冻结件，不可重跑）")
+        if rec["tier"] == "frozen":
+            p = ROOT / name
+            if not p.exists():
+                bad.append((name, "冻结件缺失", cmd))
+            elif hashlib.sha256(p.read_bytes()).hexdigest() != rec["sha256"]:
+                bad.append((name, "冻结件被改动 —— 其时间声明已失效", cmd))
+            continue
+        if rec["tier"] == "archive":
+            d = ROOT / name.rstrip("/")
+            if not d.exists():
+                bad.append((name, "归档目录缺失", cmd))
+            elif tree_sha(d)[0] != rec["sha256_tree"]:
+                bad.append((name, "归档内容变了 —— 原始返回**不该**被改动", cmd))
+            continue
         p = REPORTS / name
         if not p.exists():
-            bad.append((name, "文件缺失", rec["command"]))
+            bad.append((name, "文件缺失", cmd))
         elif sha(p) != rec["sha256_machine_only"]:
-            bad.append((name, "哈希不符（被手编过，或生成器改了没重跑）", rec["command"]))
+            bad.append((name, "哈希不符（被手编过，或生成器改了没重跑）", cmd))
     print(f"核对 {len(want)} 份报告 —— {'✅ 全部一致' if not bad else f'❌ {len(bad)} 份不符'}")
     for name, why, c in bad:
         print(f"  {name}\n     {why}\n     重生成：{c}")
@@ -168,6 +263,16 @@ def verify_rerun():
 
 
 if __name__ == "__main__":
+    _bad, _unver = validate_generators()
+    if _bad:
+        print("❌ 清单元数据有误（生成器登记不可信）：")
+        for n, w in _bad:
+            print(f"   {n}: {w}")
+        sys.exit(1)
+    if _unver:
+        print(f"⚠️ {len(_unver)} 条生成器登记 **[未验证]**（源码里没直接出现该文件名）：")
+        for n, m, w in _unver:
+            print(f"   {n} ← {m}　{w}")
     if "--update" in sys.argv:
         MANIFEST.write_text(json.dumps(build(), ensure_ascii=False, indent=1),
                             encoding="utf-8")

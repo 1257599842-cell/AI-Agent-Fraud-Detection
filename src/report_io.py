@@ -30,8 +30,70 @@
   防的是「机器区重算了、人写区还挂着旧数」——那种漂移没人会发现。
 """
 
+import hashlib
 import re
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+# ── 冻结件登记 ──────────────────────────────────────────────────────────────
+# 判据一句话：**该文件是否声称了自己写于某个时点之前 / 是否承载「当时不知道结果」。**
+# 理由不写「别动它」，写「动了会毁掉什么」——前者是命令，后者才让人自己判断。
+#
+# 为什么要落进代码：`round4_preregistration.md` 差点被 `--verify-rerun` 覆盖，
+# **是 chmod 444 拦住的，不是设计拦住的**。权限位会在 clone / 打包 / 复制时丢失。
+FROZEN = {
+    "reports/round4_preregistration.md": (
+        "2026-07-31",
+        "预注册件：指标在跑之前写死。重写它 = 事后按结果改指标，"
+        "整个「预注册」的证明力当场归零。"),
+    "reports/eval_runs/r1/anchor_blind.md": (
+        "2026-07-27",
+        "盲标表：标注者当时未看 judge 结果。重生成会带入现在的认知，**毁掉盲态**——"
+        "而盲态正是 judge-人工一致率这个数的全部效力来源。"),
+    "reports/eval_runs/r1/anchor_v2.md": (
+        "2026-07-31",
+        "round3 缩表盲标：条目所属臂被刻意隐藏。重生成即等于先看了分组，"
+        "手会对某些条目更紧、对另一些更松，把要测的东西污染掉。"),
+    "reports/eval_runs/r1/anchor_v2_manifest.json": (
+        "2026-07-30",
+        "上表的分臂对照：**标注前打开它就废了那张表**。与 anchor_v2.md 是一对，"
+        "必须同冻，否则冻了表却漏了答案。"),
+    "reports/eval_runs/r1/anchor_enrich.md": (
+        "2026-07-28",
+        "富集盲标表：用于算 judge-flag 精确率。重生成会让「独立盲标」不再独立。"),
+    "reports/eval_runs/round2_rubric_draft.md": (
+        "2026-07-29",
+        "评分前的 rubric 草案：它证明「评分标准先于评分确定」。"
+        "事后重写 rubric 再宣布分数，是最典型的移动球门。"),
+}
+
+
+class FrozenArtifactError(RuntimeError):
+    """试图重写一个承载时间声明的文件。"""
+
+
+def guard_frozen(path):
+    """冻结件一律拒写。**权限位靠不住，判断要在代码里。**"""
+    try:
+        rel = Path(path).resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return
+    if rel in FROZEN:
+        when, why = FROZEN[rel]
+        raise FrozenArtifactError(
+            f"{rel} 是冻结件（冻结于 {when}），拒绝写入。\n理由：{why}")
+
+
+def frozen_digests():
+    """冻结件当前哈希 —— 供清单与测试核对「它确实没被动过」。"""
+    out = {}
+    for rel, (when, why) in sorted(FROZEN.items()):
+        p = ROOT / rel
+        if p.exists():
+            out[rel] = {"sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+                        "frozen_at": when, "tier": "frozen", "why": why}
+    return out
 
 BEGIN = "<!-- HUMAN:BEGIN -->"
 END = "<!-- HUMAN:END -->"
@@ -63,6 +125,7 @@ def write_report(path, machine_text):
     没有人写区的文件行为与直接 `write_text` 完全一致——
     这样 26 个生成器可以无差别改用它，不必逐个判断。
     """
+    guard_frozen(path)                      # 冻结件在这里被挡住，不靠 chmod
     path = Path(path)
     keep = None
     if path.exists():

@@ -366,12 +366,44 @@ def _write_md(rows):
                  f"| {'✅' if not r['time_audit_violations'] else '❌'} "
                  f"| {rep.get('disposition', '—')} |")
     total = sum(r.get("cost_usd", 0) for _, r in rows)
-    L += ["", f"演习总成本 ${total:.4f}。报告原文见 `reports/samples/*.json`（含完整 facts 账本，可逐条对账）。"]
+    _paid = [r for _, r in rows if r.get("cost_usd", 0) > 0]
+    L += ["", f"演习总成本 **${total:.4f}**"
+              + (f"；真调查 {len(_paid)} 笔，**平均 ${total / len(_paid):.4f}/单**、"
+                 f"平均 {sum(r.get('tool_calls', 0) for r in _paid) / len(_paid):.1f} 次工具调用"
+                 if _paid else "")
+              + "。报告原文见 `reports/samples/*.json`（含完整 facts 账本，可逐条对账）。"]
     write_report(MD_OUT, "\n".join(L))
+
+
+def report_from_archive():
+    """**离线重出演习报告**：只读 `reports/samples/*.json`，不调任何 API。
+
+    分层的理由：LLM 调用**本来就不确定**，花钱重跑也不会逐字节相同——
+    对它做哈希对拍是用错了工具。项目铁律「每次调用的原始返回全部存盘」给了正解：
+      · 归档层（`reports/samples/*.json`）= 不可复现部分的**锚**，它自己进哈希清单；
+      · 分析层（本函数）= 从归档离线重算，**是确定性的**，可纳入重跑对拍。
+    解析器改了要重验时，也是拿归档重跑，不必再花一次钱（本项目已用过一次）。
+    """
+    tags = ["highp_fraud_no_gang", "highp_false_positive", "hold_zone_borderline",
+            "gate_normal", "escalate_gang_fraud", "fallback_demo"]
+    rows, missing = [], []
+    for tag in tags:
+        hits = sorted(SAMPLES_DIR.glob(f"txn_*_{tag}.json"))
+        if not hits:
+            missing.append(tag)
+            continue
+        rows.append((tag, json.loads(hits[0].read_text(encoding="utf-8"))))
+    if missing:
+        sys.exit(f"归档缺失，无法离线重出：{missing}　（需重跑 --drill，会产生 API 花费）")
+    _write_md(rows)
+    print(f"✅ 离线重出（零 API 花费）→ {MD_OUT.relative_to(PROJECT_ROOT)}")
 
 
 def main():
     args = sys.argv[1:]
+    if "--report-only" in args:
+        report_from_archive()
+        return
     if "--drill" in args:
         drill()
         return
