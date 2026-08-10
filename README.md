@@ -13,8 +13,10 @@
 
 ![决策成本沙盘](reports/demo/shots/sandbox_flip.gif)
 
-> 上图是仓库内置的**离线演示页**：拖动交易金额，五档动作的期望成本实时重算，最优档在 $73.88 和 $400.71 两处翻转。
-> `open reports/demo/index.html` —— 单个 HTML 文件，不联网、不调 API、不需要装任何东西。
+> 上图是仓库内置的**交互演示页**：拖动交易金额，五档动作的期望成本实时重算，最优档在 $73.88 和 $400.71 两处翻转。
+>
+> **▶ 在线打开：https://1257599842-cell.github.io/AI-Agent-Fraud-Detection/**
+> 或本地 `open reports/demo/index.html` —— 单个 HTML 文件，不联网、不调 API、不需要装任何东西。
 
 ---
 
@@ -64,7 +66,10 @@ flowchart TD
 - **动作由成本公式解出**，不由模型或 Agent 决定。
 - **Agent 只负责取证与叙述**，产出的每条结论必须引用具体的证据 ID；它给出的处置建议**不进入决策链**。
 
-这条边界是实测后确定的：Agent 的证据发现准确率显著高于它的处置判断（**证据层 89% vs 决策层 57%**，基线校正后净差 +21pp），所以取证归 Agent、算术归公式。
+这条边界是实测后确定的：Agent 的**团伙判断与代码计算结果的一致率**，显著高于它的**处置建议与成本最优档的一致率**
+（**89% vs 57%**，各自扣除多数类基线后净差 **+21pp**），所以取证归 Agent、算术归公式。
+
+> 这是**一致率，不是准确率**——它说明两者互相同意，不说明两者都对。用真实标签做效度检验时置信区间跨 0，**未测出**（见 [`MODEL_CARD.md`](./MODEL_CARD.md) §10）。
 
 ---
 
@@ -75,7 +80,7 @@ flowchart TD
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 
 # 2. 看演示（不需要数据，不需要跑任何东西）
-open reports/demo/index.html
+open reports/demo/index.html            # 或直接访问在线版（见文首链接）
 
 # 3. 跑测试
 python -m unittest discover -s tests -t .
@@ -251,7 +256,7 @@ DDL：`src/features/sql/01_star_schema.sql` · 特征 SQL：`src/features/sql/02
 
 ### ④ Agent 层：取证与可溯源报告
 
-只对非放行交易触发（**90.3% 的交易在闸门就结束，不产生 LLM 成本**）。四个工具：
+只对非放行交易触发（**90.3% 的交易在闸门就结束，不产生 LLM 成本**——四档口径；五档下「加验证」也是自动动作，合计 **93.3%** 无需 Agent 或人工）。四个工具：
 
 | 工具 | 返回 |
 |---|---|
@@ -373,6 +378,7 @@ Agent 评估分硬层和软层。**硬层**是可被代码判定的部分，不�
 ├── tests/            6 个文件   71 个单元测试
 ├── reports/         42 份报告   全部由脚本产出，含哈希清单
 │   └── demo/                    离线演示页（单文件 HTML，零依赖）
+├── docs/                        GitHub Pages（与 reports/demo/index.html 同一份产物）
 ├── notebooks/                   EDA
 ├── MODEL_CARD.md                模型卡：口径 · 假设 · 已知局限 · 监控 · 降级方案
 └── AGENT_DESIGN.md              Agent 层设计文档
@@ -398,7 +404,7 @@ Agent 评估分硬层和软层。**硬层**是可被代码判定的部分，不�
 
 ```bash
 python -m unittest discover -s tests -t .            # 71 个单元测试，0.5 秒
-python -m src.eval.report_manifest                   # 48 份报告的哈希核对
+python -m src.eval.report_manifest                   # 48 个清单条目的哈希核对（42 份报告 + 归档目录 + 冻结件）
 python -m src.eval.report_manifest --verify-rerun    # 确定性档真重跑，断言逐字节相同
 ```
 

@@ -188,6 +188,29 @@ class TestPageIsSelfContained(unittest.TestCase):
         self.assertLessEqual(len(re.findall(r"transition:\s*[^;}]+", self.html)), 2)
 
 
+class TestPagesCopyStaysInSync(unittest.TestCase):
+    """`docs/index.html` 是给 GitHub Pages 的同一份产物。
+
+    它由 `build_demo_page.py` 一次写两处，而不是手动拷贝——
+    手拷的副本迟早会和源版本不一致，**且没人会发现**（本项目已在报告上栽过一次）。
+    这条测试就是那个「会发现」的机制。
+    """
+
+    def test_docs_copy_is_byte_identical(self):
+        pages = ROOT / "docs" / "index.html"
+        if not pages.exists():
+            self.skipTest("docs/index.html 未生成")
+        self.assertEqual(pages.read_bytes(), PAGE.read_bytes(),
+                         "docs/ 副本与 reports/demo/ 源版本不一致 —— "
+                         "重跑 python -m src.serving.build_demo_page")
+
+    def test_nojekyll_present(self):
+        """没有 .nojekyll，Jekyll 会重新处理页面并忽略下划线开头的文件。"""
+        if not (ROOT / "docs" / "index.html").exists():
+            self.skipTest("docs/ 未生成")
+        self.assertTrue((ROOT / "docs" / ".nojekyll").exists())
+
+
 class TestShippedFigures(unittest.TestCase):
     """README 首屏引用的图必须存在且不超预算。"""
 
