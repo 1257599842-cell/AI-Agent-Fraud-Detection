@@ -19,6 +19,8 @@ from src.report_io import write_report
 from pathlib import Path
 
 import lightgbm as lgb
+import json
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
@@ -28,6 +30,7 @@ PARQUET = PROJECT_ROOT / "data" / "processed" / "train_merged.parquet"
 OUT_MD = PROJECT_ROOT / "reports" / "baseline_metrics.md"
 
 SECS_PER_DAY = 86_400
+MODEL_DIR = PROJECT_ROOT / "models"   # 服务加载的持久化模型
 T0 = 146          # 测试集起始日（含），test = [146, 末]
 VAL_DAYS = 14     # 训练窗末尾留作早停验证的天数
 CAP_FRACS = [0.005, 0.01, 0.02]   # 复核容量：按分数取 top X%

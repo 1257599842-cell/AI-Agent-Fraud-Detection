@@ -202,6 +202,13 @@
   "has_human_block": false,
   "generator_verified": true
  },
+ "online_replay.md": {
+  "sha256_machine_only": "af345054194d9e9fa95f95b1b69b4fee41e93dae86c1fb3a856e28f58cfa442b",
+  "tier": "heavy",
+  "command": "python -m src.eval.online_replay --run",
+  "has_human_block": false,
+  "generator_verified": true
+ },
  "rules_vs_model.md": {
   "sha256_machine_only": "ed5d443a9fdd927aa3436392c9d06c847a2875bdd65c75755fc490886214ffb9",
   "tier": "cheap",

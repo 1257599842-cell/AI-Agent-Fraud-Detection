@@ -72,6 +72,7 @@ GENERATORS = {
     "small_amount_floor.md": (["src.model.small_amount_floor"], "cheap"),
     "velocity_features.md": (["src.features.velocity_features"], "cheap"),
     "velocity_rules.md": (["src.model.velocity_rules"], "cheap"),
+    "online_replay.md": (["src.eval.online_replay", "--run"], "heavy"),
     "stepup.md": (["src.model.stepup"], "cheap"),
     "agent_gang_validity.md": (["src.eval.gang_validity"], "cheap"),
     "agent_gang_validity_replication.md": (["src.eval.gang_validity", "--compare"], "cheap"),

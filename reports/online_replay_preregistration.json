@@ -1,0 +1,20 @@
+{
+ "n_replay": 3000,
+ "note": "去掉 ID tiebreak 后位置语义退化为取值语义，期望出现差异的行数（全量 / 回放切片内）",
+ "card1": {
+  "full_dataset": 166,
+  "in_replay_slice": 11
+ },
+ "card1_addr1": {
+  "full_dataset": 72,
+  "in_replay_slice": 10
+ },
+ "card1_email": {
+  "full_dataset": 77,
+  "in_replay_slice": 11
+ },
+ "card1_device": {
+  "full_dataset": 4,
+  "in_replay_slice": 0
+ }
+}

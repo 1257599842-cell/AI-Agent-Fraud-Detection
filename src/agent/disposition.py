@@ -110,6 +110,31 @@ def realized_cost(action, y, a, g, a_med, prm, credit_future=False):
 
 # ---------------------------------------------------------------- 主流程
 
+def _persist(booster, X):
+    """把**权威打分模型**落盘，供 `/score` 在线调用。
+
+    只在这里落盘，不在 `train_baseline` 落——那是纯表基线臂，特征集与切分都不同。
+    **两个模型 = 两条真理**：在线算了 15 列图特征却喂给没见过它们的模型，
+    等于白算（曾经就是这样，已修）。
+
+    一并落盘的还有**类别层级**：LightGBM 记着训练时见过的类别集合，
+    服务端单行 `astype("category")` 只有 1 个层级 → 预测直接报错。
+    这是训练/线上不一致的第二种经典形态（第一种是 NaN 语义）。
+    """
+    import json as _json
+    d = PROJECT_ROOT / "models"
+    d.mkdir(parents=True, exist_ok=True)
+    booster.save_model(str(d / "scoring_model.txt"), num_iteration=booster.best_iteration)
+    (d / "feature_columns.json").write_text(
+        _json.dumps(list(X.columns), ensure_ascii=False), encoding="utf-8")
+    (d / "categorical_levels.json").write_text(_json.dumps(
+        {c: [None if pd.isna(v) else str(v) for v in X[c].cat.categories]
+         for c in X.columns if str(X[c].dtype) == "category"},
+        ensure_ascii=False), encoding="utf-8")
+    print(f"  ↳ 打分模型已落盘 → models/scoring_model.txt"
+          f"（{len(X.columns)} 列，best_iter={booster.best_iteration}）")
+
+
 def train_and_cache():
     """训表+图模型（ML 核心定稿口径），缓存 test 逐笔 p + 网络项输入；有缓存则直接用。"""
     if SCORES_OUT.exists():
@@ -135,6 +160,7 @@ def train_and_cache():
 
     print("训练 表+图 模型（fit<132 / val[132,146) / test>=146）…")
     m, booster = fit_eval(X, y, day, tab_cols + graph_cols)
+    _persist(booster, X[tab_cols + graph_cols])
     print(f"  PR-AUC {m['pr']:.4f}  ROC-AUC {m['roc']:.4f}（对照 graph_vs_tabular 定稿 0.6032/0.9306）")
 
     test = day >= T0

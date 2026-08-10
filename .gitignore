@@ -28,3 +28,6 @@ REHEARSAL.md
 
 # 整页长图：备用产物，未被任何文档引用，可由 shoot_demo.py 重跑
 reports/demo/shots/*_full.png
+
+# 持久化模型：由 python -m src.agent.disposition 产出，不入库（5 MB 二进制）
+models/
