@@ -31,3 +31,6 @@ reports/demo/shots/*_full.png
 
 # 持久化模型：由 python -m src.agent.disposition 产出，不入库（5 MB 二进制）
 models/
+
+# 学习读本：面向本人复习，与答案库同类，不随仓库发布
+STUDY/
