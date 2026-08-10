@@ -9,6 +9,7 @@
 ![DuckDB](https://img.shields.io/badge/DuckDB-SQL_pipeline-FFF000?logo=duckdb&logoColor=black)
 ![FastAPI](https://img.shields.io/badge/FastAPI-serving-009688?logo=fastapi&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-71_passing-success)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 ![决策成本沙盘](reports/demo/shots/sandbox_flip.gif)
 
@@ -424,7 +425,14 @@ python -m src.eval.report_manifest --verify-rerun    # 确定性档真重跑，�
 
 ---
 
+## 许可
+
+代码以 [MIT License](./LICENSE) 发布，可自由使用、修改、分发。
+
+**数据不在此列**：Kaggle IEEE-CIS Fraud Detection 数据集由 Vesta Corporation 提供，
+受 [比赛条款](https://www.kaggle.com/competitions/ieee-fraud-detection/rules)约束，**未随仓库分发**，需自行下载。
+`data/` 目录已在 `.gitignore` 中。
+
 ## 说明
 
-- **数据**：Kaggle IEEE-CIS Fraud Detection，仅用于研究，未随仓库分发。
-- **工具**：设计取舍与技术判定由本人决定，工程实现以 Claude Code 结对完成。
+设计取舍与技术判定由本人决定，工程实现以 Claude Code 结对完成。
