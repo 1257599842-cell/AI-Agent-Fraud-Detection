@@ -237,6 +237,20 @@
   "has_human_block": false,
   "generator_verified": true
  },
+ "velocity_features.md": {
+  "sha256_machine_only": "39aece562da0bc1a285786c56b9ac5cfb88a0ca632cbcab70e7cfabfc0d78847",
+  "tier": "cheap",
+  "command": "python -m src.features.velocity_features",
+  "has_human_block": false,
+  "generator_verified": true
+ },
+ "velocity_rules.md": {
+  "sha256_machine_only": "5ceb6c3fd02b4908a784d5da1cdfb782ef6c879207e4396d770ee9e0547c29c4",
+  "tier": "cheap",
+  "command": "python -m src.model.velocity_rules",
+  "has_human_block": false,
+  "generator_verified": true
+ },
  "reports/eval_runs/r1/anchor_blind.md": {
   "sha256": "ec99b8501f2ef7305e9b6468d4600099f407f579e70387753dfde001def10312",
   "frozen_at": "2026-07-27",

@@ -70,6 +70,8 @@ GENERATORS = {
     "agent_defect_taxonomy.md": (["src.eval.agent_eval", "--relabel-score", "r1"], "cheap"),
     "rules_vs_model.md": (["src.model.rules_vs_model"], "cheap"),
     "small_amount_floor.md": (["src.model.small_amount_floor"], "cheap"),
+    "velocity_features.md": (["src.features.velocity_features"], "cheap"),
+    "velocity_rules.md": (["src.model.velocity_rules"], "cheap"),
     "stepup.md": (["src.model.stepup"], "cheap"),
     "agent_gang_validity.md": (["src.eval.gang_validity"], "cheap"),
     "agent_gang_validity_replication.md": (["src.eval.gang_validity", "--compare"], "cheap"),

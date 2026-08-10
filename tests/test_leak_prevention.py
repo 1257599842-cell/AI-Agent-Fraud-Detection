@@ -165,3 +165,46 @@ class TestPublishedDemoDataIsClean(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestVelocityTimeDiscipline(unittest.TestCase):
+    """Velocity 是**结构型但需要 RANGE 帧**的特征 —— 两层纪律的一个反例。
+
+    它撞破了「结构型→ROWS、标签型→RANGE」这个曾被当成规律的对应：
+    帧型（位置 vs 取值）与 embargo（标签是否成熟）是两件**正交**的事。
+    """
+
+    @staticmethod
+    def _count(dt, codes, window):
+        import numpy as np
+        from src.features.velocity_features import velocity_counts
+        return velocity_counts(np.asarray(dt), np.asarray(codes), window)
+
+    def test_counts_only_strictly_earlier_transactions(self):
+        """右端开区间：不含本笔，**也不含同一时刻的并列交易**——「同时」不是「之前」。"""
+        got = self._count([0, 100, 100, 200], [1, 1, 1, 1], 1000)
+        self.assertEqual(list(got), [0, 1, 1, 3])
+
+    def test_window_excludes_transactions_older_than_the_window(self):
+        """落在窗口之外的旧交易不该被数进来。"""
+        got = self._count([0, 5000, 5100], [1, 1, 1], 3600)   # 1 小时窗
+        self.assertEqual(list(got), [0, 0, 1])
+
+    def test_entities_do_not_leak_into_each_other(self):
+        got = self._count([10, 20, 30], [1, 2, 1], 3600)
+        self.assertEqual(list(got), [0, 0, 1])
+
+    def test_result_order_matches_input_order(self):
+        """内部按 (组, 时间) 排序计算，必须还原成输入顺序——错位不会报错，只会静默给错值。"""
+        got = self._count([300, 100, 200], [1, 1, 1], 3600)
+        self.assertEqual(list(got), [2, 0, 1])
+
+    def test_velocity_needs_no_embargo(self):
+        """velocity 只数笔数、不读标签，因此**不需要 21 天 embargo**。
+
+        若哪天有人「顺手统一」给它加上 embargo，1 小时窗会永远返回 0——
+        这个测试会先炸掉。
+        """
+        got = self._count([0, 1800], [1, 1], 3600)
+        self.assertEqual(list(got), [0, 1],
+                         "1 小时窗内的前一笔没被数到——是不是误加了 embargo？")
