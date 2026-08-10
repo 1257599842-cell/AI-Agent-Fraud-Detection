@@ -22,7 +22,10 @@ import json
 import sys
 from pathlib import Path
 
-import anthropic
+try:                      # anthropic 是**可选依赖**：只有真正调用 LLM 时才需要。
+    import anthropic      # 纯逻辑路径（单元测试、离线分析、演示页构建）不应因缺它而无法导入。
+except ModuleNotFoundError:
+    anthropic = None
 
 from src.agent.backends import DataBackedTools, Resources
 from src.agent.schema import report_from_json, validate_report
@@ -113,8 +116,13 @@ TOOL_DEFS = [
      "input_schema": {"type": "object", "properties": {}, "additionalProperties": False}},
 ]
 
-LLM_FAILURES = (anthropic.APIConnectionError, anthropic.RateLimitError,
-                anthropic.APIStatusError)
+class _AnthropicUnavailable(Exception):
+    """占位异常：未安装 anthropic 时使 LLM_FAILURES 仍是合法的 except 元组。"""
+
+
+LLM_FAILURES = ((anthropic.APIConnectionError, anthropic.RateLimitError,
+                 anthropic.APIStatusError) if anthropic is not None
+                else (_AnthropicUnavailable,))
 
 
 def enforce_evidence_floor(report, registry):
@@ -328,6 +336,11 @@ def drill(kill_llm=False):
 
 
 def _make_client(kill):
+    if anthropic is None:
+        raise RuntimeError(
+            "本操作需要调用 LLM API，但未安装可选依赖 anthropic。\n"
+            "  pip install anthropic\n"
+            "（仅实时调查需要；单元测试、离线分析与演示页构建均不需要。）")
     if kill:
         return anthropic.Anthropic(base_url="http://127.0.0.1:9", api_key="dead",
                                    max_retries=0, timeout=3.0)

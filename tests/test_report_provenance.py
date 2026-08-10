@@ -16,6 +16,7 @@
 
 import hashlib
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -208,3 +209,64 @@ class TestManifestMetadataIsItselfChecked(unittest.TestCase):
             with self.subTest(report=name):
                 self.assertIn("generator_verified", rec)
                 self.assertIn(rec["generator_verified"], (True, "[未验证]"))
+
+
+class TestModelCardIsNotStale(unittest.TestCase):
+    """**文档过期要被自动抓到，不靠人记。**
+
+    来历：`§13「已推演但未实现」` 两次留着已经做成的能力（step-up 拖了 5 天、
+    在线特征服务拖了 1 天），表头的版本与日期也停在 5 天前。
+
+    根因是结构性的：**`§13` 是全文唯一一个「做成了要回来删东西」的清单**，
+    其余章节都是往里加——所以只有它会系统性地漏。
+    项目负责人为此定了「本节随能力落地逐条重划」的规矩；本测试是那条规矩的执行端。
+
+    判据：文档日期不得早于它所引用的任何一份报告的**生成时间**。
+    报告是机器写的、动过就会更新 mtime；文档是人写的、改不改全凭记得。
+    **拿会自动更新的那个，去卡不会自动更新的那个。**
+    """
+
+    HEADER_DATE = re.compile(r"^\|\s*文档日期\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|", re.M)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.card = ROOT / "MODEL_CARD.md"
+        if not cls.card.exists():
+            raise unittest.SkipTest("MODEL_CARD.md 不存在")
+        cls.text = cls.card.read_text(encoding="utf-8")
+
+    def test_header_declares_a_document_date(self):
+        self.assertIsNotNone(self.HEADER_DATE.search(self.text),
+                             "表头缺「文档日期」——没有它就无从判断是否过期")
+
+    def test_document_date_is_not_older_than_its_sources(self):
+        """引用的报告比文档新 → 文档在讲一份已经变过的数据。"""
+        import datetime as dt
+        doc_day = dt.date.fromisoformat(self.HEADER_DATE.search(self.text).group(1))
+        newest, who = None, None
+        for name in sorted(set(re.findall(r"`?([a-z0-9_]+\.md)`?", self.text))):
+            p = REPORTS / name
+            if not p.exists():
+                continue
+            d = dt.date.fromtimestamp(p.stat().st_mtime)
+            if newest is None or d > newest:
+                newest, who = d, name
+        if newest is None:
+            self.skipTest("MODEL_CARD 未引用任何 reports/ 文件")
+        self.assertGreaterEqual(
+            doc_day, newest,
+            f"\n文档日期 {doc_day} 早于它引用的报告 {who}（{newest}）。"
+            f"\n报告重跑过而文档没跟上 —— 要么复核后更新表头日期，"
+            f"要么说明为何本次重跑不影响结论。")
+
+    def test_version_field_covers_every_layer_that_has_one(self):
+        """有版本号的层必须都出现在表头 —— 少一层就是「往低了说自己」。"""
+        m = re.search(r"^\|\s*版本\s*\|(.+)\|", self.text, re.M)
+        self.assertIsNotNone(m, "表头缺「版本」")
+        ver = m.group(1)
+        # §12 变更记录里出现过的层，表头都该有
+        layers = set(re.findall(r"^\|\s*(?:Agent|Serving|ML 核心)\s*\*?\*?([\w.-]+)",
+                                self.text, re.M))
+        for tag in ("v4-citable-context", "v1-online-scoring"):
+            if tag in self.text:
+                self.assertIn(tag, ver, f"§12 记了 {tag}，表头版本却没有它")
