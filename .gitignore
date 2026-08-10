@@ -25,3 +25,6 @@ AGENTS.md
 PROGRESS.md
 REHEARSAL.md
 会话全程记录_W5_Agent层与eval.md
+
+# 整页长图：备用产物，未被任何文档引用，可由 shoot_demo.py 重跑
+reports/demo/shots/*_full.png
