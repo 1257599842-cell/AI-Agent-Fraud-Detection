@@ -15,11 +15,10 @@ venv/
 # 系统
 .DS_Store
 
-# 面试答案库：本地保留，不入公开仓库
+# 本地工作文档，不随仓库发布
 INTERVIEW.md
 
-# 内部工作文件：本地保留，不随仓库发布
-# 移出理由见 MODEL_CARD §12（结论实质已由 §12.5「已作废的结论」对外承接）
+# 本地工作文档，不随仓库发布（结论实质见 MODEL_CARD §12.5）
 CLAUDE.md
 AGENTS.md
 PROGRESS.md
@@ -32,5 +31,5 @@ reports/demo/shots/*_full.png
 # 持久化模型：由 python -m src.agent.disposition 产出，不入库（5 MB 二进制）
 models/
 
-# 学习读本：面向本人复习，与答案库同类，不随仓库发布
+# 本地学习笔记，不随仓库发布
 STUDY/
