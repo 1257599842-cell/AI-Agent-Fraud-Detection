@@ -63,7 +63,7 @@
   "generator_verified": true
  },
  "agent_knowledge.md": {
-  "sha256_machine_only": "8916dc9f70a281c1dc14cca1445c67d785320bdc0e53e6767c9684b0e4926a1b",
+  "sha256_machine_only": "2365c4a8c18fc3bc2695f5107f9fc188e1e9d8c5150f0a135e4471c05dcbbc59",
   "tier": "heavy",
   "command": "python -m src.agent.knowledge",
   "has_human_block": false,
@@ -104,43 +104,50 @@
   "has_human_block": false,
   "generator_verified": true
  },
+ "bank_metrics.md": {
+  "sha256_machine_only": "bf020319fcb848941e1f102b164995e0613642f4d80c16de4912941107d7b735",
+  "tier": "cheap",
+  "command": "python -m src.model.bank_metrics",
+  "has_human_block": false,
+  "generator_verified": true
+ },
  "baseline_metrics.md": {
-  "sha256_machine_only": "dd3ca56241fc30e6d985cbc028407e0d0bcadff709b3f703f94e08a972a7caa5",
+  "sha256_machine_only": "d47ed26671f751848ddb068fe4ad1dab5941bafbc921e8b022721ed4df5bb3d9",
   "tier": "heavy",
   "command": "python -m src.model.train_baseline",
   "has_human_block": false,
   "generator_verified": true
  },
  "calib_window_size.md": {
-  "sha256_machine_only": "9ae265e0f8d90fce50bbb3225577854c60afca8d843974fa059c726ff2f485aa",
+  "sha256_machine_only": "9cbe892736dd0cf6fa84bb09aee11cc0e6089bede397ed458d4500424dba7c4b",
   "tier": "heavy",
   "command": "python -m src.model.calib_window_size",
   "has_human_block": true,
   "generator_verified": true
  },
  "calibration.md": {
-  "sha256_machine_only": "743a2cb01ad19dffb11e317cf67e21b8e50fd0e58f952bc1edda0b32391a0aa5",
+  "sha256_machine_only": "358ffaa1c0abaf6b8ae9ac827481caa1454ce947d8dcc6e5422161956a49a3ec",
   "tier": "heavy",
   "command": "python -m src.model.calibration",
   "has_human_block": true,
   "generator_verified": true
  },
  "cost_sensitive.md": {
-  "sha256_machine_only": "48cef46dca11aaf5c796270b1cf63143caf696304c023b6af47861bee35ecee4",
+  "sha256_machine_only": "93f7236f6fdc9034e84b81e70a1171f010b4862cf955ea7fed04f77b47487638",
   "tier": "heavy",
   "command": "python -m src.model.cost_sensitive",
   "has_human_block": false,
   "generator_verified": true
  },
  "disposition.md": {
-  "sha256_machine_only": "68e628adf0dc56b641135d4ee24b0569c15cff133ffa066a07b0e8d5c15a47e7",
+  "sha256_machine_only": "5aabdf611ffb2d6b32214cc53af8fd6e7d37dffd3b518174d7d0dcc31d13f804",
   "tier": "cheap",
   "command": "python -m src.agent.disposition",
   "has_human_block": false,
   "generator_verified": true
  },
  "drift_monitor.md": {
-  "sha256_machine_only": "0f40a3780e9fa06da93a8c33846863b923f388cc6eceaea8e80500cc9a730237",
+  "sha256_machine_only": "9a3dcfa5649ecc9c02645943aa1b84df514b9708609e12b6fc69b5484b5b1248",
   "tier": "heavy",
   "command": "python -m src.eval.drift_monitor",
   "has_human_block": true,
@@ -154,7 +161,7 @@
   "generator_verified": true
  },
  "embargo_decomposition.md": {
-  "sha256_machine_only": "9dfc8e0a86ebbceaf4b881b7334a90c39c923b8615c8ba5e0ae861863ae46ee8",
+  "sha256_machine_only": "3df4ad331c53b7ef6e942cba21dd8a95f5f1121fcad968aba36030f86dde7af3",
   "tier": "heavy",
   "command": "python -m src.model.embargo_control",
   "has_human_block": true,
@@ -175,21 +182,21 @@
   "generator_verified": true
  },
  "graph_leak_audit.md": {
-  "sha256_machine_only": "3139a707bb7683434c7be959a073d87d5c14ac0907ae9a4a627c88b519387727",
+  "sha256_machine_only": "fd395a4f2f128a6d5397dc05fcaa5ec6f52b36b1bdef441f689e15d810da2ac5",
   "tier": "heavy",
   "command": "python -m src.model.graph_leak_audit",
   "has_human_block": true,
   "generator_verified": true
  },
  "graph_vs_tabular.md": {
-  "sha256_machine_only": "fa48cf212fbb5b9b432f999b3cfc889f84a6ae873c620a3c33cd5c6d1a44ea21",
+  "sha256_machine_only": "bff17705425c266bf731e746592e656fbb95ccab39c79b5da175b928c1224f24",
   "tier": "heavy",
   "command": "python -m src.model.graph_vs_tabular",
   "has_human_block": true,
   "generator_verified": "[未验证]"
  },
  "graph_vs_tabular_e60.md": {
-  "sha256_machine_only": "ca5b95c92a5e820b38a3181074f8e36a6f5fba68ca61b8d4715e1fbd5dd9d55a",
+  "sha256_machine_only": "6444b50da0caca6fe7f97b251b59fd1ae741876308eb413788c07d892dac8c4e",
   "tier": "heavy",
   "command": "GRAPH_FILE=data/processed/graph_features_e60.parquet python -m src.model.graph_vs_tabular",
   "has_human_block": false,
@@ -202,8 +209,22 @@
   "has_human_block": false,
   "generator_verified": true
  },
+ "label_availability_audit.json": {
+  "sha256_machine_only": "d9b4df08da06a4a5b699b5af39320dfb3ee79f32283b50190c5b41b087ddba42",
+  "tier": "heavy",
+  "command": "python -m src.model.label_availability_audit",
+  "has_human_block": false,
+  "generator_verified": true
+ },
+ "label_availability_audit.md": {
+  "sha256_machine_only": "1cb8329864c03ef8832124790aa6d61fa017cb5443ccc15e5824b8a894475fce",
+  "tier": "heavy",
+  "command": "python -m src.model.label_availability_audit",
+  "has_human_block": false,
+  "generator_verified": true
+ },
  "online_replay.md": {
-  "sha256_machine_only": "af345054194d9e9fa95f95b1b69b4fee41e93dae86c1fb3a856e28f58cfa442b",
+  "sha256_machine_only": "a6b6ac24db96cca8f690ae10e5b7dc487cfbcae073c3c18ad35365ebf386e90d",
   "tier": "heavy",
   "command": "python -m src.eval.online_replay --run",
   "has_human_block": false,
@@ -224,21 +245,21 @@
   "generator_verified": true
  },
  "small_amount_floor.md": {
-  "sha256_machine_only": "ad84dcd9aab8184953984da94a5813a429d3a2f4bb034dea7f065ba2679fbf1e",
+  "sha256_machine_only": "fe71c93b9c1a34dbfb029d10ce1ac671b614a4f850dc92ce96ba8cb5d663f35d",
   "tier": "cheap",
   "command": "python -m src.model.small_amount_floor",
   "has_human_block": false,
   "generator_verified": true
  },
  "sql_vs_pandas_reconciliation.md": {
-  "sha256_machine_only": "4a61e335d8a1a6c3ef2ce743da208a8717eb17799633d3fe179c516a5003d657",
+  "sha256_machine_only": "f0df8b94f0e35c2eaca3eec81a2a98db5761b9c74e7fa8c3962e8509282599a5",
   "tier": "cheap",
   "command": "python -m src.features.build_duckdb",
   "has_human_block": false,
   "generator_verified": true
  },
  "stepup.md": {
-  "sha256_machine_only": "706c47b348cdd010b88519786e4c7945765d7800317a2c38917489db0503e8f2",
+  "sha256_machine_only": "54917f00f9633a1314fd9d356f5ce490af905fc374e0f8dc3213bfc41fcd1746",
   "tier": "cheap",
   "command": "python -m src.model.stepup",
   "has_human_block": false,
@@ -252,10 +273,10 @@
   "generator_verified": true
  },
  "velocity_rules.md": {
-  "sha256_machine_only": "5ceb6c3fd02b4908a784d5da1cdfb782ef6c879207e4396d770ee9e0547c29c4",
+  "sha256_machine_only": "72ff48644f5b0bfcfa39b2a251d4049c636a30032abfc9ac0b2009c7321b4c37",
   "tier": "cheap",
   "command": "python -m src.model.velocity_rules",
-  "has_human_block": false,
+  "has_human_block": true,
   "generator_verified": true
  },
  "reports/eval_runs/r1/anchor_blind.md": {
@@ -304,6 +325,7 @@
   "sha256_tree": "56fb5649af05ebf1011055e5bde2a2b3fde5bfc0fec29fb95d806dfa50816649",
   "n_files": 70,
   "tier": "archive",
+  "tree_hash_version": 2,
   "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
   "why": "剥夺实验原始返回"
  },
@@ -311,13 +333,15 @@
   "sha256_tree": "106a9eb7d825bded24966bf66f90447d84fc7978d0851531aff348d4bdf861ca",
   "n_files": 60,
   "tier": "archive",
+  "tree_hash_version": 2,
   "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
   "why": "喂分翻转实验原始返回"
  },
  "reports/eval_runs/r1/": {
-  "sha256_tree": "190bae228b26eb3fc82f88056628ffc4e907898ca802b08c186926e7b667a742",
-  "n_files": 109,
+  "sha256_tree": "5c6e23ed8fdf2c7c7ae8c7e08119f7ffb0159089a600e9d92f45e5bfef988af1",
+  "n_files": 108,
   "tier": "archive",
+  "tree_hash_version": 2,
   "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
   "why": "round 1 全量调查原始返回"
  },
@@ -325,6 +349,7 @@
   "sha256_tree": "48e6b1422f4e1fd0040faff2adb507d198a27cf5fae0161c77515483f38bb6e3",
   "n_files": 100,
   "tier": "archive",
+  "tree_hash_version": 2,
   "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
   "why": "round 3 全量调查原始返回"
  },
@@ -332,6 +357,7 @@
   "sha256_tree": "3af13569cc29ca1e0f9ad18eb44b50510620dae91c54e28fb312a83c3153314f",
   "n_files": 100,
   "tier": "archive",
+  "tree_hash_version": 2,
   "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
   "why": "round 4 全量调查原始返回"
  },
@@ -339,6 +365,7 @@
   "sha256_tree": "8e129e88679fe51d311a49deecb98d7da5e51f4f1a4f850a714432a07e176fe0",
   "n_files": 18,
   "tier": "archive",
+  "tree_hash_version": 2,
   "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
   "why": "round 4 v4-prompt 配对原始返回"
  },
@@ -346,6 +373,7 @@
   "sha256_tree": "9a2f0d272d06944f2c25daccc410dff16ebcf3d6c2d1c11dd94b580d3f55cd86",
   "n_files": 7,
   "tier": "archive",
+  "tree_hash_version": 2,
   "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
   "why": "管道演习的原始返回（agent_pipeline.md 的锚）"
  }

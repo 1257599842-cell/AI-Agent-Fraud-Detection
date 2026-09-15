@@ -25,7 +25,9 @@ BASE = PROJECT_ROOT / "data" / "processed" / "train_merged.parquet"
 GRAPH = Path(os.environ.get("GRAPH_FILE", PROJECT_ROOT / "data" / "processed" / "graph_features.parquet"))
 # md 按图文件的 embargo 后缀命名，避免审计运行覆盖主结果
 _gsuffix = GRAPH.stem.replace("graph_features", "")
+GRAPH_DELAY = "60天" if _gsuffix == "_e60" else ("21天" if not _gsuffix else "由输入产物定义的")
 OUT_MD = PROJECT_ROOT / "reports" / f"graph_vs_tabular{_gsuffix}.md"
+SCORES_OUT = PROJECT_ROOT / "data" / "processed" / f"gvt_scores{_gsuffix}.parquet"
 
 SECS_PER_DAY = 86_400
 
@@ -34,7 +36,7 @@ def load():
     df = pd.read_parquet(BASE)
     gf = pd.read_parquet(GRAPH)
     graph_cols = [c for c in gf.columns if c != "TransactionID"]
-    df = df.merge(gf, on="TransactionID", how="left")
+    df = df.merge(gf, on="TransactionID", how="left", validate="one_to_one")
     day = ((df["TransactionDT"] // SECS_PER_DAY) - (df["TransactionDT"] // SECS_PER_DAY).min()).to_numpy()
     y = df["isFraud"].astype(int)
     X = df.drop(columns=["isFraud", "TransactionID", "TransactionDT"])
@@ -60,6 +62,9 @@ def fit_eval(X, y, day, cols):
     for f in CAP_FRACS:
         _, rec, _ = prec_recall_at_topk(yte, p, f)
         m[f"rec@{f:.1%}"] = rec
+    # 全窗预测一并返回：训练窗 KS 要用它（银行看的是 KS 跨时间稳不稳，不只看高低）。
+    # 训练窗上是**样本内**分数，天然偏乐观——正因如此它才是有用的对照。
+    m["_p_all"] = booster.predict(X.loc[:, cols], num_iteration=booster.best_iteration)
     return m, booster
 
 
@@ -89,8 +94,27 @@ def main():
     for c in graph_cols:
         print(f"  #{ranks[c]:>3}/{total}  gain={imp[c]:>12.0f}  {c}")
 
+    _save_scores(A.pop("_p_all"), B.pop("_p_all"), y, day)
     _write_md(A, B, graph_cols, ranks, total, imp)
     print(f"\n✅ {OUT_MD.relative_to(PROJECT_ROOT)}")
+
+
+def _save_scores(p_tab, p_graph, y, day):
+    """把两臂的逐笔分数落盘，供 `bank_metrics.py` 算 KS / 十等分表。
+
+    **为什么要落盘而不是让 KS 那边重训**：重训一次就多一份「可能不同源」的分数。
+    对外报告里的 `PR-AUC 0.5645→0.6032` 出自本模块这一次运行，KS 必须出自**同一次**，
+    否则两个数会来自两个模型——本项目已经在「同值不同义」上栽过四次。
+    """
+    ids = pd.read_parquet(BASE, columns=["TransactionID"])["TransactionID"].to_numpy()
+    split = np.where(day >= T0, "test",
+                     np.where(day >= T0 - VAL_DAYS, "val", "fit"))
+    out = pd.DataFrame({"TransactionID": ids, "day": day, "split": split,
+                        "isFraud": y.to_numpy(), "p_tab": p_tab, "p_graph": p_graph})
+    out.to_parquet(SCORES_OUT, index=False)
+    print(f"  ↳ 两臂分数已落盘 → {SCORES_OUT.relative_to(PROJECT_ROOT)}"
+          f"（{len(out):,} 行，fit/val/test = "
+          f"{(split=='fit').sum():,}/{(split=='val').sum():,}/{(split=='test').sum():,}）")
 
 
 def _write_md(A, B, graph_cols, ranks, total, imp):
@@ -98,7 +122,7 @@ def _write_md(A, B, graph_cols, ranks, total, imp):
     best_gc = min(graph_cols, key=lambda c: ranks[c])
     L = [
         "# 纯表 vs 表+图 干净对照（硬点⑥ 量化依据）\n",
-        "同切分（fit<132/test≥146）、同 LGB 配置，只差图特征。**delta 可能≈0 = 诚实结论（图信号已被匿名特征吸收）。**\n",
+        f"同切分（fit<132 / val[132,146) / test≥146）、同 LGB 配置，只差图特征。模型训练和早停未设标签成熟隔离；本次图文件`{GRAPH.name}`按{GRAPH_DELAY}标签延迟生成。增量大小不证明匿名特征吸收机制。\n",
         "## 结果（test）\n",
         "| 臂 | PR-AUC | ROC-AUC | recall@0.5% | recall@1% | recall@2% |",
         "|----|--------|---------|-------------|-----------|-----------|",
@@ -116,8 +140,8 @@ def _write_md(A, B, graph_cols, ranks, total, imp):
         "",
         "## 结论（按实际数字，接 ⑥）",
         f"- 表+图相对纯表：PR-AUC {dpr:+.4f}、ROC-AUC {droc:+.4f}。最有用的图特征是 `{best_gc}`（排名 #{ranks[best_gc]}）。",
-        "- 若 delta 微弱：印证「图信号已被 C1-C14/V 匿名计数特征吸收」→ **用轻量图特征（度/prior 欺诈率/fan-out）而非 GNN**：轻量特征已吃掉大部分图价值，GNN 的边际增量不值其训练/推理/服务复杂度。",
-        "- 时间因果：结构型（prior_cnt/fan-out）只用 t 之前的边；标签型（prior_fraud_rate）邻居标签留 21 天 embargo——图特征版硬点②，标签+结构两层泄漏都防住。",
+        "- 本项目保留轻量图特征方案。匿名C/V可能吸收部分结构信号只是解释假说；没有GNN对照，不能声称已验证其边际收益或性价比。",
+        f"- 结构型用(dt,输入次序)前序边；输入按ID排序，同秒较小ID可见。标签型使用{GRAPH_DELAY}成熟截止。这只定义特征可见性，不证明训练标签可得性或匿名字段无泄漏。",
         "- 团伙叙事（喂②风控/④业务安全两张皮）：组合键（card1+邮箱/设备）的 prior_fraud_rate 与 fan-out 是「共享稀有实体」的团伙信号。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)

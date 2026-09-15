@@ -38,6 +38,8 @@ MANIFEST = REPORTS / "_manifest.json"
 
 # 报告 → (生成命令, 开销档)。**命令要能直接复制运行**，参数即口径。
 GENERATORS = {
+    "label_availability_audit.md": (["src.model.label_availability_audit"], "heavy"),
+    "label_availability_audit.json": (["src.model.label_availability_audit"], "heavy"),
     "baseline_metrics.md": (["src.model.train_baseline"], "heavy"),
     "calibration.md": (["src.model.calibration"], "heavy"),
     "calib_window_size.md": (["src.model.calib_window_size"], "heavy"),
@@ -70,6 +72,7 @@ GENERATORS = {
     "agent_defect_taxonomy.md": (["src.eval.agent_eval", "--relabel-score", "r1"], "cheap"),
     "rules_vs_model.md": (["src.model.rules_vs_model"], "cheap"),
     "small_amount_floor.md": (["src.model.small_amount_floor"], "cheap"),
+    "bank_metrics.md": (["src.model.bank_metrics"], "cheap"),
     "velocity_features.md": (["src.features.velocity_features"], "cheap"),
     "velocity_rules.md": (["src.model.velocity_rules"], "cheap"),
     "online_replay.md": (["src.eval.online_replay", "--run"], "heavy"),
@@ -97,13 +100,14 @@ ARCHIVES = {
 }
 
 
-def tree_sha(d):
+def tree_sha(d, include_metadata=False):
     """目录聚合哈希：按文件名排序，把「相对路径 + 内容哈希」串起来再哈希。
 
     这样任何一个归档件被改动 / 增删都会翻，而清单只多一行。
     """
     h = hashlib.sha256()
-    files = sorted(p for p in d.rglob("*") if p.is_file())
+    files = sorted(p for p in d.rglob("*") if p.is_file()
+                   and (include_metadata or p.name != ".DS_Store"))
     for p in files:
         h.update(str(p.relative_to(d)).encode("utf-8"))
         h.update(hashlib.sha256(p.read_bytes()).digest())
@@ -158,6 +162,11 @@ def validate_generators():
             problems.append((name, f"模块不存在或不可导入：{mod}"))
             continue
         src = pathlib.Path(spec.origin).read_text(encoding="utf-8")
+        import ast
+        literals = [node.value for node in ast.walk(ast.parse(src))
+                    if isinstance(node, ast.Constant) and isinstance(node.value, str)]
+        if any(value == name or value.endswith("/" + name) for value in literals):
+            continue
         stem = name.removesuffix(".md")
         # 直接出现全名，或以 f-string 拼接（如 graph_vs_tabular{_gsuffix}.md）
         if f'"{name}"' in src or f"'{name}'" in src:
@@ -192,9 +201,20 @@ def build():
             print(f"⚠️ 归档目录不存在：{rel}")
             continue
         digest, n = tree_sha(d)
-        out[rel + "/"] = {"sha256_tree": digest, "n_files": n, "tier": "archive",
+        out[rel + "/"] = {"sha256_tree": digest, "n_files": n, "tier": "archive", "tree_hash_version": 2,
                           "command": "（不可复现：LLM 原始返回。它是锚，不是产物）",
                           "why": why}
+    if MANIFEST.exists():
+        previous = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        for name, rec in previous.items():
+            if rec.get("tier") in ("frozen", "archive"):
+                key = "sha256" if rec["tier"] == "frozen" else "sha256_tree"
+                current = out.get(name, {}).get(key)
+                if rec["tier"] == "archive" and rec.get("tree_hash_version", 1) == 1:
+                    # 一次性格式迁移：先按旧算法验证原锚，再登记排除OS元数据的新摘要。
+                    current = tree_sha(ROOT / name.rstrip("/"), include_metadata=True)[0]
+                if name not in out or current != rec[key]:
+                    raise RuntimeError(f"拒绝刷新已改变/缺失的冻结或归档锚：{name}")
     return out
 
 
@@ -232,20 +252,36 @@ def verify():
     sys.exit(1 if bad else 0)
 
 
-def verify_rerun():
-    """只对 cheap 档：真重跑一次，断言逐字节相同。
+def preserve_reports():
+    """恢复每个生成器写过的所有报告/图像（含异常路径），不只登记的主报告。
 
-    **会临时改写 reports/**，跑完自动还原成重跑前的内容；
-    因为它有副作用，所以不进快速测试集，由本命令显式触发。
+    派生 data/ 与 models/ 仍可能由生成器更新；本命令不可和构建任务并发。
     """
+    from contextlib import contextmanager
+
+    @contextmanager
+    def snapshot():
+        saved = {p: (p.read_bytes(), p.stat()) for p in REPORTS.rglob("*") if p.is_file()}
+        try:
+            yield
+        finally:
+            for p in REPORTS.rglob("*"):
+                if p.is_file() and p not in saved:
+                    p.unlink()
+            for p, (content, stat) in saved.items():
+                if not p.exists() or p.read_bytes() != content:
+                    p.parent.mkdir(parents=True, exist_ok=True)
+                    p.write_bytes(content)
+                os.utime(p, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+    return snapshot()
+
+
+def verify_rerun():
+    """重跑 cheap 档；每次恢复整个 reports/。data/、models/ 可能有派生写入。"""
     ok, fail = [], []
     for name, (argv, tier) in sorted(GENERATORS.items()):
-        if tier != "cheap":
-            continue
-        if not (p := REPORTS / name).exists() or not (p.stat().st_mode & 0o200):
-            continue          # 只读 = 冻结件，绝不触碰
         p = REPORTS / name
-        if not p.exists():
+        if tier != "cheap" or not p.exists() or not (p.stat().st_mode & 0o200):
             continue
         before, mtime_before = p.read_bytes(), p.stat().st_mtime_ns
         env = dict(os.environ)
@@ -253,25 +289,24 @@ def verify_rerun():
             if "=" in e and not e.startswith("-"):
                 k, v = e.split("=", 1)
                 env[k] = str(ROOT / v)
-        r = subprocess.run([sys.executable, "-m", *[a for a in argv if "=" not in a]],
-                           cwd=ROOT, capture_output=True, text=True, timeout=900, env=env)
-        after = p.read_bytes() if p.exists() else b""
-        touched = p.exists() and p.stat().st_mtime_ns != mtime_before
-        if after != before:
-            p.write_bytes(before)                   # 只在真被改动时才还原，不做无谓写入
+        try:
+            with preserve_reports():
+                r = subprocess.run([sys.executable, "-m", *[a for a in argv if "=" not in a]],
+                                   cwd=ROOT, capture_output=True, text=True, timeout=900, env=env)
+                after = p.read_bytes() if p.exists() else b""
+                touched = p.exists() and p.stat().st_mtime_ns != mtime_before
+        except (subprocess.TimeoutExpired, OSError) as exc:
+            fail.append((name, f"重跑失败：{type(exc).__name__}"))
+            continue
         if r.returncode != 0:
-            fail.append((name, f"生成器退出码 {r.returncode}"))
+            fail.append((name, f"生成器退出码 {r.returncode}: {r.stderr[-400:]}"))
         elif not touched:
-            # **假放行修复**：`agent_eval grounding r1`（漏了 --）退出码 0、
-            # 只打印用法、**什么都不写**，而内容比对当然说「相同」。
-            # 「内容没变」与「根本没被写」必须分开判——后者是登记的命令是错的。
-            fail.append((name, "生成器退出码 0 但**没有写这个文件** —— 登记的命令多半是错的"))
+            fail.append((name, "生成器退出码0但未写目标文件"))
         elif after != before:
-            fail.append((name, "重新生成后内容不同 —— 非确定性或已被手编"))
+            fail.append((name, "重生成内容不同（非确定性、旧产物或手工修改）"))
         else:
             ok.append(name)
-    print(f"cheap 档重跑对拍：{len(ok)} 份逐字节相同"
-          + (f"、{len(fail)} 份不符" if fail else " ✅"))
+    print(f"cheap 档重跑对拍：{len(ok)} 份逐字节相同、{len(fail)} 份不符")
     for name, why in fail:
         print(f"  ❌ {name}：{why}")
     sys.exit(1 if fail else 0)

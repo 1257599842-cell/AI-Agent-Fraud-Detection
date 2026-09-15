@@ -45,6 +45,7 @@ def main() -> None:
 
     day_max = int(day.max())
     wins = []
+    psi_edges = None                 # PSI 的分箱切点：**只在基准窗定一次**
     for lo in range(VAL_END, day_max + 1, WINDOW):
         hi = lo + WINDOW
         mask = (day >= lo) & (day < hi)
@@ -52,9 +53,15 @@ def main() -> None:
         if mask.sum() < 500 or yy.sum() < 10:
             continue
         pp = booster.predict(X[mask], num_iteration=booster.best_iteration)
+        if psi_edges is None:        # 首窗 = 基准，切点由它确定，后续窗一律沿用
+            psi_edges, base_ratio = _psi_reference(pp)
+            psi = 0.0
+        else:
+            psi = _psi(pp, psi_edges, base_ratio)
         wins.append({
             "lo": lo, "hi": hi, "n": int(mask.sum()), "fraud_rate": float(yy.mean()),
             "roc": float(roc_auc_score(yy, pp)), "pr": float(average_precision_score(yy, pp)),
+            "psi": float(psi),
         })
 
     base = wins[0]["roc"]           # 基线 = 第一个（最近训练期）窗口的 ROC-AUC
@@ -70,6 +77,31 @@ def main() -> None:
     _plot(wins, base, trigger)
     _write_md(wins, base, trigger, n_alarm)
     print(f"\n✅ 图 08 + {OUT_MD.relative_to(PROJECT_ROOT)}")
+
+
+PSI_BINS = 10
+PSI_WARN, PSI_ALERT = 0.10, 0.25   # 银行常用阈值：<0.1 稳定 / 0.1–0.25 轻微 / >0.25 显著
+
+
+def _psi_reference(p, n_bins=PSI_BINS):
+    """用**基准窗**的分数定分箱切点与各箱占比。
+
+    切点只在基准窗定一次、后续窗沿用——**若每个窗各自等频分箱，占比恒等于 1/n，
+    PSI 永远是 0**，这个监控就成了摆设。
+    与本项目「目标编码只在训练集拟合」是同一条纪律：**参照系不能跟着被测对象一起动。**
+    """
+    edges = np.quantile(p, np.linspace(0, 1, n_bins + 1))
+    edges[0], edges[-1] = -np.inf, np.inf
+    edges = np.unique(edges)
+    ratio = np.histogram(p, bins=edges)[0] / len(p)
+    return edges, np.maximum(ratio, 1e-6)      # 防 log(0)
+
+
+def _psi(p, edges, base_ratio):
+    """PSI = Σ (当前占比 − 基准占比) × ln(当前占比 / 基准占比)。"""
+    cur = np.histogram(p, bins=edges)[0] / len(p)
+    cur = np.maximum(cur, 1e-6)
+    return float(np.sum((cur - base_ratio) * np.log(cur / base_ratio)))
 
 
 def _plot(wins, base, trigger):
@@ -103,12 +135,18 @@ def _write_md(wins, base, trigger, n_alarm):
         "冻结早期模型（fit day<83），在后续每 14 天窗上算 AUC（不重训），看衰减 + 监控触发器。",
         f"基线 ROC-AUC（首窗）={base:.4f}，触发线=基线−{DELTA}={trigger:.4f}，共 {len(wins)} 个窗、{n_alarm} 个触发告警。\n",
         "## 滚动窗 AUC\n",
-        "| 窗口(day) | n | 欺诈率 | ROC-AUC | PR-AUC | 告警 |",
-        "|-----------|---|--------|---------|--------|------|",
+        "| 窗口(day) | n | 欺诈率 | ROC-AUC | PR-AUC | PSI | 告警 |",
+        "|-----------|---|--------|---------|--------|-----|------|",
     ]
     for w in wins:
+        flag = "⚠️" if w["roc"] < trigger else ""
+        if w["psi"] >= PSI_ALERT:
+            flag += "📊显著"
+        elif w["psi"] >= PSI_WARN:
+            flag += "📊轻微"
+        psi_txt = "基准" if w is wins[0] else f"{w['psi']:.4f}"
         L.append(f"| [{w['lo']},{w['hi']}) | {w['n']:,} | {w['fraud_rate']:.2%} | "
-                 f"{w['roc']:.4f} | {w['pr']:.4f} | {'⚠️' if w['roc'] < trigger else ''} |")
+                 f"{w['roc']:.4f} | {w['pr']:.4f} | {psi_txt} | {flag} |")
     L += [
         "",
         "## 结论（按实际数字）",
@@ -120,6 +158,11 @@ def _write_md(wins, base, trigger, n_alarm):
         f"- 波动幅度：ROC-AUC {max(w['roc'] for w in wins) - min(w['roc'] for w in wins):.4f}"
         f"、PR-AUC **{max(w['pr'] for w in wins) - min(w['pr'] for w in wins):.4f}**"
         f"（PR 区间 [{min(w['pr'] for w in wins):.4f}, {max(w['pr'] for w in wins):.4f}]）。",
+        f"- **PSI（模型分分布稳定性）**：各窗相对首窗（基准）的 "
+        f"PSI 最大 **{max(w['psi'] for w in wins):.4f}**、末窗 {wins[-1]['psi']:.4f}"
+        f"（银行阈值：<0.10 稳定 / 0.10–0.25 轻微 / >0.25 显著）。"
+        f"分箱切点**只在基准窗定一次**，后续窗沿用——"
+        f"每窗各自等频分箱会让占比恒为 1/n、PSI 恒等于 0，监控就成了摆设。",
         f"- **PR-AUC 相对基线的最大落差 {wins[0]['pr'] - min(w['pr'] for w in wins):.4f}**"
         f"（基线 {wins[0]['pr']:.4f} → 最低 {min(w['pr'] for w in wins):.4f}），"
         f"同期 ROC 落差仅 {wins[0]['roc'] - min(w['roc'] for w in wins):.4f}"
