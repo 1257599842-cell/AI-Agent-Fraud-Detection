@@ -73,6 +73,7 @@ GENERATORS = {
     "rules_vs_model.md": (["src.model.rules_vs_model"], "cheap"),
     "small_amount_floor.md": (["src.model.small_amount_floor"], "cheap"),
     "bank_metrics.md": (["src.model.bank_metrics"], "cheap"),
+    "scorecard.md": (["src.model.scorecard"], "heavy"),
     "velocity_features.md": (["src.features.velocity_features"], "cheap"),
     "velocity_rules.md": (["src.model.velocity_rules"], "cheap"),
     "online_replay.md": (["src.eval.online_replay", "--run"], "heavy"),

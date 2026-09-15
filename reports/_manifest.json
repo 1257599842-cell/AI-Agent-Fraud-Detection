@@ -237,6 +237,13 @@
   "has_human_block": false,
   "generator_verified": true
  },
+ "scorecard.md": {
+  "sha256_machine_only": "923e4e29854ab7f009463748c71fd2075b45bee3731539efec6ddc27806f62a0",
+  "tier": "heavy",
+  "command": "python -m src.model.scorecard",
+  "has_human_block": false,
+  "generator_verified": true
+ },
  "selective_bias.md": {
   "sha256_machine_only": "85d69c0cac8bb81e4dd8f1c0412711c503d35a7338b0d05c682afa795ae3b731",
   "tier": "heavy",
