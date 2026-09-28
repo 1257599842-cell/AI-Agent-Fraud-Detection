@@ -40,15 +40,15 @@ GRID = {"c_fp": [10.0, 25.0, 50.0, 100.0], "c_review": [2.0, 5.0, 10.0, 20.0],
 
 def load(tag):
     rows = []
-    for f in sorted((RUNS_DIR / tag).glob("txn_*.json")):
-        r = json.loads(f.read_text())
+    from src.eval.run_integrity import load_complete_run
+    for r in load_complete_run(RUNS_DIR / tag, pd.read_parquet(EVAL_SET)):
         rep = r.get("report") or {}
         if rep.get("disposition"):
             rows.append({"TransactionID": r["txn_id"], "agent": rep["disposition"],
                          "cost_usd": r.get("cost_usd", 0), "tool_calls": r.get("tool_calls", 0)})
     if not rows:
         raise SystemExit(f"round {tag} 没有可用报告")
-    return pd.DataFrame(rows).merge(pd.read_parquet(EVAL_SET), on="TransactionID")
+    return pd.DataFrame(rows).merge(pd.read_parquet(EVAL_SET), on="TransactionID", validate="one_to_one")
 
 
 def metrics(d, prm=None):

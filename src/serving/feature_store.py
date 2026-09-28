@@ -43,6 +43,16 @@
 """
 
 from pathlib import Path
+from functools import wraps
+from threading import RLock
+
+
+def _serialized(fn):
+    @wraps(fn)
+    def wrapped(self, *args, **kwargs):
+        with self._lock:
+            return fn(self, *args, **kwargs)
+    return wrapped
 
 ROOT = Path(__file__).resolve().parents[2]
 EMBARGO_SECS = 21 * 86_400
@@ -67,6 +77,7 @@ class FeatureStore:
 
     def __init__(self, db_path=":memory:"):
         import duckdb
+        self._lock = RLock()
         self.con = duckdb.connect(db_path)
         self.con.execute("""
             CREATE TABLE IF NOT EXISTS events (
@@ -81,6 +92,7 @@ class FeatureStore:
             )""")
 
     # ── 写入 ────────────────────────────────────────────────────────────
+    @_serialized
     def append_frame(self, df, label_delay=EMBARGO_SECS, labeled_mask=None):
         """批量灌入历史。
 
@@ -89,18 +101,28 @@ class FeatureStore:
         """
         import numpy as np
         import pandas as pd
+        if not isinstance(label_delay, (int, np.integer)) or label_delay < 0:
+            raise ValueError("label_delay 必须为非负整数秒")
+        labels = pd.to_numeric(df["isFraud"], errors="raise").reset_index(drop=True)
+        if not labels.dropna().isin([0, 1]).all():
+            raise ValueError("isFraud 必须为 0、1 或缺失")
         e = pd.DataFrame({
             "transaction_id": df["TransactionID"].to_numpy(),
             "event_time": df["TransactionDT"].to_numpy(),
-            "is_fraud": df["isFraud"].to_numpy().astype("int8"),
+            "is_fraud": labels.astype("Int8"),
         })
         lt = e["event_time"].to_numpy() + label_delay
+        known = labels.notna().to_numpy()
         if labeled_mask is not None:
-            lt = np.where(np.asarray(labeled_mask), lt, np.nan)
+            mask = np.asarray(labeled_mask)
+            if mask.shape != (len(e),) or mask.dtype != bool:
+                raise ValueError("labeled_mask 必须是与数据等长的布尔数组")
+            known = known & mask  # pandas可能返回只读NumPy视图，不原地修改
+        lt = np.where(known, lt, np.nan)
         e["label_time"] = lt
         for col, src in (("card1", "card1"), ("addr1", "addr1"),
                          ("p_emaildomain", "P_emaildomain"), ("device_info", "DeviceInfo")):
-            e[col] = df[src].astype("string").to_numpy()
+            e[col] = df[src].map(lambda v: _s(v, numeric=col in ("card1", "addr1"))).to_numpy()
         self.con.register("_incoming", e)
         self.con.execute("""INSERT INTO events
             SELECT transaction_id, event_time, label_time, is_fraud,
@@ -109,6 +131,7 @@ class FeatureStore:
         return len(e)
 
     # ── 读取 ────────────────────────────────────────────────────────────
+    @_serialized
     def get_features(self, txn, tiebreak_id=None, use_tiebreak=True):
         """算出 27 列在线特征。
 
@@ -117,7 +140,7 @@ class FeatureStore:
         """
         t = int(txn["TransactionDT"])
         tid = int(tiebreak_id if tiebreak_id is not None else txn.get("TransactionID", 0))
-        vals = {"card1": _s(txn.get("card1")), "addr1": _s(txn.get("addr1")),
+        vals = {"card1": _s(txn.get("card1"), numeric=True), "addr1": _s(txn.get("addr1"), numeric=True),
                 "p_emaildomain": _s(txn.get("P_emaildomain")),
                 "device_info": _s(txn.get("DeviceInfo"))}
         out = {}
@@ -141,8 +164,8 @@ class FeatureStore:
             # 标签型：取值语义 + 标签必须已成熟；label_time IS NULL 的永不参与
             oc, of = self.con.execute(
                 f"SELECT count(*), coalesce(sum(is_fraud), 0) FROM events "
-                f"WHERE {where_key} AND label_time IS NOT NULL AND label_time <= ?",
-                args + [t]).fetchone()
+                f"WHERE {where_key} AND label_time <= ? AND event_time < ? AND is_fraud IS NOT NULL",
+                args + [t, t]).fetchone()
             out[f"{kname}_prior_fraud_cnt"] = int(of)
             # **obs_cnt = 0 → NULL，不是 0**：与离线 np.where(oc>0, ..., nan) 对齐
             out[f"{kname}_prior_fraud_rate"] = (of / oc) if oc > 0 else None
@@ -165,26 +188,39 @@ class FeatureStore:
                 [vals["card1"]] + pos_args).fetchone()[0]
         return out
 
+    @_serialized
     def entity_history_len(self, txn):
         """本笔所属 card1 的历史长度 —— 延迟要按它分桶报，不能只报一个 p95。"""
-        c = _s(txn.get("card1"))
+        c = _s(txn.get("card1"), numeric=True)
         if c is None:
             return 0
         return self.con.execute(
             "SELECT count(*) FROM events WHERE card1 = ? AND event_time < ?",
             [c, int(txn["TransactionDT"])]).fetchone()[0]
 
+    @_serialized
     def close(self):
         self.con.close()
 
 
-def _s(v):
+def _s(v, numeric=False):
     """统一成 VARCHAR 或 None；NaN / 空串一律视作缺失（与离线 astype('string') 对齐）。"""
     import pandas as pd
     if v is None or (isinstance(v, float) and pd.isna(v)) or v is pd.NA:
         return None
     s = str(v)
-    return None if s in ("", "nan", "<NA>", "None") else s
+    if s == "":
+        return None
+    if numeric:
+        from decimal import Decimal, InvalidOperation
+        try:
+            d = Decimal(s)
+            if not d.is_finite():
+                raise ValueError("实体数值必须有限")
+            return format(d.normalize(), "f")
+        except InvalidOperation:
+            pass  # 合成测试也允许 C1/A1 这样的键
+    return s
 
 
 FEATURE_COLUMNS = (

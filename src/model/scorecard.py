@@ -1,32 +1,15 @@
-"""逻辑回归评分卡对照：分箱 → WOE/IV → LR → 标准刻度评分卡 → 同口径对照 GBDT。
+"""小规模WOE+LR评分卡对照；保留GBDT主模型。
 
-## 为什么做这个对照
-银行到今天仍大量使用逻辑回归评分卡，原因不是技术落后，是**监管要求模型可解释、
-可复核、可审计**——每一笔拒绝都要能说出理由，而且理由要能被业务和监管直接读懂。
-
-「我可以用 SHAP」是所有人都会给的答案。本模块给的是另一种答案：
-**我做了对照，评分卡在这个数据上损失多少性能、换来什么，所以受监管场景我会怎么选。**
-
-## 最关键的防泄漏点（本模块的核心纪律）
-**WOE 本质上是有监督的目标编码**——它用标签信息给每个箱赋值。
-所以**分箱与 WOE 必须只在训练窗拟合，再映射到测试窗**；全量分箱就是泄漏。
-
-这与本项目早已焊死的那条纪律（目标编码只在训练集拟合，高基数类别尤甚）是同一个问题，
-也与图特征的两层时间纪律同源：**任何吃标签的变换，都必须受时间切分约束。**
-
-## 口径（与 GBDT 对照必须严格一致）
-时间切分 `fit < day 132 / val [132,146) / test ≥ 146`，无 embargo，
-与 `graph_vs_tabular.md` 的 `PR-AUC 0.5645 → 0.6032`、`bank_metrics.md` 的 KS 同源同窗。
-LR 在 `fit` 上拟合（不使用 val——评分卡不需要早停），在同一个 test 窗评估。
-
-## 范围（严格限定，不扩张）
-不调参、不追 AUC、不碰 434 列、不引第三方评分卡库（自己写分箱更好讲）。
-产出四个对照数字 + 一张评分卡表即收工。
-
-用法：python -m src.model.scorecard
+拟合窗[0,132)，测试窗[146,182)，图标签使用主实验历史延迟特征。
+分箱、WOE、IV及变量筛选只读拟合窗；普通箱至少占全拟合窗5%，
+缺失单列。单调与系数符号是本对照的解释性约束。
+产出四项指标、分值表以及精确分箱/系数/逐笔分数，不调参。
+运行：python -m src.model.scorecard
 """
 
 from pathlib import Path
+import hashlib
+import json
 
 import numpy as np
 import pandas as pd
@@ -40,7 +23,7 @@ SCORES = ROOT / "data" / "processed" / "gvt_scores.parquet"
 REPORT = ROOT / "reports" / "scorecard.md"
 
 T0, VAL_DAYS = 146, 14          # 与 train_baseline 同一套切分常量
-MIN_BIN_FRAC = 0.05             # 每箱样本占比下限（银行惯例）
+MIN_BIN_FRAC = 0.05             # 普通箱占训练全窗比例；缺失箱单列并披露
 MAX_BINS = 6
 IV_FLOOR, IV_CEIL = 0.02, 0.5   # IV<0.02 剔除；IV>0.5 警惕泄漏
 CORR_MAX = 0.80                 # 高相关剔除阈值
@@ -52,8 +35,7 @@ CAND_TAB = ["V258", "V257", "DeviceInfo", "C1", "C14", "C13", "V294", "D2",
             "D15", "id_31", "P_emaildomain", "D1", "C8", "V317"]
 CAND_GRAPH = ["card1_prior_fraud_rate", "card1_addr1_prior_fraud_rate",
               "card1_email_prior_fraud_rate"]
-# card1 是**卡号 ID**，不是风险属性。评分卡里放 ID 等于给每张卡记忆一个分值，
-# 业务上讲不通、监管不会接受。GBDT 能用它（树会切段），评分卡不能——**这是真实分歧点**。
+# card1为匿名卡相关字段，不假定它是唯一卡号。本最小评分卡不对其数值顺序作业务解释。
 DROP_ID_LIKE = {"card1"}
 
 
@@ -61,7 +43,7 @@ DROP_ID_LIKE = {"card1"}
 def bin_numeric(x, y, max_bins=MAX_BINS, min_frac=MIN_BIN_FRAC):
     """数值型等频分箱后**合箱至 WOE 单调**。缺失单独成箱（不填均值）。
 
-    单调是银行的硬要求：业务上必须能说出「分越高风险越低」。
+    单调是本对照的建模约束；缺失无自然次序，不参加普通箱单调约束。
     """
     m = ~pd.isna(x)
     xs = np.asarray(x[m], dtype=float)
@@ -74,7 +56,7 @@ def bin_numeric(x, y, max_bins=MAX_BINS, min_frac=MIN_BIN_FRAC):
         idx = np.digitize(xs, cuts, right=True)
         cnt = np.bincount(idx, minlength=len(edges) - 1)
         # 先保证每箱样本量
-        small = [i for i, c in enumerate(cnt) if c < min_frac * len(xs)]
+        small = [i for i, c in enumerate(cnt) if c < min_frac * len(x)]
         if small and len(cuts) > 0:
             cuts.pop(min(small[0], len(cuts) - 1))
             continue
@@ -116,6 +98,12 @@ def bin_categorical(x, y, min_frac=MIN_BIN_FRAC):
     s = pd.Series(x).astype("string")
     vc = s.value_counts(dropna=True)
     keep = list(vc[vc >= min_frac * len(s)].index)
+    # 若非空「其他」仍不足5%，再合入最小的保留类别。
+    while keep:
+        other_n = int(s.notna().sum() - vc.reindex(keep).sum())
+        if other_n == 0 or other_n >= min_frac * len(s):
+            break
+        keep.remove(min(keep, key=lambda value: vc[value]))
     return keep
 
 
@@ -179,6 +167,8 @@ def fit_scorecard(df, feats):
     specs, woes, ivs, dropped = {}, {}, {}, []
     for c in feats:
         x = df.loc[fit, c]
+        if x.notna().sum() < MIN_BIN_FRAC * len(x):
+            dropped.append((c, '非缺失总样本不足训练全窗5%，无法建立普通箱')); continue
         if pd.api.types.is_numeric_dtype(x):
             cuts, mono = bin_numeric(x, yf)
             spec = {"kind": "num", "cuts": cuts, "monotonic": mono}
@@ -186,6 +176,8 @@ def fit_scorecard(df, feats):
             spec = {"kind": "cat", "keep": bin_categorical(x, yf)}
         idx = apply_bins(x, spec)
         w, iv = woe_table(idx, yf)
+        if any(v['n'] < MIN_BIN_FRAC * len(x) for b, v in w.items() if b != -1):
+            raise ValueError(f'{c}普通箱不足训练全窗5%')
         if iv < IV_FLOOR:
             dropped.append((c, f"IV {iv:.4f} < {IV_FLOOR}")); continue
         specs[c], woes[c], ivs[c] = spec, w, iv
@@ -202,18 +194,11 @@ def to_woe_frame(df, mask, specs, woes):
 
 
 def drop_negative_coefficients(lr, keep, Wf, y, max_rounds=10):
-    """剔除**系数为负**的变量，逐轮重拟合直到全为正。
+    """本对照选择逐轮剔除负系数，使分箱风险方向与分值方向一致。
 
-    **为什么这是标准步骤而不是补丁**：WOE 已经把方向编码进去了
-    （WOE 越高 = 该箱越坏），所以 LR 系数理应**全为正**。
-    出现负系数，说明该变量与其他变量共线、被「借」去充当修正项——
-    它在卡上的分值方向会与自身坏率相反（**坏率最高的箱反而加分**），
-    业务无法解释、监管不会接受。
-
-    银行的做法是**直接剔除**，不是强行约束符号：
-    一个方向讲不通的变量，留在卡上就是一个讲不通的拒绝理由。
+    多变量条件效应可与单变量方向不同；负系数不自动证明共线或泄漏。
+    这是本项目的解释性约束，不是普遍监管规则。
     """
-    from sklearn.linear_model import LogisticRegression
     dropped = []
     for _ in range(max_rounds):
         neg = [c for c, b in zip(keep, lr.coef_[0]) if b < 0]
@@ -223,7 +208,11 @@ def drop_negative_coefficients(lr, keep, Wf, y, max_rounds=10):
         dropped.append((worst, f"系数 {dict(zip(keep, lr.coef_[0]))[worst]:+.4f} < 0，"
                                f"分值方向与坏率相反"))
         keep = [c for c in keep if c != worst]
+        if not keep:
+            raise ValueError('符号筛选剔除了全部变量')
         lr.fit(Wf[keep], y)
+    if not keep or np.any(lr.coef_[0] < 0):
+        raise ValueError('未在限定轮次内得到非负系数评分卡')
     return keep, dropped
 
 
@@ -241,7 +230,7 @@ def drop_correlated(W, ivs, thr=CORR_MAX):
 
 
 def scale(coef, intercept, n_feat):
-    """标准刻度：基准分 600、基准 odds 1:50、PDO 20。
+    """标准刻度：基准分 600、基准好:坏 odds 50:1、PDO 20。
 
     score = offset + Σ(−(β_i·WOE_i + α/n)·factor)
     这是评分卡的标准折算法，产出的分值表可直接给业务与监管审阅。
@@ -252,7 +241,7 @@ def scale(coef, intercept, n_feat):
 
 
 def expected_loss(y, p, amt, c_fp=25.0):
-    """套上本项目的代价敏感阈值，算期望总损失。
+    """套上预设二动作代价阈值，以真标签计算模型化损失。
 
     与 `cost_sensitive.md` 同一口径：逐样本金额感知阈值 t_i = c_FP/(a_i + c_FP)。
     拦截 → 若为好人则赔 c_FP；放行 → 若为欺诈则赔整笔金额。
@@ -278,12 +267,12 @@ def ece(y, p, n_bins=15):
 def main():
     from sklearn.linear_model import LogisticRegression
     from sklearn.metrics import average_precision_score, roc_auc_score
-    from src.model.bank_metrics import ks
+    from src.model.bank_metrics import ks, validate_scores
 
     df = load()
     feats = [c for c in CAND_TAB + CAND_GRAPH
              if c in df.columns and c not in DROP_ID_LIKE]
-    print(f"候选特征 {len(feats)} 个（已剔除 ID 型 {sorted(DROP_ID_LIKE)}）")
+    print(f"候选特征 {len(feats)} 个（已剔除匿名标识候选 {sorted(DROP_ID_LIKE)}）")
 
     specs, woes, ivs, dropped_iv = fit_scorecard(df, feats)
     print(f"  IV 筛选后剩 {len(specs)} 个；剔除 {len(dropped_iv)} 个")
@@ -293,21 +282,26 @@ def main():
     test = df["day"] >= T0
     Wf = to_woe_frame(df, fit, specs, woes)
     keep, dropped_corr = drop_correlated(Wf, ivs)
-    print(f"  高相关剔除 {len(dropped_corr)} 个 → 最终入模 {len(keep)} 个")
+    print(f"  高相关剔除 {len(dropped_corr)} 个 → 符号筛选前剩 {len(keep)} 个")
 
     lr = LogisticRegression(max_iter=1000, C=1.0)
     lr.fit(Wf[keep], df.loc[fit, "isFraud"])
     keep, dropped_sign = drop_negative_coefficients(lr, keep, Wf, df.loc[fit, "isFraud"])
+    print(f"  符号筛选后最终入模 {len(keep)} 个")
     Wt = to_woe_frame(df, test, specs, woes)[keep]
     p_sc = lr.predict_proba(Wt)[:, 1]
 
     y_te = df.loc[test, "isFraud"].to_numpy()
     amt = df.loc[test, "TransactionAmt"].to_numpy()
     gb = pd.read_parquet(SCORES)
+    validate_scores(gb)
+    if set(gb.loc[gb["split"] == "test", "TransactionID"]) != set(df.loc[test, "TransactionID"]):
+        raise ValueError("评分卡与GBDT测试交易集合不同")
     gb = gb[gb["split"] == "test"].set_index("TransactionID").loc[
         df.loc[test, "TransactionID"].to_numpy()]
     p_gb = gb["p_graph"].to_numpy()
-    assert (gb["isFraud"].to_numpy() == y_te).all(), "GBDT 分数与本窗标签未对齐"
+    if not np.array_equal(gb["isFraud"].to_numpy(), y_te):
+        raise ValueError("GBDT分数与本窗标签未对齐")
 
     res = {}
     for name, p in (("评分卡（LR+WOE）", p_sc), ("GBDT（表+图）", p_gb)):
@@ -316,9 +310,10 @@ def main():
                      "roc": roc_auc_score(y_te, p), "ece": ece(y_te, p),
                      "loss": loss, "nblock": nblock}
         print(f"  {name}: KS {res[name]['ks']:.4f}  PR-AUC {res[name]['pr']:.4f}  "
-              f"ECE {res[name]['ece']:.4f}  期望损失 ${loss:,.0f}")
+              f"ECE {res[name]['ece']:.4f}  模型化损失 ${loss:,.0f}")
 
     card = build_card(specs, woes, keep, lr, len(keep))
+    export_artifacts(df, test, specs, woes, keep, lr, p_sc, card[1])
     _write(df, feats, specs, woes, ivs, keep, dropped_iv, dropped_corr,
            dropped_sign, high_iv, res, card, lr, len(fit), int(fit.sum()), int(test.sum()))
     print(f"\n✅ → {REPORT.relative_to(ROOT)}")
@@ -331,7 +326,9 @@ def build_card(specs, woes, keep, lr, n_feat):
     rows = []
     for c, beta in zip(keep, lr.coef_[0]):
         spec = specs[c]
-        for b, v in sorted(woes[c].items()):
+        possible = [-1] + list(range(len(spec.get('cuts', spec.get('keep'))) + 1))
+        for b in possible:
+            v = woes[c].get(b, {'woe': 0.0, 'n': 0, 'bad_rate': float('nan')})
             if spec["kind"] == "num":
                 cuts = spec["cuts"]
                 if b == -1:
@@ -353,100 +350,94 @@ def build_card(specs, woes, keep, lr, n_feat):
     return pd.DataFrame(rows), base
 
 
+def export_artifacts(df, test, specs, woes, keep, lr, p_sc, base):
+    """保存精确分箱/系数和逐笔预测，使评分表可实际回算；不是服务主模型。"""
+    factor, offset = scale(None, None, len(keep))
+    artifact = {'version': 'scorecard-total-fit-min-bin-v2',
+                'base_score': BASE_SCORE, 'pdo': PDO, 'base_good_bad_odds': BASE_ODDS,
+                'factor': factor, 'offset': offset, 'intercept': float(lr.intercept_[0]),
+                'base_points': float(base), 'features': keep,
+                'coefficients': dict(zip(keep, map(float, lr.coef_[0]))),
+                'specs': {c: specs[c] for c in keep},
+                'woe': {c: {str(b): v['woe'] for b, v in woes[c].items()} for c in keep},
+                'unseen_bin_woe': 0.0,
+                'input_sha256': {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+                                 for p in (MERGED, GRAPH, SCORES)}}
+    (SCORES.parent / 'scorecard_model.json').write_text(
+        json.dumps(artifact, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
+    out = df.loc[test, ['TransactionID', 'day', 'isFraud', 'TransactionAmt']].copy()
+    out['p_scorecard'] = p_sc
+    out['score'] = offset - factor * lr.decision_function(
+        to_woe_frame(df, test, specs, woes)[keep])
+    out.to_parquet(SCORES.parent / 'scorecard_test_scores.parquet', index=False)
+
+
 def _write(df, feats, specs, woes, ivs, keep, dropped_iv, dropped_corr,
            dropped_sign, high_iv, res, card_pack, lr, _n, n_fit, n_test):
     card, base = card_pack
-    sc, gb = res["评分卡（LR+WOE）"], res["GBDT（表+图）"]
-    L = [
-        "# 逻辑回归评分卡 vs GBDT：同口径对照\n",
-        "> **为什么做这个对照**：银行到今天仍大量使用评分卡，原因不是技术落后，",
-        "> 是**监管要求模型可解释、可复核、可审计**——每一笔拒绝都要能说出理由，",
-        "> 且理由要能被业务和监管直接读懂。\n",
-        "> 「我可以用 SHAP」是通用答案。本节给的是另一种：**我做了对照，",
-        "> 评分卡在这个数据上损失多少性能、换来什么，所以受监管场景我会怎么选。**\n",
-        "## 口径（与 GBDT 严格一致，否则对照无意义）\n",
-        f"时间切分 `fit < day {T0-VAL_DAYS} / test ≥ {T0}`，**无 embargo**，",
-        "与 `graph_vs_tabular.md` 的 `PR-AUC 0.5645→0.6032`、`bank_metrics.md` 的 KS 同源同窗。",
-        f"训练 **{n_fit:,}** 笔、测试 **{n_test:,}** 笔。\n",
-        "### ⚠️ 最关键的防泄漏点：WOE 是有监督的目标编码\n",
-        "WOE 用**标签信息**给每个箱赋值，所以**分箱与 WOE 只在训练窗拟合、再映射到测试窗**；",
-        "**全量分箱就是泄漏**。\n",
-        "> 这与本项目早已焊死的那条纪律（目标编码只在训练集拟合，高基数类别尤甚）是同一个问题，",
-        "> 也与图特征的两层时间纪律同源：**任何吃标签的变换，都必须受时间切分约束。**\n",
-        "## 1. 四项同口径对照\n",
-        "| 指标 | 评分卡（LR+WOE） | GBDT（表+图） | 差 |", "|---|---|---|---|",
-        f"| **KS** | {sc['ks']:.4f} | **{gb['ks']:.4f}** | {sc['ks']-gb['ks']:+.4f} |",
-        f"| **PR-AUC** | {sc['pr']:.4f} | **{gb['pr']:.4f}** | {sc['pr']-gb['pr']:+.4f} |",
-        f"| ROC-AUC | {sc['roc']:.4f} | {gb['roc']:.4f} | {sc['roc']-gb['roc']:+.4f} |",
-        f"| **ECE**（越小越准） | {sc['ece']:.4f} | {gb['ece']:.4f} | {sc['ece']-gb['ece']:+.4f} |",
-        f"| **期望总损失**（金额感知阈值，c_FP=$25） | ${sc['loss']:,.0f} | ${gb['loss']:,.0f} | "
-        f"{(sc['loss']-gb['loss'])/gb['loss']:+.1%} |",
-        f"| ↳ 拦截笔数 | {sc['nblock']:,} | {gb['nblock']:,} | |",
-        "",
-        "> 期望损失口径与 `cost_sensitive.md` 一致：逐样本金额感知阈值 `t_i = c_FP/(a_i + c_FP)`；",
-        "> 拦截且为好人赔 `c_FP`，放行且为欺诈赔整笔金额。\n",
-        "### 判读\n",
-        f"**GBDT 赢，而差距本身就是结论**：评分卡 KS 低 **{gb['ks']-sc['ks']:.3f}**、",
-        f"期望损失高 **{(sc['loss']-gb['loss'])/gb['loss']:.1%}**。换来的是：\n",
-        "1. **逐笔可解释的拒绝理由** —— 每一笔的分值可拆到「哪个变量、哪个区间、扣了多少分」；",
-        "2. **可被业务与监管直接审阅的分值表**（见下节），不需要额外的解释器；",
-        "3. **更稳定的跨时间表现**（线性模型自由度低，不易追随短期噪声）。\n",
-        "> **在受监管的授信场景我会用评分卡；在实时反欺诈这种不需要向客户逐笔解释、",
-        "> 但对漏损极敏感的场景我会用 GBDT。两者不是替代关系。**\n",
-        "## 2. 入模变量与 IV\n",
-        f"候选 {len(feats)} 个（GBDT gain top-20 表特征 + 进 top-11 的图特征）→ "
-        f"IV 与相关性筛选后**入模 {len(keep)} 个**。\n",
-        "| 变量 | IV | 分箱数 | 单调 |", "|---|---|---|---|"]
-    for c in sorted(keep, key=lambda x: -ivs[x]):
-        mono = specs[c].get("monotonic")
-        L.append(f"| `{c}` | {ivs[c]:.4f} | {len(woes[c])} | "
-                 f"{'✅' if mono else ('—' if specs[c]['kind']=='cat' else '合箱后仍非严格单调')} |")
-    L += ["", "**剔除记录**（照实列出，不只报留下的）：\n"]
-    if dropped_iv:
-        L.append(f"- IV 不足（<{IV_FLOOR}）**{len(dropped_iv)}** 个："
-                 + "、".join(f"`{c}`({r.split()[1]})" for c, r in dropped_iv[:8])
-                 + ("…" if len(dropped_iv) > 8 else ""))
-    if dropped_corr:
-        L.append(f"- 高相关（>{CORR_MAX}）**{len(dropped_corr)}** 个："
-                 + "、".join(f"`{c}`" for c, _ in dropped_corr))
-    if dropped_sign:
-        L.append(f"- **系数为负 {len(dropped_sign)} 个**："
-                 + "、".join(f"`{c}`（{r}）" for c, r in dropped_sign) + "。")
-        L.append("  WOE 已把方向编码进去（WOE 越高 = 该箱越坏），所以系数**理应全为正**。"
-                 "出现负系数说明该变量与他人共线、被「借」去当修正项，"
-                 "**其分值方向会与自身坏率相反——坏率最高的箱反而加分**，"
-                 "业务无法解释、监管不会接受。银行的做法是**直接剔除**，"
-                 "不是强行约束符号：**一个方向讲不通的变量，留在卡上就是一个讲不通的拒绝理由。**")
-    L.append(f"- **ID 型**：`card1` 是**卡号**，不是风险属性。评分卡里放 ID 等于"
-             "给每张卡记忆一个分值，业务上讲不通、监管不会接受。"
-             "**GBDT 能用它（树会切段），评分卡不能——这是两者的真实分歧点，不是实现取舍。**")
-    if high_iv:
-        gcand = [c for c, _ in high_iv if c in CAND_GRAPH]
-        L.append(f"- ⚠️ **IV > {IV_CEIL} 需警惕泄漏**：" +
-                 "、".join(f"`{c}`(IV {v:.2f})" for c, v in high_iv) + "。")
-        L.append("  **这些是 Vesta 的匿名工程特征（V/C 系列），构造方式未公开，"
-                 "因此本项目无法对它们做泄漏审计——高 IV 是一个真实的、我解决不了的疑点，"
-                 "照实记。**")
-        L.append("  > 需要区分清楚：本项目做过的泄漏审计（标签隔离期 21→60 天、"
-                 "图特征增益 +0.039→+0.023 缩但不崩）覆盖的是**自建的图特征**，"
-                 "**不覆盖 V/C 系列**。**不能拿那个审计去替这些特征背书。**")
-    L += ["", "## 3. 评分卡（标准刻度：基准分 600、基准 odds 1:50、PDO 20）\n",
-          f"**基础分 {base:.0f}**，各变量按所落分箱加减。总分越高 → 风险越低。\n",
-          "| 变量 | 分箱 | 样本 | 坏率 | WOE | 分值 |", "|---|---|---|---|---|---|"]
+    sc, gb = res['评分卡（LR+WOE）'], res['GBDT（表+图）']
+    L = ['# 逻辑回归评分卡 vs GBDT：同窗最小对照\n',
+         '分箱、WOE/IV、相关性筛选与LR全部只在fit [0,132)拟合；test [146,182)与主实验逐笔ID、标签对齐。',
+         '训练和早停没有统一21天标签成熟隔离。GBDT沿用主实验缓存，评分卡本次重新拟合。',
+         f'训练 **{n_fit:,}** 笔；测试 **{n_test:,}** 笔。',
+         '本版修正普通箱最小样本的分母：由非缺失样本改为训练全窗；缺失箱单列并披露小样本。',
+         '旧版评分卡数字不可与本版混用。候选是历史GBDT重要性列表固定的22列，未根据此次测试表现再选变量。\n',
+         '## 1. 四项对照\n',
+         '| 指标 | 评分卡 LR+WOE | GBDT 表+图 | 评分卡减GBDT |', '|---|---|---|---|']
+    for key, label in [('ks', 'KS'), ('pr', 'PR-AUC（AP）'), ('roc', 'ROC-AUC'), ('ece', 'ECE（15个等宽概率箱）')]:
+        L.append(f"| {label} | {sc[key]:.4f} | {gb[key]:.4f} | {sc[key]-gb[key]:+.4f} |")
+    L += [f"| 标签实现的模型化总损失 | ${sc['loss']:,.0f} | ${gb['loss']:,.0f} | {(sc['loss']/gb['loss']-1):+.1%} |",
+          f"| 拦截笔数 | {sc['nblock']:,} | {gb['nblock']:,} | {sc['nblock']-gb['nblock']:+,} |", '',
+          '两臂均使用未经另行校准的概率；ECE仅反映本测试窗所选分箱下的平均偏差，不证明所有工作点可靠。',
+          '成本参数c_FP=$25为假设，逐笔阈值 t_i=25/(金额+25)，p>t_i时拦截，等于时放行。',
+          '这是二动作（放行/拦截）对照，不是现有四动作/五动作策略收益。',
+          '表中损失用真标签计算：误拦好样本×25 + 放过欺诈的金额；不是模型预测的期望损失或真实业务损失。',
+          '阈值公式不在测试标签上扫描，但该时段此前已被研究使用，仍是回顾性对照。\n',
+          '## 2. 特征与分箱约束\n',
+          f'候选 {len(feats)} 列，最终保留 {len(keep)} 列。IV<0.02剔除，WOE相关绝对值>0.80保留IV较高者。',
+          '普通数值箱至少占训练全窗5%，按WOE合箱至单调；缺失无自然顺序，独立成箱且豁免5%约束。',
+          '类别变量不强加字母顺序单调，低频类别合为其他；训练未见箱采用中性WOE=0并在评分表列出。',
+          'WOE=ln(坏样本分布/好样本分布)，零计数用0.5平滑；本对照剔除负LR系数以统一分值方向。',
+          '单调与符号约束是本项目的选择，不是所有银行模型一概适用的硬规定。\n',
+          '| 变量 | IV | 已观测箱数 | 普通箱WOE单调 |', '|---|---|---|---|']
+    for c in sorted(keep, key=lambda c: -ivs[c]):
+        mono = '是' if specs[c].get('monotonic') else '不适用（类别）'
+        L.append(f'| `{c}` | {ivs[c]:.4f} | {len(woes[c])} | {mono} |')
+    L += ['', '### 剔除与警示\n',
+          '- `card1`为匿名卡相关字段，无法核实其业务编码含义，本对照不赋予其数值顺序解释；不称其唯一卡号。']
+    for c, reason in dropped_iv + dropped_corr + dropped_sign:
+        L.append(f'- `{c}`：{reason}。')
+    for c, iv in high_iv:
+        L.append(f'- 高IV警示 `{c}`={iv:.4f}；' + ('保留' if c in keep else '已剔除') + '。')
+    L += ['高IV不是泄漏判决。匿名V/C构造不可核实；自建图标签延迟审计不能替匿名列背书。',
+          '这也限制了业务解释：可拆解分值不等于能用自然语言解释匿名变量的真实含义。', '',
+          '### 小样本缺失箱（豁免但不可忽略）\n']
+    sparse = [(c, w[-1]) for c, w in woes.items() if c in keep and -1 in w and w[-1]['n'] < MIN_BIN_FRAC*n_fit]
+    if sparse:
+        for c, v in sparse:
+            L.append(f"- `{c}`：{v['n']:,}笔，占fit {v['n']/n_fit:.4%}，坏样本{v['bad']}笔；其WOE及分值估计不稳定。")
+    else:
+        L.append('本次没有低于5%的已观测缺失箱。')
+    L += ['', '## 3. 可复算评分卡\n',
+          f'基准分{BASE_SCORE}，PDO={PDO}，基准好:坏odds={BASE_ODDS:g}:1。',
+          'factor=PDO/ln(2)，offset=600−factor×ln(50)，score=offset−factor×logit(p)。',
+          f'基础分 **{base:.6f}**；各箱贡献为 −factor×系数×WOE。总分越高，模型预测风险越低。',
+          '当p=1/51时得600分；好:坏odds翻倍加20分。',
+          '精确切点、WOE、系数与输入哈希在 `data/processed/scorecard_model.json`；',
+          '逐笔概率与未舍入总分在 `data/processed/scorecard_test_scores.parquet`。下表为显示而舍入，实际计算使用精确产物。\n',
+          '| 变量 | 分箱 | 样本 | 坏率 | WOE | 分值 |', '|---|---|---|---|---|---|']
     for _, r in card.iterrows():
-        L.append(f"| `{r['变量']}` | {r['分箱']} | {int(r['样本']):,} | {r['坏率']:.2%} | "
-                 f"{r['WOE']:+.4f} | **{r['分值']:+.1f}** |")
-    L += ["",
-          "> 这张表是本节最值钱的交付物：**一眼可见「哪个变量、哪个区间、给多少分」**，",
-          "> 业务和监管可以直接读，不需要任何解释器。\n",
-          "## 口径与限制\n",
-          "- **未调参**：LR 用默认 `C=1.0`，不做网格搜索——本节的目的是对照，不是把 LR 推到极限。",
-          "- 分箱为等频起步 + **合箱至 WOE 单调**；每箱样本占比下限 "
-          f"{MIN_BIN_FRAC:.0%}；缺失**单独成箱**，不填均值（沿用本项目「缺失当一种取值」的纪律）。",
-          "- 评分卡在 `fit` 窗拟合，**不使用 val 窗**（评分卡不需要早停）；GBDT 用了 val 做早停。",
-          "  这对 GBDT 略有利，属于两类模型的固有差异，**照实记，不做补偿**。\n"]
-    write_report(REPORT, "\n".join(L))
+        rate = f"{r['坏率']:.2%}" if r['样本'] else '未见：中性回退'
+        L.append(f"| `{r['变量']}` | {r['分箱']} | {int(r['样本']):,} | {rate} | {r['WOE']:+.4f} | {r['分值']:+.4f} |")
+    L += ['', '## 4. 结论及证据边界\n',
+          f"本窗评分卡KS比GBDT低 {gb['ks']-sc['ks']:.4f}，模型化损失高 {(sc['loss']/gb['loss']-1):.1%}。",
+          '换来的是固定加法结构、精确可拆解的分值表；没有实验支持“评分卡跨时间更稳定”。',
+          '未调参（LR C=1、max_iter=1000），没有强评分卡基线或高IV变量消融，不代表评分卡类模型的性能上限。',
+          'LR不使用验证窗；GBDT用同一fit窗训练并用val选早停轮次，两臂模型选择预算并不完全相同。',
+          '本实验支持保留GBDT作为该反欺诈任务的主模型。授信模型选择还需其自身数据、解释性审查与验证，不能由这份交易实验决定。',
+          f"\nGBDT缓存SHA-256：`{hashlib.sha256(SCORES.read_bytes()).hexdigest()}`。"]
+    write_report(REPORT, '\n'.join(L))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -2,7 +2,7 @@
 # 用法：source .venv/bin/activate && pip install -r requirements.txt
 #
 # 分阶段装，避免一次性引入未用到的重依赖。
-# 当前阶段（搭骨架 + 数据加载 + EDA）只需下面这些：
+# 当前离线分析、测试与服务依赖如下；实时LLM与浏览器截图依赖另装。
 
 # 数据处理
 pandas
@@ -16,14 +16,20 @@ seaborn
 
 # 基础建模工具（特征处理、评估指标、校准曲线）——EDA 也会用到
 scikit-learn
+scipy             # 统计检验直接依赖
+tabulate          # DataFrame.to_markdown 报告生成依赖
 
-# 风险评分主模型（arm64 Mac 的 wheel 自带 libomp，无需 brew install libomp）
+# 风险评分主模型；OpenMP 运行时需求取决于平台及发行包
 lightgbm
 
-# ── 以下留到对应阶段再解除注释安装 ──
-# fastapi         # serving 层：打分端点 + 调查端点
-# uvicorn         # FastAPI 运行器
-# 详细版本锁定（pip freeze）留到依赖稳定后再做。
-fastapi
+fastapi>=0.100
+pydantic>=2,<3
 uvicorn
 duckdb
+httpx              # FastAPI TestClient 依赖它；跑单元测试必需
+
+# ── 可选依赖：只有特定用途才需要，缺失时不影响单元测试与离线分析 ──
+# anthropic        # 仅「实时调用 LLM 做调查」需要。pipeline.py 已做惰性导入，
+#                  # 缺失时纯逻辑路径照常工作，真要调用才报明确错误。
+# playwright       # 仅「重新生成演示页截图/动图」需要（本地浏览器引擎，约 77MB）。
+#                  # 装完还需 `playwright install webkit`。

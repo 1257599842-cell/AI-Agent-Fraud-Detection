@@ -89,7 +89,8 @@ def main():
             def _pool_of(name):
                 if name in pools:
                     return pools[name]
-                for q in REPORTS.rglob(pathlib.Path(name).name):
+                q = REPORTS / name
+                if q.is_file() and q.resolve().is_relative_to(REPORTS.resolve()):
                     return _vals(q.read_text(encoding="utf-8"))
                 return None
             got = {n: _pool_of(n) for n in named}

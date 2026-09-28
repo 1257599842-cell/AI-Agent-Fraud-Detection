@@ -1,7 +1,7 @@
 """乐观 gap 归因 —— 等量旧窗对照，把 embargo 的损失拆成「数据量」+「新鲜度」两项。
 
 问题：baseline 里 embargo（砍最新 21 天）让 PR-AUC 掉 0.032，但这混了两件事：
-  (1) 训练样本少了 6.4 万（数据量损失）；(2) 最新信息被砍（新鲜度损失）。
+  (1) 训练样本少了 6.4 万（砍旧差异）；(2) 最新信息被砍（砍新与砍旧差异）。
 评审者必问"这 gap 到底哪来的"。本脚本用三组对照把它拆开（test/val/seed/超参全对齐）：
 
   full      ：fit = day<132，         val=[132,146)        —— 全量
@@ -93,15 +93,15 @@ def main() -> None:
     ctrl = train_eval(X, y, ctrl_fit, ctrl_val, test_mask, "ctrl_old")
 
     def decomp(metric: str):
-        cost_data = ctrl[metric] - full[metric]      # 纯数据量代价
-        cost_total = emb[metric] - full[metric]      # 数据量 + 新鲜度
-        net_fresh = emb[metric] - ctrl[metric]       # embargo 净效应（新鲜度）
+        cost_data = ctrl[metric] - full[metric]      # 砍旧描述性差异
+        cost_total = emb[metric] - full[metric]      # 训练/验证窗口联合变化
+        net_fresh = emb[metric] - ctrl[metric]       # 砍新与砍旧之差（含验证窗混淆）
         return cost_data, cost_total, net_fresh
 
     print("\n=== 乐观 gap 分解 ===")
     for metric in ("pr_auc", "roc_auc"):
         cd, ct, nf = decomp(metric)
-        print(f"  {metric:8s}: 总gap(砍新−全量)={ct:+.4f} = 数据量({cd:+.4f}) + 新鲜度净效应({nf:+.4f})")
+        print(f"  {metric:8s}: 总gap(砍新−全量)={ct:+.4f} = 数据量({cd:+.4f}) + 联合窗口差异({nf:+.4f})")
 
     _write_md(full, emb, ctrl, n_drop, decomp)
     print(f"\n✅ 写出 {OUT_MD.relative_to(PROJECT_ROOT)}")
@@ -112,7 +112,7 @@ def _write_md(full, emb, ctrl, n_drop, decomp) -> None:
     roc_cd, roc_ct, roc_nf = decomp("roc_auc")
     L = [
         "# 乐观 gap 归因 —— 等量旧窗对照（硬点② 论据）\n",
-        f"把 baseline 的 embargo gap 拆成「数据量损失」+「新鲜度损失」。三组 test/val/seed/超参对齐，丢弃样本数 N={n_drop:,}。\n",
+        f"把 baseline 的 embargo gap 拆成「砍旧差异」+「砍新与砍旧差异」。三组 test/seed/超参对齐；full/ctrl 的 val=[132,146)，embargo 的 val=[111,125)，验证窗未对齐，丢弃样本数 N={n_drop:,}。\n",
         "## 三组结果（test 固定 [146,181]）\n",
         "| 组 | fit 描述 | n_fit | PR-AUC | ROC-AUC | recall@1% |",
         "|----|---------|-------|--------|---------|-----------|",
@@ -121,14 +121,14 @@ def _write_md(full, emb, ctrl, n_drop, decomp) -> None:
         f"| embargo | day<111（砍最新21天） | {emb['n_fit']:,} | {emb['pr_auc']:.4f} | {emb['roc_auc']:.4f} | {emb['recall@1.0%']:.3f} |",
         "",
         "## 分解（负=变差）\n",
-        "| 指标 | 总 gap（砍新−全量） | = 数据量损失（砍旧−全量） | + 新鲜度净效应（砍新−砍旧） |",
+        "| 指标 | 总 gap（砍新−全量） | = 砍旧差异（砍旧−全量） | + 联合窗口差异（砍新−砍旧） |",
         "|------|------|------|------|",
         f"| PR-AUC | {pr_ct:+.4f} | {pr_cd:+.4f} | {pr_nf:+.4f} |",
         f"| ROC-AUC | {roc_ct:+.4f} | {roc_cd:+.4f} | {roc_nf:+.4f} |",
         "",
         "## 一句话论据（进对外文档 ②）",
-        f"- embargo 的总 gap（PR-AUC {pr_ct:+.4f}）拆开后，**纯数据量只占 {pr_cd:+.4f}，信息新鲜度净损失 {pr_nf:+.4f}**——",
-        "  所以这个 gap 主要是「拿不到最新标签」的真实代价，不是「训练数据变少」的假象。白板上能拆给评审者看。",
+        f"- embargo 的总 gap（PR-AUC {pr_ct:+.4f}）拆开后，**砍旧差异为 {pr_cd:+.4f}，砍新减砍旧为 {pr_nf:+.4f}**——",
+        "  该分解只是代数恒等式：训练样本的年龄、验证窗与早停轮数均有变化，不能识别纯数据量或纯新鲜度因果效应。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
     write_report(OUT_MD, "\n".join(L))

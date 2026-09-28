@@ -138,7 +138,10 @@ def run_round(tag, holdout=False, limit=None):
         # 生产里降级是正确行为；测量里降级是**缺测**，必须留空等重跑，不能拿兜底顶数。
         if r.get("mode") == "degraded":
             (out / f"_failed_{txn}.json").write_text(
-                json.dumps({"txn_id": txn, "reason": r.get("degraded_reason")},
+                json.dumps({"txn_id": txn, "reason": r.get("degraded_reason"),
+                            "cost_usd": r.get("cost_usd"), "usage_complete": r.get("usage_complete", True),
+                            "tokens": r.get("tokens"), "tool_calls": r.get("tool_calls"),
+                            "pipeline_version": r.get("pipeline_version")},
                            ensure_ascii=False), encoding="utf-8")
             return txn, r.get("cost_usd", 0), -1     # -1 = 缺测标记
         (out / f"txn_{txn}.json").write_text(json.dumps(r, ensure_ascii=False, indent=1),
@@ -223,7 +226,7 @@ def hard_metrics(result):
     """单份调查结果的硬层指标（纯代码，无 LLM）。"""
     rep, facts = result.get("report"), {f["fact_id"]: f for f in result.get("facts", [])}
     out = {"txn_id": result["txn_id"],
-           "structure_ok": not result.get("schema_violations"),
+           "structure_ok": isinstance(rep, dict) and bool(rep) and not result.get("schema_violations"),
            "fabricated_ids": 0, "time_audit_ok": not result.get("time_audit_violations"),
            "n_findings": 0, "findings_with_unmatched_nums": 0,
            "no_label_evidence_but_confident": False,
@@ -260,8 +263,10 @@ def _load_run(tag):
 
 
 def score_round(tag):
-    results = _load_run(tag)
-    es = pd.read_parquet(EVAL_SET).set_index("TransactionID")
+    from src.eval.run_integrity import load_complete_run
+    es = pd.read_parquet(EVAL_SET)
+    results = load_complete_run(RUNS_DIR / tag, es)
+    es = es.set_index("TransactionID")
     rows = [hard_metrics(r) for r in results]
     df = pd.DataFrame(rows).set_index("txn_id")
     df = df.join(es[["stratum", "split", "ht_weight", "isFraud", "TransactionAmt",

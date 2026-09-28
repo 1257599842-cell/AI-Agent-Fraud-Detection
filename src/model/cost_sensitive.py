@@ -6,7 +6,7 @@
   → 只有成本比例重要；因 c_FN 随金额变，逐样本最优阈值 t_i = c_FP/(a_i + c_FP)。
 
 产出三件事：
-  1. 期望成本曲线：扫全局阈值 t，cost(t)=c_FP·(误拦好人) + Σ金额(漏放欺诈)，找 t*=argmin；对比 0.5。
+  1. 真标签代入成本的事后扫描曲线：扫全局阈值 t，cost(t)=c_FP·(误拦好人) + Σ金额(漏放欺诈)，找 t*=argmin；对比 0.5。
   2. 逐样本代价敏感策略（block 当 p_i > c_FP/(a_i+c_FP)）的成本（金额感知，理论更优）。
   3. 头条 delta：有效拦截率 recall 从 0.5 阈值 → 代价敏感 t*。
 
@@ -116,7 +116,7 @@ def _plot(p, yte, amt, c_fp):
     plt.scatter([T_GRID[i_star]], [costs[i_star] / 1000], color="#55A868", zorder=5)
     plt.xlabel("Probability threshold t")
     plt.ylabel("Total cost on test ($k)")
-    plt.title(f"Expected-cost curve (c_FP=${c_fp}, c_FN=amount)")
+    plt.title(f"Retrospective labeled-cost curve (c_FP=${c_fp}, c_FN=amount)")
     plt.legend()
     plt.tight_layout()
     FIG.parent.mkdir(parents=True, exist_ok=True)
@@ -130,7 +130,8 @@ def _write_md(rows, n_fraud, fraud_dollars, n_test):
         "# 代价敏感阈值（硬点①）—— 朴素 0.5 → 代价敏感 t*\n",
         "**成本假设**：漏放成本 = 交易金额（真损失）；误拦成本 = 固定 c_FP（客服/流失）。只有比例重要，故做 c_FP 敏感性。\n",
         f"test：{n_test:,} 笔，欺诈 {n_fraud:,} 笔，欺诈暴露总额 ${fraud_dollars:,.0f}。\n",
-        "## c_FP 敏感性（全局阈值 t* vs 朴素 0.5）\n",
+        "**评估口径：下表 t* 是在 test 真标签上扫描得到的事后最优值；同窗报告收益有选参乐观偏差，不能当作独立测试收益。预选阈值的回顾性对照见 label_availability_audit.md。**\n",
+        "## c_FP 敏感性（事后全局阈值 t* vs 朴素 0.5）\n",
         "| c_FP | t* | cost@0.5 | cost@t* | 省 | recall@0.5 | recall@t* | precision@t* | t* 拦截量占比 |",
         "|------|-----|----------|---------|----|-----------|-----------|--------------|------------|",
     ]
@@ -141,15 +142,15 @@ def _write_md(rows, n_fraud, fraud_dollars, n_test):
             f"{r['prec_star']:.3f} | {r['vol_star']:.2%} |")
     L += [
         "",
-        "## 头条（锚点 c_FP=$%d）" % C_FP_ANCHOR,
+        "## 事后描述（锚点 c_FP=$%d）" % C_FP_ANCHOR,
         f"- **有效拦截率（recall）：朴素 0.5 阈值 {a['recall_half']:.3f} → 代价敏感 t*={a['t_star']:.3f} 时 {a['recall_star']:.3f}**（README 的 X→Y）。",
         f"- 总成本：${a['cost_half']:,.0f} → ${a['cost_star']:,.0f}（**省 {a['save_vs_half']:.1%}**）。",
         f"- 代价敏感 t* 拦截 {a['vol_star']:.2%} 的交易量，precision {a['prec_star']:.3f}。",
-        f"- 逐样本金额感知策略（block 当 p>c_FP/(a+c_FP)）成本 ${a['cost_inst']:,.0f}，理论上 ≤ 最优全局阈值，因为它对大额更敏感。",
+        f"- 逐样本金额感知策略（block 当 p>c_FP/(a+c_FP)）成本 ${a['cost_inst']:,.0f}，；仅在概率与成本模型正确时最小化条件期望，不保证有限样本实报成本必然更低。",
         "",
         "## 讲法（硬点①）",
-        "- 0.5 不是「抓不到」（recall@0.5=0.338），而是**远离成本最优**——它漏掉约 2/3 的欺诈金额，因为它无视「漏一笔的代价=整笔金额」这个不对称。",
-        "- 把 FP/FN 成本写进期望成本，最优阈值远低于 0.5（c_FP=$25 时 t*≈0.078）；金额感知版进一步对大额降阈值，成本还更低。",
+        "- 0.5 不是「抓不到」（recall@0.5=0.338），而是**远离成本最优**——它漏掉约 2/3 的欺诈笔数（不能拿 recall 推出金额比例），因为它无视「漏一笔的代价=整笔金额」这个不对称。",
+        "- 把 FP/FN 成本写进期望成本，本次事后扫描的阈值低于 0.5（c_FP=$25 时 t*≈0.078）；金额感知版进一步对大额降阈值，成本还更低。",
         "- 注意容量约束：t* 拦截量若超过复核员日容量，则在 t* 与容量之间取约束最优（接 precision@容量 曲线）。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)

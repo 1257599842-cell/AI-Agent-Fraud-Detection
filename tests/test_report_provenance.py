@@ -95,7 +95,7 @@ class TestReportProvenance(unittest.TestCase):
         from src.eval.report_manifest import GENERATORS
         reports_only = {n for n, r in self.man.items()
                         if r.get("tier") not in ("archive", "frozen")}
-        self.assertEqual(reports_only, set(GENERATORS) & reports_only)
+        self.assertEqual(reports_only, set(GENERATORS))
         missing = [n for n in GENERATORS if not (REPORTS / n).exists()]
         self.assertEqual(missing, [], f"清单登记了但文件不存在：{missing}")
 
@@ -175,8 +175,9 @@ class TestFrozenArtifacts(unittest.TestCase):
                 self.assertGreater(len(why), 25, "理由太短，多半只写了『别动』")
 
     def test_frozen_files_still_match_recorded_digest(self):
-        from src.report_io import frozen_digests
-        for rel, rec in frozen_digests().items():
+        for rel, rec in self.man.items():
+            if rec.get("tier") != "frozen":
+                continue
             with self.subTest(artifact=rel):
                 self.assertEqual(sha_full(ROOT / rel), rec["sha256"])
 
@@ -221,9 +222,7 @@ class TestModelCardIsNotStale(unittest.TestCase):
     其余章节都是往里加——所以只有它会系统性地漏。
     项目负责人为此定了「本节随能力落地逐条重划」的规矩；本测试是那条规矩的执行端。
 
-    判据：文档日期不得早于它所引用的任何一份报告的**生成时间**。
-    报告是机器写的、动过就会更新 mtime；文档是人写的、改不改全凭记得。
-    **拿会自动更新的那个，去卡不会自动更新的那个。**
+    判据：复核过的模型卡和引用源内容摘要必须相同；文件mtime不代表实验发生时间。
     """
 
     HEADER_DATE = re.compile(r"^\|\s*文档日期\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|", re.M)
@@ -239,25 +238,15 @@ class TestModelCardIsNotStale(unittest.TestCase):
         self.assertIsNotNone(self.HEADER_DATE.search(self.text),
                              "表头缺「文档日期」——没有它就无从判断是否过期")
 
-    def test_document_date_is_not_older_than_its_sources(self):
-        """引用的报告比文档新 → 文档在讲一份已经变过的数据。"""
-        import datetime as dt
-        doc_day = dt.date.fromisoformat(self.HEADER_DATE.search(self.text).group(1))
-        newest, who = None, None
-        for name in sorted(set(re.findall(r"`?([a-z0-9_]+\.md)`?", self.text))):
-            p = REPORTS / name
-            if not p.exists():
-                continue
-            d = dt.date.fromtimestamp(p.stat().st_mtime)
-            if newest is None or d > newest:
-                newest, who = d, name
-        if newest is None:
-            self.skipTest("MODEL_CARD 未引用任何 reports/ 文件")
-        self.assertGreaterEqual(
-            doc_day, newest,
-            f"\n文档日期 {doc_day} 早于它引用的报告 {who}（{newest}）。"
-            f"\n报告重跑过而文档没跟上 —— 要么复核后更新表头日期，"
-            f"要么说明为何本次重跑不影响结论。")
+    def test_reviewed_source_content_has_not_changed(self):
+        """比对复核时的内容；mtime 在 clone/复制后会变，不能充当实验日期。"""
+        record = json.loads((ROOT / "MODEL_CARD_SOURCES.json").read_text())
+        self.assertEqual(record["model_card_sha256"], sha_full(self.card))
+        self.assertTrue(record["sources"])
+        for rel, digest in record["sources"].items():
+            with self.subTest(source=rel):
+                self.assertEqual(sha_full(ROOT / rel), digest,
+                                 "模型卡引用源已变化，需要重新复核并记录内容摘要")
 
     def test_version_field_covers_every_layer_that_has_one(self):
         """有版本号的层必须都出现在表头 —— 少一层就是「往低了说自己」。"""
@@ -267,6 +256,7 @@ class TestModelCardIsNotStale(unittest.TestCase):
         # §12 变更记录里出现过的层，表头都该有
         layers = set(re.findall(r"^\|\s*(?:Agent|Serving|ML 核心)\s*\*?\*?([\w.-]+)",
                                 self.text, re.M))
-        for tag in ("v4-citable-context", "v1-online-scoring"):
+        from src.agent.pipeline import PROMPT_VERSION, PIPELINE_VERSION
+        for tag in (PROMPT_VERSION, PIPELINE_VERSION, "v1-online-scoring"):
             if tag in self.text:
                 self.assertIn(tag, ver, f"§12 记了 {tag}，表头版本却没有它")

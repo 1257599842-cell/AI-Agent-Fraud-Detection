@@ -167,10 +167,11 @@ footer{padding:40px 0 64px;color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
+<div class="wrap"><p class="note">审查口径：本页为五动作离线沙盘，当前评分API与Agent为四动作。案例和用量来自历史版本，不代表v5管道实测；原始案例中的“人工洗清”等说法无真实处理记录支持。</p></div>
 
 <div class="bar"><div class="wrap">
   <span class="badge"><span class="dot"></span><b>离线演示 / 非生产系统</b></span>
-  <span class="badge">预置案例 · 不调用实时 API</span>
+  <span class="badge">历史预置案例 · 不调用实时 API</span>
   <span class="spacer"></span>
   <button class="ghost" id="theme">切换深浅</button>
 </div></div>
@@ -290,10 +291,10 @@ function md(s){return esc(s).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
 /* ① 首屏 chips */
 var G=DEMO.globals;
 document.getElementById('chips').innerHTML=[
-  ['代价最优阈值 vs 0.5','省 26.1%','有效拦截率 0.338 → 0.623'],
-  ['Agent 报告编造数字','0','2,672 个数字全量两级对账'],
+  ['评估窗事后成本扫描 vs 0.5','−26.1%','同窗选阈值；非独立测试或业务收益'],
+  ['历史数字匹配未发现无来源项','0','2,672 个数字；不保证语义推理正确'],
   ['⑧ 闸门放行（不进 Agent）',(G.gate_pass_rate_four_tier*100).toFixed(1)+'%',
-   '五档下自动化率 '+(G.auto_rate_five_tier*100).toFixed(1)+'%']
+   '离线五档方案自动化率 '+(G.auto_rate_five_tier*100).toFixed(1)+'%']
 ].map(function(c){return '<div class="chip"><div class="k">'+c[0]+
   '</div><div class="v num">'+c[1]+'</div><div class="n">'+c[2]+'</div></div>'}).join('');
 

@@ -42,15 +42,15 @@ GANG_CUTS = [0.3, 0.4, 0.5, 0.6, 0.7]
 
 def load(tag):
     rows = []
-    for f in sorted((RUNS_DIR / tag).glob("txn_*.json")):
-        r = json.loads(f.read_text())
+    from src.eval.run_integrity import load_complete_run
+    for r in load_complete_run(RUNS_DIR / tag, pd.read_parquet(EVAL_SET)):
         rep = r.get("report") or {}
         ga = rep.get("gang_association")
         rows.append({"TransactionID": r["txn_id"], "agent": rep.get("disposition"),
                      "ga_present": ga is not None,
                      "susp": (ga or {}).get("suspected"),
                      "evidence_insufficient": bool(rep.get("evidence_insufficient"))})
-    return pd.DataFrame(rows).merge(pd.read_parquet(EVAL_SET), on="TransactionID")
+    return pd.DataFrame(rows).merge(pd.read_parquet(EVAL_SET), on="TransactionID", validate="one_to_one")
 
 
 def _wilson(k, n, z=1.96):

@@ -29,7 +29,7 @@ except ModuleNotFoundError:
 
 from src.agent.backends import DataBackedTools, Resources
 from src.agent.schema import report_from_json, validate_report
-from src.agent.tools import MAX_TOOL_CALLS, FactRegistry, audit_time_boundary
+from src.agent.tools import MAX_TOOL_CALLS, FactRegistry, ToolResult, audit_time_boundary
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SAMPLES_DIR = PROJECT_ROOT / "reports" / "samples"
@@ -38,6 +38,12 @@ MD_OUT = PROJECT_ROOT / "reports" / "agent_pipeline.md"
 MODEL = "claude-opus-4-8"
 PRICE_IN, PRICE_OUT = 5.0, 25.0        # $ / MTok
 MAX_TOKENS = 8000
+PIPELINE_VERSION = "v5-validated-output"
+
+
+class AgentProtocolError(RuntimeError):
+    """模型未遵守工具协议；停止循环并走可审计降级。"""
+
 
 # prompt 版本号：随报告落盘，保证「哪一版 prompt 产出了这批数字」可追溯。
 # v1  = round1 口径（reports/eval_runs/r1/*.json 全部是 v1）
@@ -50,7 +56,7 @@ MAX_TOKENS = 8000
 #      并按"基础设施轮"定位——**本轮不出任何指标结论**，任何跨轮比较须为此校正。
 #      (1) policy_param 上台面：成本假设成为可引用事实（POLICY_000..005）；
 #      (2) null_result：工具空返回也登记事实，让「查了但没查到」可被引用。
-PROMPT_VERSION = "v4-citable-context"
+PROMPT_VERSION = "v5-label-grounding"  # 撤回无依据的人工洗清过程叙事
 
 SYSTEM_PROMPT = """你是交易反欺诈调查助手。你的任务：用工具收集证据，独立评估一笔可疑交易，产出结构化调查报告。
 
@@ -65,7 +71,7 @@ SYSTEM_PROMPT = """你是交易反欺诈调查助手。你的任务：用工具�
    - 「金额小，所以损失有限」——这是由金额推出的**因果判断**，最高 supported ✗ 不是 confirmed
    - 「与高危规则画像一致」——这是**对比判断**，需要规则/案例侧的证据一起引，最高 supported
    判断标准：把 finding 拆成「查到的值」和「由值得出的话」，**后者决定强度上限**。
-5. 相似案例中既有确认欺诈也有被人工洗清的高分假阳——"长得像欺诈"不等于欺诈，注意对照两类。
+5. 相似案例中既有标签为1的欺诈也有标签为0的高分假阳；数据不含人工调查或洗清过程——"长得像欺诈"不等于欺诈，注意对照两类。
 6. 工具调用上限 8 次，够用即收。
 9. **可引用的两类特殊证据**（它们和工具返回的事实一样，可以写进 evidence_ids）：
    - `POLICY_000`~`POLICY_005`：本系统的**决策成本假设**（误拦 $25 / 复核 $5 / 上报 $40 /
@@ -112,7 +118,7 @@ TOOL_DEFS = [
                       "properties": {"entity": {"type": "string", "description": "形如 'field=value'"}},
                       "required": ["entity"], "additionalProperties": False}},
     {"name": "retrieve_rules_and_cases",
-     "description": "检索本笔命中的风控规则（真实数据准入，带欺诈率/lift）+ top-4 结构化相似历史案例（含确认欺诈与被洗清的高分假阳）。",
+     "description": "检索本笔命中的风控规则（真实数据准入，带欺诈率/lift）+ top-4 结构化相似历史案例（含标签为1的欺诈与标签为0的高分假阳；无人工洗清过程记录）。",
      "input_schema": {"type": "object", "properties": {}, "additionalProperties": False}},
 ]
 
@@ -149,18 +155,26 @@ def enforce_evidence_floor(report, registry):
     一个悄悄改写模型输出的管道会是第四次。
     """
     overrides = []
-    if report is None:
+    if not isinstance(report, dict):
         return report, overrides
 
-    if not any(f.label_based for f in registry.all_facts()):
+    if not any(f.label_based and f.type != "null_result"
+               and (f.type != "gang_score" or (isinstance(f.value, (int, float)) and f.value > 0))
+               for f in registry.all_facts()):
         if not report.get("evidence_insufficient"):
             report["evidence_insufficient"] = True
             overrides.append("R1: 账本零条标签型事实 → 强制 evidence_insufficient=true"
                              "（模型原报 false）")
 
     known = registry.known_ids()
-    for i, kf in enumerate(report.get("key_findings", [])):
-        cited = [e for e in kf.get("evidence_ids", []) if e in known]
+    findings = report.get("key_findings", [])
+    if not isinstance(findings, list):
+        return report, overrides
+    for i, kf in enumerate(findings):
+        if not isinstance(kf, dict):
+            continue  # 由结构校验器报告，不能在修复层先崩溃
+        ids = kf.get("evidence_ids", [])
+        cited = [e for e in ids if isinstance(e, str) and e in known] if isinstance(ids, list) else []
         if not cited and kf.get("assertion_strength") != "tentative":
             overrides.append(f"R2: key_findings[{i}] 未引用任何有效 fact → "
                              f"assertion_strength {kf.get('assertion_strength')} → tentative")
@@ -168,7 +182,7 @@ def enforce_evidence_floor(report, registry):
     return report, overrides
 
 
-def investigate(res, txn_id, client, p_override=None):
+def investigate(res, txn_id, client, p_override=None, usage_trace=None):
     """happy path：LLM 调查一笔交易。返回结果 dict（报告 + 验收 + 成本）。
 
     p_override：5.1 翻转实验专用——**只改喂进 prompt 的那个分数，不动任何工具返回的证据**。
@@ -188,8 +202,13 @@ def investigate(res, txn_id, client, p_override=None):
                  f"请调查交易 {txn_id}。上游 GBDT 模型风险分 p={p:.4f}（待核实线索，请独立核实）。"
                  f"完成调查后输出 JSON 报告。"}]
     usage = {"input": 0, "output": 0, "api_calls": 0}
+    budget_rejections = 0
+    trace = usage_trace if usage_trace is not None else {}
+    trace.update(tokens=usage, tool_calls=0, usage_complete=True)
     while True:
         force_end = reg.tool_calls >= MAX_TOOL_CALLS
+        trace["usage_complete"] = False  # 请求失败时，其未返回用量不可假装为零
+        trace["tool_calls"] = reg.tool_calls
         resp = client.messages.create(
             model=MODEL, max_tokens=MAX_TOKENS, system=SYSTEM_PROMPT,
             tools=TOOL_DEFS, messages=messages,
@@ -197,40 +216,62 @@ def investigate(res, txn_id, client, p_override=None):
         usage["input"] += resp.usage.input_tokens
         usage["output"] += resp.usage.output_tokens
         usage["api_calls"] += 1
+        trace["usage_complete"] = True
         if resp.stop_reason == "refusal":
-            raise anthropic.APIConnectionError(request=None)  # 交给兜底
+            raise AgentProtocolError("refusal")
         if resp.stop_reason != "tool_use":
             break
+        if force_end:
+            raise AgentProtocolError("工具预算耗尽后仍请求调用")
         tool_blocks = [b for b in resp.content if b.type == "tool_use"]
+        if not tool_blocks:
+            raise AgentProtocolError("tool_use 响应没有工具块")
         messages.append({"role": "assistant", "content": resp.content})
         results = []
         for tb in tool_blocks:
-            reg.tool_calls += 1
-            tr = handlers[tb.name](tb.input or {})
+            # 在每个工具执行前检查，而不只是下一轮开始时检查。
+            if reg.tool_calls >= MAX_TOOL_CALLS:
+                budget_rejections += 1
+                results.append({"type": "tool_result", "tool_use_id": tb.id,
+                                "is_error": True, "content": "工具预算耗尽，请用已有证据收尾。"})
+                continue
+            reg.tool_calls += 1  # 包含非法工具请求，防止其无限重试
+            valid_input = isinstance(tb.input, dict) and (
+                set(tb.input) == {"entity"} and isinstance(tb.input.get("entity"), str)
+                if tb.name == "query_historical_stats" else not tb.input)
+            if tb.name not in handlers or not valid_input:
+                results.append({"type": "tool_result", "tool_use_id": tb.id,
+                                "is_error": True, "content": "未知工具或参数不符合工具schema。"})
+                continue
+            tr = handlers[tb.name](tb.input)
             results.append({"type": "tool_result", "tool_use_id": tb.id,
                             "content": json.dumps(tr.to_dict(), ensure_ascii=False)})
         messages.append({"role": "user", "content": results})
 
-    text = next((b.text for b in resp.content if b.type == "text"), "")
+    text = "\n".join(b.text for b in resp.content if b.type == "text")
     report, errs = report_from_json(text)
     # 证据下限在**校验之前**执行：R2 会把无引用 finding 降到 tentative，
     # 若放在校验之后，报告落盘的强度与校验时看到的就不是同一份。
     report, overrides = enforce_evidence_floor(report, reg)
     violations = errs if errs else validate_report(report, reg.known_ids())
+    if isinstance(report, dict) and report.get("txn_id") != txn_id:
+        violations.append("报告 txn_id 与请求不一致")
     audit = audit_time_boundary(reg.all_facts(), backend.as_of)
     cost = usage["input"] / 1e6 * PRICE_IN + usage["output"] / 1e6 * PRICE_OUT
     return {"txn_id": txn_id, "mode": "llm", "model": MODEL, "p": p,
             "p_true": p_true, "p_injected": p_override is not None,
             "prompt_version": PROMPT_VERSION,
+            "pipeline_version": PIPELINE_VERSION,
+            "budget_rejections": budget_rejections,
             "pipeline_overrides": overrides,      # 管道改写了什么，逐条留痕，绝不静默
-            "report": report, "raw_text": text if report is None else None,
+            "report": report, "raw_text": text if report is None or violations else None,
             "schema_violations": violations, "time_audit_violations": audit,
             "tool_calls": reg.tool_calls, "api_calls": usage["api_calls"],
             "tokens": usage, "cost_usd": round(cost, 4),
             "facts": [f.to_dict() | {"label_based": f.label_based} for f in reg.all_facts()]}
 
 
-def degraded_report(res, txn_id, reason):
+def degraded_report(res, txn_id, reason, max_evidence_calls=MAX_TOOL_CALLS):
     """⑨ 兜底：GBDT 出分 + 规则模板报告。全程无 LLM，结构与正常报告同 schema。"""
     txn_id = int(txn_id)
     reg = FactRegistry()
@@ -241,12 +282,16 @@ def degraded_report(res, txn_id, reason):
     score_fact = reg.new_fact("STAT", type="model_score", entity=f"txn={txn_id}",
                               value=round(p, 4), window=(backend.as_of, backend.as_of),
                               label_based=False, source="degraded_pipeline")
-    rule_result = backend.retrieve_rules_and_cases()
-    rule_facts = [f for f in rule_result.facts if f.fact_id.startswith("RULE")]
-    graph_result = backend.query_entity_graph()
+    # 兜底取证也服从本单剩余预算；耗尽时只给模型分/成本建议并声明证据不足。
+    evidence_calls = min(2, max(0, max_evidence_calls))
+    rule_result = (backend.retrieve_rules_and_cases() if evidence_calls >= 1
+                   else ToolResult("retrieve_rules_and_cases", [], "预算耗尽"))
+    rule_facts = [f for f in rule_result.facts if f.type == "rule"]
+    graph_result = (backend.query_entity_graph() if evidence_calls >= 2
+                    else ToolResult("query_entity_graph", [], "预算耗尽"))
     gang_facts = [f for f in graph_result.facts if f.type in ("gang_score", "prior_fraud_rate")]
 
-    findings = [{"finding": f"GBDT 风险分 p={p:.4f}（决策区间校准已验，raw 可当概率用）",
+    findings = [{"finding": f"GBDT 风险分 p={p:.4f}（raw 模型输出；历史 top-k 诊断不保证本笔校准）",
                  "evidence_ids": [score_fact.fact_id], "assertion_strength": "confirmed"}]
     findings += [{"finding": f"命中规则：{f.value}", "evidence_ids": [f.fact_id],
                   "assertion_strength": "confirmed"} for f in rule_facts[:3]]
@@ -262,12 +307,15 @@ def degraded_report(res, txn_id, reason):
               "confidence": "low", "evidence_insufficient": len(rule_facts) == 0,
               "summary": f"[降级模式：{reason}] LLM 不可用，本报告由 GBDT 分数 + 规则模板生成。"
                          f"风险分 {p:.2f}，命中规则 {len(rule_facts)} 条，处置建议 {dispo}。"
-                         f"拦截能力不受影响；LLM 恢复后可补充叙事性调查。"}
+                         f"确定性成本建议保留；LLM 恢复后可补充叙事性调查。"}
+    report, overrides = enforce_evidence_floor(report, reg)
     violations = validate_report(report, reg.known_ids())
     audit = audit_time_boundary(reg.all_facts(), backend.as_of)
     return {"txn_id": txn_id, "mode": "degraded", "degraded_reason": reason, "p": p,
-            "report": report, "schema_violations": violations,
-            "time_audit_violations": audit, "tool_calls": 0, "api_calls": 0,
+            "report": report if not violations and not audit else None,
+            "pipeline_version": PIPELINE_VERSION, "prompt_version": PROMPT_VERSION, "pipeline_overrides": overrides,
+            "schema_violations": violations,
+            "time_audit_violations": audit, "tool_calls": evidence_calls, "llm_tool_calls": 0, "api_calls": 0,
             "tokens": {"input": 0, "output": 0}, "cost_usd": 0.0,
             "facts": [f.to_dict() | {"label_based": f.label_based} for f in reg.all_facts()]}
 
@@ -278,12 +326,41 @@ def run_one(res, txn_id, client, force=False, p_override=None):
     dispo_gt = str(res.gt.loc[txn_id, "disposition_gt"])
     if dispo_gt == "approve" and not force:
         return {"txn_id": txn_id, "mode": "gated",
+                "prompt_version": PROMPT_VERSION, "pipeline_version": PIPELINE_VERSION,
                 "p": float(res.gt.loc[txn_id, "p"]),
                 "note": "⑧ 闸门：应然档=approve，不消耗 LLM，直接放行", "cost_usd": 0.0}
+    usage_trace = {}
     try:
-        return investigate(res, txn_id, client, p_override=p_override)
-    except LLM_FAILURES as e:
-        return degraded_report(res, txn_id, type(e).__name__)
+        if client is None:
+            try:
+                client = _make_client(kill=False)
+            except (RuntimeError, ValueError) as e:
+                return degraded_report(res, txn_id, type(e).__name__)
+        out = investigate(res, txn_id, client, p_override=p_override, usage_trace=usage_trace)
+    except (*LLM_FAILURES, AgentProtocolError) as e:
+        fallback = degraded_report(res, txn_id, type(e).__name__,
+                                   max_evidence_calls=MAX_TOOL_CALLS-usage_trace.get("tool_calls", 0))
+        fallback_calls = fallback.get("tool_calls", 0)
+        usage = usage_trace.get("tokens", {"input": 0, "output": 0, "api_calls": 0})
+        fallback.update(tokens=usage, api_calls=usage["api_calls"],
+                        tool_calls=usage_trace.get("tool_calls", 0) + fallback_calls,
+                        llm_tool_calls=usage_trace.get("tool_calls", 0),
+                        usage_complete=usage_trace.get("usage_complete", False),
+                        cost_usd=round((usage["input"] * PRICE_IN + usage["output"] * PRICE_OUT) / 1e6, 4))
+        return fallback
+    if out["schema_violations"] or out["time_audit_violations"]:
+        fallback = degraded_report(res, txn_id, "report_validation_failed",
+                                   max_evidence_calls=MAX_TOOL_CALLS-out["tool_calls"])
+        # 违规草稿只保留为诊断件，不作为面向用户的 report。历史原始归档不重写。
+        fallback["rejected_draft"] = out
+        fallback["cost_usd"] = out["cost_usd"]
+        fallback["tokens"] = out["tokens"]
+        fallback["api_calls"] = out["api_calls"]
+        fallback["tool_calls"] = out["tool_calls"] + fallback.get("tool_calls", 0)
+        fallback["llm_tool_calls"] = out["tool_calls"]
+        return fallback
+    return out
+
 
 
 def _save(result, tag):
@@ -425,7 +502,7 @@ def main():
         return
     txn = int(args[args.index("--txn") + 1])
     res = Resources()
-    r = run_one(res, txn, _make_client(kill="--kill-llm" in args), force="--force" in args)
+    r = run_one(res, txn, _make_client(kill=True) if "--kill-llm" in args else None, force="--force" in args)
     path = _save(r, "kill" if "--kill-llm" in args else "single")
     _brief(r, path)
     if r.get("report"):

@@ -105,7 +105,7 @@
   "generator_verified": true
  },
  "bank_metrics.md": {
-  "sha256_machine_only": "bf020319fcb848941e1f102b164995e0613642f4d80c16de4912941107d7b735",
+  "sha256_machine_only": "9ddb6b70809acff3eaed321173e84f6f52f0b8cb33b80df8df9066817bf1797e",
   "tier": "cheap",
   "command": "python -m src.model.bank_metrics",
   "has_human_block": false,
@@ -238,7 +238,7 @@
   "generator_verified": true
  },
  "scorecard.md": {
-  "sha256_machine_only": "923e4e29854ab7f009463748c71fd2075b45bee3731539efec6ddc27806f62a0",
+  "sha256_machine_only": "bdcd337489d3f7c49ec20d2f2e332236f4ec712e67774c40ea8c4fdcf24038da",
   "tier": "heavy",
   "command": "python -m src.model.scorecard",
   "has_human_block": false,

@@ -1,0 +1,92 @@
+{
+  "protocol": {
+    "kind": "retrospective_label_availability_audit",
+    "freeze_day": 146,
+    "label_delay_days": 21,
+    "tree_fit": [
+      0,
+      90
+    ],
+    "early_stopping": [
+      90,
+      104
+    ],
+    "calibrator_fit": [
+      104,
+      115
+    ],
+    "selection": [
+      115,
+      125
+    ],
+    "evaluation": [
+      146,
+      182
+    ],
+    "selection_criterion": "lowest Brier on selection; ties prefer raw, then platt, then isotonic",
+    "threshold_criterion": "minimum labeled cost on selection; c_fp=25; fixed T_GRID",
+    "limitations": [
+      "evaluation period was previously used; no claim of untouched holdout",
+      "synthetic constant label delay; anonymous feature availability unknown",
+      "costs assumed; no observed treatment outcomes"
+    ]
+  },
+  "phase_counts": {
+    "tree_fit": 315927,
+    "early_stopping": 49671,
+    "calibrator_fit": 32371,
+    "selection": 33156,
+    "evaluation": 102703
+  },
+  "results": {
+    "tabular": {
+      "best_iteration": 275,
+      "features": 431,
+      "selection_brier": {
+        "raw": 0.023124536491661647,
+        "platt": 0.023041290511919478,
+        "isotonic": 0.023244124113995193
+      },
+      "chosen_calibration": "platt",
+      "selection_threshold": 0.17236180904522613,
+      "test_roc_auc": 0.8922731311209754,
+      "test_pr_auc": 0.5085779301005211,
+      "test_brier": 0.022853448345042895,
+      "test_threshold_metrics": {
+        "t": 0.17236180904522613,
+        "n_flag": 4564,
+        "vol": 0.044438818729735256,
+        "recall": 0.5297466552803871,
+        "precision": 0.4077563540753725
+      },
+      "test_cost_selected_threshold": 359230.478,
+      "test_cost_05": 405664.018,
+      "test_cost_amount_policy": 273447.604
+    },
+    "tabular_graph": {
+      "best_iteration": 149,
+      "features": 446,
+      "selection_brier": {
+        "raw": 0.022226998119291057,
+        "platt": 0.022556192576019617,
+        "isotonic": 0.022699738131931938
+      },
+      "chosen_calibration": "raw",
+      "selection_threshold": 0.09423558897243108,
+      "test_roc_auc": 0.915698992181102,
+      "test_pr_auc": 0.5530843907757159,
+      "test_brier": 0.021244896715144703,
+      "test_threshold_metrics": {
+        "t": 0.09423558897243108,
+        "n_flag": 5418,
+        "vol": 0.05275405781720106,
+        "recall": 0.6128664958724737,
+        "precision": 0.3973791066814323
+      },
+      "test_cost_selected_threshold": 333271.804,
+      "test_cost_05": 413484.18899999995,
+      "test_cost_amount_policy": 247245.034
+    }
+  },
+  "source_sha256": "2728a61dc390dec74cc70c00b593baa536b5524b8a04bb8ca595c5431c9b0919"
+}

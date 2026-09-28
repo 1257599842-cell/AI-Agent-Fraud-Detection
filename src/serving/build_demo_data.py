@@ -188,7 +188,7 @@ def build():
             "banner": "离线演示 / 非生产系统",
             "disclaimer": "本数据包全部取自项目既有产物（reports/ 与 data/processed/），"
                           "**未新造任何数据、未调用任何 API**。案例为预置缓存，"
-                          "演示不依赖实时服务。",
+                          "演示不依赖实时服务。五动作仅为离线沙盘，当前API四动作；历史案例不代表v5实测。",
             "positioning": "离线决策系统 + 已推演工业化路径；**不声称曾在生产环境运行**。",
             "dataset": "Kaggle IEEE-CIS Fraud Detection（Vesta 真实电商交易）",
         },

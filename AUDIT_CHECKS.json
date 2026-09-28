@@ -1,0 +1,93 @@
+{
+  "audit_date": "2026-09-13",
+  "python": "3.13.9",
+  "packages": {
+    "numpy": "2.5.0",
+    "pandas": "3.0.3",
+    "pyarrow": "24.0.0",
+    "lightgbm": "4.6.0",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.18.0",
+    "duckdb": "1.5.5",
+    "fastapi": "0.141.1",
+    "pydantic": "2.13.4",
+    "httpx": "0.28.1",
+    "matplotlib": "3.11.0",
+    "tabulate": "0.10.0"
+  },
+  "source_modules": 62,
+  "sql_modules": 2,
+  "scoring_bundle": {
+    "features": 446,
+    "comparison_rows": 102703,
+    "max_abs_score_cache_difference": 0.0,
+    "files_sha256": {
+      "models/scoring_model.txt": "9ac92910f4dfd631862a256aa1c35e295cff5041836d6ef197d673f567bcd3ee",
+      "models/feature_columns.json": "2053fe0ac47ae5cd597b614e03f33a76277bae5b3db2bf1154749b881e8517b5",
+      "models/categorical_levels.json": "e9287edfc949315b2477648b8ac822d0dd04b991efcb5f81e90c4b2ece31e997"
+    }
+  },
+  "sql_date_full_dataset": {
+    "rows": 590540,
+    "mismatches": 0
+  },
+  "archives_unchanged_excluding_os_metadata": true,
+  "frozen_files_unchanged": true,
+  "archive_count": 7,
+  "frozen_count": 7,
+  "tests": {
+    "unit_tests": 117,
+    "new_regressions": 24,
+    "passed": true
+  },
+  "report_replay": {
+    "cheap_reports": 22,
+    "byte_equal": 22
+  },
+  "online_replay": {
+    "rows": 3000,
+    "columns": 27,
+    "mismatch_rows": 0,
+    "null_mismatches": 0,
+    "negative_control": [
+      11,
+      10,
+      11,
+      0
+    ],
+    "slice_days": [
+      93,
+      94
+    ]
+  },
+  "http_smoke": {
+    "health": true,
+    "demo_and_full_raw_score_equal": true,
+    "actions": 4,
+    "features": 27,
+    "missing_amount_http_status": 422,
+    "gate": "gated",
+    "missing_client": "degraded"
+  },
+  "demo_checks": {
+    "checks_passed": 6,
+    "webkit_formula_inputs": 400,
+    "max_abs_cost_difference": 0,
+    "cases": 7,
+    "citations": 108,
+    "dangling_citations": 0
+  },
+  "unperformed": [
+    "new external Kaggle submission",
+    "paid LLM evaluation of v5",
+    "production load/deployment test",
+    "genuinely unused future-period evaluation"
+  ],
+  "prompt_version": "v5-label-grounding",
+  "pipeline_version": "v5-validated-output",
+  "provenance": {
+    "manifest_entries": 53,
+    "reviewed_model_card_sources": 28,
+    "human_blocks_checked": 8
+  }
+}

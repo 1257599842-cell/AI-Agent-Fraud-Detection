@@ -26,7 +26,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+from threading import RLock
+
+_MODEL_LOCK = RLock()
 
 STATE = {}
 
@@ -37,8 +40,12 @@ async def lifespan(app: FastAPI):
     from src.agent.backends import Resources
     STATE["res"] = Resources()
     STATE["ready"] = True
-    yield
-    STATE.clear()
+    try:
+        yield
+    finally:
+        if "store" in STATE:
+            STATE["store"].close()
+        STATE.clear()
 
 
 app = FastAPI(title="AI Fraud Investigation Copilot",
@@ -56,10 +63,27 @@ class RawTxnRequest(BaseModel):
     `fields` 放原始表字段（TransactionAmt / ProductCD / card* / C* / V* …）；
     缺的列按缺失处理——生产里上游本来就可能缺字段，**缺失不该让服务 500**。
     """
-    transaction_dt: int = Field(..., description="交易时刻（TransactionDT，相对秒）")
-    fields: dict = Field(default_factory=dict, description="原始表字段")
+    transaction_dt: int = Field(..., ge=0, description="交易时刻（TransactionDT，相对秒）")
+    fields: dict = Field(..., description="原始表字段（必须含 TransactionAmt）")
     transaction_id: int | None = Field(
         None, description="仅用于与离线逐行对账时打破 dt 并列；生产无此物，见 feature_store 文档")
+
+    @field_validator("fields")
+    @classmethod
+    def validate_fields(cls, fields):
+        import math
+        if any(isinstance(v, (list, dict)) for v in fields.values()):
+            raise ValueError("原始交易字段必须为标量")
+        amount = fields.get("TransactionAmt")
+        if isinstance(amount, bool) or amount is None:
+            raise ValueError("TransactionAmt 必须提供有限非负金额")
+        try:
+            amount = float(amount)
+        except (TypeError, ValueError):
+            raise ValueError("TransactionAmt 必须是数值") from None
+        if not math.isfinite(amount) or amount < 0:
+            raise ValueError("TransactionAmt 必须提供有限非负金额")
+        return {**fields, "TransactionAmt": amount}
 
 
 class ScoreResponse(BaseModel):
@@ -75,6 +99,11 @@ class ScoreResponse(BaseModel):
 
 
 def _model():
+    with _MODEL_LOCK:
+        return _load_model()
+
+
+def _load_model():
     """按需加载持久化模型与 FeatureStore（首次调用时建，之后复用）。
 
     历史事件只灌 **< T0（第 146 天）** 的部分——服务不该"看过"测试期，
@@ -89,15 +118,18 @@ def _model():
         mdir = ROOT / "models"
         if not (mdir / "scoring_model.txt").exists():
             raise HTTPException(503, "打分模型未落盘，先跑 python -m src.agent.disposition")
-        STATE["booster"] = lgb.Booster(model_file=str(mdir / "scoring_model.txt"))
-        STATE["feat_cols"] = json.loads((mdir / "feature_columns.json").read_text())
-        STATE["cat_levels"] = json.loads((mdir / "categorical_levels.json").read_text())
+        booster = lgb.Booster(model_file=str(mdir / "scoring_model.txt"))
+        feat_cols = json.loads((mdir / "feature_columns.json").read_text())
+        cat_levels = json.loads((mdir / "categorical_levels.json").read_text())
         res = _res()
         st = FeatureStore()
         hist = res.meta[res.meta["TransactionDT"] // 86400
                         - res.meta["TransactionDT"].min() // 86400 < 146]
         st.append_frame(hist)
-        STATE["store"] = st
+        if booster.num_feature() != len(feat_cols) or booster.feature_name() != feat_cols:
+            st.close()
+            raise HTTPException(503, "模型与特征列清单不一致，请重新生成模型包")
+        STATE.update(store=st, booster=booster, feat_cols=feat_cols, cat_levels=cat_levels)
         print(f"  在线特征库：预灌 {len(hist):,} 笔历史（仅 day < 146）")
     return STATE["store"], STATE["booster"], STATE["feat_cols"]
 
@@ -135,6 +167,7 @@ def score(req: RawTxnRequest):
     store, booster, feat_cols = _model()
     txn = dict(req.fields)
     txn["TransactionDT"] = req.transaction_dt
+    txn.pop("TransactionID", None)  # tiebreak 仅取显式请求字段
 
     t0 = time.perf_counter()
     hist = store.get_features(txn, tiebreak_id=req.transaction_id)
@@ -158,7 +191,7 @@ def score(req: RawTxnRequest):
     p = float(booster.predict(X)[0])
     t_model = (time.perf_counter() - t1) * 1000
 
-    amt = float(txn.get("TransactionAmt") or 0.0)
+    amt = float(txn["TransactionAmt"])
     gang = float(gang_score(hist["card1_fanout_device"],
                             hist["card1_prior_fraud_rate"] or 0.0,
                             hist["card1_prior_fraud_cnt"]))
@@ -181,7 +214,13 @@ def demo_score(transaction_id: int):
     res = _res()
     if transaction_id not in res.meta.index:
         raise HTTPException(404, f"transaction_id {transaction_id} 不在数据集内")
-    row = res.meta.loc[transaction_id].to_dict()
+    # res.meta 是调查工具的精简字段集，不能拿它充当431列原始模型输入。
+    import pandas as pd
+    raw = pd.read_parquet(ROOT / "data" / "processed" / "train_merged.parquet",
+                          filters=[("TransactionID", "=", transaction_id)])
+    if len(raw) != 1:
+        raise HTTPException(404, "原始交易不存在或ID不唯一")
+    row = raw.iloc[0].to_dict()
     dt = int(row.pop("TransactionDT"))
     row.pop("isFraud", None)
     return score(RawTxnRequest(transaction_dt=dt, fields=row,
@@ -195,26 +234,30 @@ def investigate(req: TxnRequest, force: bool = False):
     force=False 时遵守 ⑧ 闸门（应然档=approve 直接放行、零 LLM 成本）。
     LLM 不可用 → ⑨ 兜底降级报告，仍返回 200（降级是产品行为，不是服务故障）。
     """
-    from src.agent.pipeline import _make_client, run_one
+    from src.agent.pipeline import run_one
     res = _res()
     if req.transaction_id not in res.gt.index:
         raise HTTPException(404, f"transaction_id {req.transaction_id} 不在 test 窗应然档表内")
     try:
-        client = _make_client(kill=False)
-        out = run_one(res, req.transaction_id, client, force=force)
+        out = run_one(res, req.transaction_id, None, force=force)
     except Exception as e:                       # 非 LLM 类故障才算服务错误
         raise HTTPException(500, f"{type(e).__name__}: {e}") from e
     return {
         "transaction_id": out["txn_id"],
         "mode": out.get("mode"),                 # llm / degraded / gated
         "prompt_version": out.get("prompt_version"),
+        "pipeline_version": out.get("pipeline_version"),
         "p": out.get("p"),
         "report": out.get("report"),
         "acceptance": {                          # 硬层验收随响应一起返回，便于上游审计
             "schema_violations": out.get("schema_violations", []),
             "time_audit_violations": out.get("time_audit_violations", []),
+            "rejected_draft_violations": {
+                k: out.get("rejected_draft", {}).get(k, [])
+                for k in ("schema_violations", "time_audit_violations")},
         },
         "cost_usd": out.get("cost_usd", 0.0),
+        "usage_complete": out.get("usage_complete", True),
         "tool_calls": out.get("tool_calls", 0),
         "note": out.get("note") or out.get("degraded_reason"),
     }

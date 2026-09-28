@@ -4,13 +4,13 @@
 唯 card1 有特异性 → 用**组合键**造"稀有共享实体"：card1、card1+addr1、card1+邮箱、card1+设备。
 
 两层防泄漏（加固二，图特征版硬点②）：
-  - 结构型（prior_count / fan-out）：只用**该交易时间点之前**的边聚合（two-pointer，只看 DT 更早的行）。
+  - 结构型（prior_count / fan-out）：按 (DT, 输入次序) 取前序边；本数据以 TransactionID 排序，同秒较小 ID 也计入。
   - 标签型（prior_fraud_rate）：邻居 isFraud 只取 DT ≤ t−EMBARGO（拒付延迟，"之前"再往前挪 21 天）。
 
 每个实体键 K：
   {K}_prior_cnt         —— 之前同 K 的交易数（度/velocity；结构型）
   {K}_prior_fraud_cnt   —— 之前同 K 且已确认(embargo)的欺诈数（标签型）
-  {K}_prior_fraud_rate  —— 上两者之比（无历史则 NaN）
+  {K}_prior_fraud_rate  —— 成熟欺诈数 / 成熟历史行数（不是全部 prior_cnt；无成熟历史则 NaN）
 card1 的 fan-out（结构型）：prior 见过的 distinct addr1 / 邮箱 / 设备数（团伙扩散信号）。
 
 用法：python -m src.features.graph_features

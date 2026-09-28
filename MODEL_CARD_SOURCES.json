@@ -1,12 +1,12 @@
 {
-  "model_card_sha256": "16b5d19e525f0532f75efc081b68e25653f33c077a126c14b575bb2b38b433ce",
+  "model_card_sha256": "121a863cf0f8155d81bc055221671246f95a1e3943308de7e67e4314ac89477d",
   "sources": {
     "EXPERIMENT_PROTOCOL.md": "483ba93da3d58516f1e750b25fa766488be574d1fdebce94a80464e1d4f232a5",
     "reports/agent_disposition_sensitivity.md": "bb8322ce74b75378cdcc24755b0e3425533cda43ed3456751e1920d4aa3ab7d5",
     "reports/agent_eval_r1.md": "1a7fbb4f9f96a21e4a05065083fb3d8fac01997cfc9f897918954c7277f6fa20",
     "reports/agent_gang_validity.md": "39bebaee76d36d36c20796f60d467e7c668dbd46ea09be6c6f4e922678424ffc",
     "reports/agent_grounding.md": "36807c12a78b02e78afcb409091ee781c8c586b54cd13509672361b8a883c973",
-    "reports/bank_metrics.md": "bf020319fcb848941e1f102b164995e0613642f4d80c16de4912941107d7b735",
+    "reports/bank_metrics.md": "9ddb6b70809acff3eaed321173e84f6f52f0b8cb33b80df8df9066817bf1797e",
     "reports/baseline_metrics.md": "d47ed26671f751848ddb068fe4ad1dab5941bafbc921e8b022721ed4df5bb3d9",
     "reports/calib_window_size.md": "7a375f7dc4529e15eb7726b900b3717b607ad425794c0856d7a7274d7772ca06",
     "reports/calibration.md": "1ebeb867bfeb1e852aafd0e19d22c3d2c26271677e4a07853b273e3e21a27146",
@@ -25,7 +25,7 @@
     "reports/online_replay.md": "a6b6ac24db96cca8f690ae10e5b7dc487cfbcae073c3c18ad35365ebf386e90d",
     "reports/rules_vs_model.md": "ed5d443a9fdd927aa3436392c9d06c847a2875bdd65c75755fc490886214ffb9",
     "reports/stepup.md": "54917f00f9633a1314fd9d356f5ce490af905fc374e0f8dc3213bfc41fcd1746",
-    "reports/scorecard.md": "923e4e29854ab7f009463748c71fd2075b45bee3731539efec6ddc27806f62a0",
+    "reports/scorecard.md": "bdcd337489d3f7c49ec20d2f2e332236f4ec712e67774c40ea8c4fdcf24038da",
     "reports/selective_bias.md": "85d69c0cac8bb81e4dd8f1c0412711c503d35a7338b0d05c682afa795ae3b731",
     "reports/small_amount_floor.md": "fe71c93b9c1a34dbfb029d10ce1ac671b614a4f850dc92ce96ba8cb5d663f35d",
     "reports/sql_vs_pandas_reconciliation.md": "f0df8b94f0e35c2eaca3eec81a2a98db5761b9c74e7fa8c3962e8509282599a5",

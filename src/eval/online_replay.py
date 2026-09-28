@@ -165,6 +165,8 @@ def run():
     neg = _negative_control(df, sl, off, pre)
     store.close()
     _write(sl, mismatch, null_mismatch, lat, hist_len, neg, pre, len(hist))
+    if mismatch or any(v != pre[k]["in_replay_slice"] for k,v in neg.items()):
+        raise SystemExit("回放对账或负对照不符合预期")
     print(f"\n✅ → {REPORT.relative_to(ROOT)}")
 
 
@@ -242,7 +244,7 @@ def _write(sl, mismatch, null_mismatch, lat, hist_len, neg, pre, n_hist):
           "它是**离线特征定义里的一个人造依赖，在线无法忠实复现**。这是结论，不是瑕疵。\n",
           "## 延迟（**只测量，不承诺**）\n",
           "测量条件：单机 · DuckDB in-memory · **并发 = 1** · 无预聚合（方案 A，每次点查全扫）·",
-          f"事件表 {n_hist:,} 行起步 · 每笔 27 列共 ~15 次查询。\n",
+          f"事件表 {n_hist:,} 行起步 · 实体键齐全时每笔 27 列最多 23 次特征查询（缺失键会跳过部分查询）。\n",
           f"- p50 **{np.percentile(lat, 50):.1f} ms**　p95 **{np.percentile(lat, 95):.1f} ms**"
           f"　p99 **{np.percentile(lat, 99):.1f} ms**　最大 {lat.max():.1f} ms\n",
           "### 延迟 vs 实体历史长度\n",

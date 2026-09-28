@@ -4,7 +4,7 @@
   - 时间切分：test 固定 [t0, 末]=[146,181]；train = day < (t0 - embargo)。
       embargo=0  → train [0,145]（简单切，第一组数）
       embargo=21 → train [0,124]，空窗 [125,145] 丢弃（模拟标签延迟）
-      两轮 AUC 之差 = "线下→线上乐观 gap"。
+      两轮 AUC 之差是训练窗和验证窗同时改变的回顾性差异，不是实际线上损失。
   - 自然分布：不重采样、不 scale_pos_weight。
   - 类别：object 列 → category，用 LightGBM 原生类别处理（纯 label 映射，无目标编码 → 无泄漏）。
   - 缺失：LightGBM 原生处理，不填均值。
@@ -177,7 +177,7 @@ def _write_md(results: list[dict]) -> None:
           "",
           "## 填入 README ▢",
           f"- baseline PR-AUC / ROC-AUC（无 embargo）：{r0['pr_auc']:.4f} / {r0['roc_auc']:.4f}",
-          f"- 线下→线上乐观 gap（PR-AUC）：{r0['pr_auc']:.4f} → {r21['pr_auc']:.4f}（Δ {r21['pr_auc']-r0['pr_auc']:+.4f}，embargo 后掉了）",
+          f"- 训练/验证窗口联合变化（PR-AUC）：{r0['pr_auc']:.4f} → {r21['pr_auc']:.4f}（Δ {r21['pr_auc']-r0['pr_auc']:+.4f}，embargo 后掉了）",
           f"- recall@容量（=有效拦截率，top1%，无 embargo）：{r0['recall@1.0%']:.3f}",
           "",
           "> 校准意外：全局 ECE 仅 {:.4f}（很低）—— LightGBM logloss 训练全局已较准。但 3.4% 基率下等宽 ECE".format(r0['ece']),

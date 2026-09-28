@@ -156,7 +156,7 @@ def _plot_drift(y, p_old, p_near):
         plt.plot(xs, ys, marker="o", ms=3, lw=1.2, color=c, label=name)
     plt.xlabel("Mean predicted probability")
     plt.ylabel("Actual fraud rate")
-    plt.title("Near-window recalibration beats old-window (on test)")
+    plt.title("Near vs old calibration (retrospective evaluation)")
     plt.legend()
     plt.tight_layout()
     plt.savefig(FIG_DRIFT, dpi=120)
@@ -168,8 +168,9 @@ def _write_md(results, m_old, m_near, n_test, n_near, n_old):
     L = [
         "# 概率校准（硬点③）—— 决策区间验证 + 近窗重校准\n",
         "新口径：不看会被 p≈0 稀释的全局 ECE，而看**决策区间（top1~2%）**的校准；校准器只在**时间外近窗**拟合。\n",
-        f"四段时间切分：fit[0,104) / val[104,111) / old[111,125) / near[132,146) / test[146,182)。",
+        f"五段时间切分：fit[0,104) / val[104,111) / old[111,125) / near[132,146) / test[146,182)。",
         f"test={n_test:,}，near 校准窗={n_near:,}，old 校准窗={n_old:,}。\n",
+        "这是独立纯表校准实验；near 窗标签在 day146 尚未按 21 天假设成熟。top2% gap 不能代替主模型或全动作工作点的校准。\n",
         "## 1. 校准方法对比（test 上；校准器拟合于 near 窗）\n",
         "| 方法 | 全局 ECE | Brier | top1% 预测 vs 实际 | top1% gap | top2% gap |",
         "|------|---------|-------|-------------------|-----------|-----------|",

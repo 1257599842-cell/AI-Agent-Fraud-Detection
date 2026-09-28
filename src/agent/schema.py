@@ -62,7 +62,7 @@ def validate_report(report, known_fact_ids=None):
     for field, typ in REPORT_FIELDS.items():
         if field not in report:
             violations.append(f"缺少必填字段 '{field}'")
-        elif not isinstance(report[field], typ):
+        elif (not isinstance(report[field], typ) or (typ is int and isinstance(report[field], bool))):
             violations.append(f"字段 '{field}' 类型错误: {type(report[field]).__name__}")
     for field in report:
         if field not in REPORT_FIELDS:
@@ -91,12 +91,15 @@ def validate_report(report, known_fact_ids=None):
             continue
         if not isinstance(kf.get("finding"), str) or not kf["finding"].strip():
             violations.append(f"{where}: finding 缺失或为空")
-        if kf.get("assertion_strength") not in ASSERTION_STRENGTHS:
+        if not isinstance(kf.get("assertion_strength"), str) or kf["assertion_strength"] not in ASSERTION_STRENGTHS:
             violations.append(f"{where}: assertion_strength 非法: {kf.get('assertion_strength')!r}")
         _check_evidence_ids(kf.get("evidence_ids"), where, known_fact_ids, violations)
 
     gang = report["gang_association"]
     if gang is not None:
+        if not isinstance(gang.get("entities"), list) or any(
+                not isinstance(e, str) for e in gang.get("entities", [])):
+            violations.append("gang_association.entities 必须是字符串列表")
         if not isinstance(gang.get("suspected"), bool):
             violations.append("gang_association.suspected 缺失或非布尔")
         elif gang["suspected"]:

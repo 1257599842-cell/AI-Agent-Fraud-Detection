@@ -112,6 +112,10 @@ def split_report(text):
     后者「有一块空的人写区」——两者在校验时该被区别对待。
     """
     m = _BLOCK.search(text)
+    if BEGIN in text or END in text:
+        if (text.count(BEGIN) != 1 or text.count(END) != 1 or m is None
+                or text[m.end():].strip()):
+            raise ValueError("人写区必须唯一、标记成对且位于文末；拒绝静默丢弃内容")
     if not m:
         return text, None
     return text[:m.start()], m.group(0)

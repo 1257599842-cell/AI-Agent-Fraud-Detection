@@ -66,6 +66,10 @@ def build():
 def reconcile():
     a = pd.read_parquet(PANDAS_OUT).sort_values("TransactionID").reset_index(drop=True)
     b = pd.read_parquet(SQL_OUT).sort_values("TransactionID").reset_index(drop=True)
+    if (not a["TransactionID"].is_unique or not b["TransactionID"].is_unique
+            or not a["TransactionID"].equals(b["TransactionID"])
+            or set(a.columns) != set(b.columns)):
+        raise ValueError("对账要求唯一且逐行相同的交易 ID，以及一致的特征列集合")
     cols = [c for c in a.columns if c != "TransactionID"]
 
     L = ["# SQL/DuckDB 与 pandas 的逐列对账\n",
@@ -137,7 +141,7 @@ def reconcile():
               "   复合键在两侧都天然传播 NULL（pandas 字符串相加、SQL `||`），这一点无需额外处理。",
               "",
               "> 顺带一提：**「窗口帧类型」正好对应本项目的两层防泄漏**——",
-              "> 结构型只问「在不在之前」（ROWS），标签型还要问「标签熟没熟」（RANGE + embargo 偏移）。",
+              "> 这批 prior/fan-out 用 ROWS，标签历史用 RANGE + embargo；velocity 虽是结构型，却也需要时间取值语义。",
               "> 同一条纪律，在 pandas 里是两段代码，在 SQL 里是两种帧。"]
     else:
         L += ["❌ **存在不一致列**，逐项差异样本如下（必须解释清楚才算完成）：\n"]
@@ -153,4 +157,4 @@ def reconcile():
 if __name__ == "__main__":
     if "--reconcile-only" not in sys.argv:
         build()
-    reconcile()
+    raise SystemExit(0 if reconcile() else 1)

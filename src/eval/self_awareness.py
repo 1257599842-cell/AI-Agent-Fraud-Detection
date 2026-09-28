@@ -91,8 +91,8 @@ def _auc(y, s, w=None):
 
 def load(tag):
     rows = []
-    for f in sorted((RUNS_DIR / tag).glob("txn_*.json")):
-        r = json.loads(f.read_text())
+    from src.eval.run_integrity import load_complete_run
+    for r in load_complete_run(RUNS_DIR / tag, pd.read_parquet(EVAL_SET)):
         rep = r.get("report") or {}
         rows.append({"TransactionID": r["txn_id"], "p": r.get("p"),
                      "risk_level": rep.get("risk_level"),
@@ -103,7 +103,7 @@ def load(tag):
     df = pd.DataFrame(rows)
     es = pd.read_parquet(EVAL_SET)
     return df.merge(es[["TransactionID", "isFraud", "stratum", "ht_weight",
-                        "disposition_gt", "TransactionAmt", "gang_score"]], on="TransactionID")
+                        "disposition_gt", "TransactionAmt", "gang_score"]], on="TransactionID", validate="one_to_one")
 
 
 def run(tag):

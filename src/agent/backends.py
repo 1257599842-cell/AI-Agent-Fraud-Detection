@@ -161,4 +161,4 @@ class DataBackedTools(InvestigationTools):
                                    "相似案例检索无返回", (0, lab_end), True))
         return ToolResult("retrieve_rules_and_cases", facts,
                           f"命中规则 {len(hits)} 条，相似案例 {len(cases)} 条"
-                          "（案例含确认欺诈与被洗清的高分假阳两类，注意对照）")
+                          "（案例含标签为1的欺诈与标签为0的高分假阳两类；无人工洗清过程记录）")

@@ -40,14 +40,14 @@ def _per_txn_cost(actions, y, amt, g, prm):
 
 def load(tag):
     rows = []
-    for f in sorted((RUNS_DIR / tag).glob("txn_*.json")):
-        r = json.loads(f.read_text())
+    from src.eval.run_integrity import load_complete_run
+    for r in load_complete_run(RUNS_DIR / tag, pd.read_parquet(EVAL_SET)):
         rep = r.get("report") or {}
         if rep.get("disposition"):
             rows.append({"TransactionID": r["txn_id"], "agent": rep["disposition"],
                          "confidence": rep.get("confidence")})
     es = pd.read_parquet(EVAL_SET)
-    d = pd.DataFrame(rows).merge(es, on="TransactionID")
+    d = pd.DataFrame(rows).merge(es, on="TransactionID", validate="one_to_one")
     # ⑧ 闸门在位：应然档 approve 的交易根本不进 Agent（eval 是 force 灌入的）
     d["prod"] = np.where(d["disposition_gt"] == "approve", "approve", d["agent"])
     return d

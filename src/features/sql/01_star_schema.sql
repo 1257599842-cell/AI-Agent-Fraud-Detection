@@ -1,6 +1,6 @@
 -- ============================================================================
 -- 小星型模型（IEEE-CIS 反欺诈）
---   事实表 1 张（交易，粒度 = 一笔交易）+ 维表 5 张 + 特征事实表 1 张。
+--   事实表 1 张（交易，粒度 = 一笔交易）+ 维表 6 张 + 特征事实表 1 张。
 --   目的：把现有 pandas 流水线用数仓的方式表达一遍——**不新增任何特征**。
 -- ============================================================================
 
@@ -36,17 +36,17 @@ FROM (SELECT DISTINCT ProductCD AS product_cd FROM raw_txn);
 -- ---------- 维表：日期 ----------
 -- TransactionDT 是「相对起点的秒数」，不是真实日历时间；day 从 0 起。
 CREATE OR REPLACE TABLE dim_date AS
-SELECT d AS date_sk, d AS day, d / 7 AS week_idx, d % 7 AS dow_idx
-FROM (SELECT DISTINCT CAST(TransactionDT / 86400 AS BIGINT)
-                      - (SELECT MIN(CAST(TransactionDT / 86400 AS BIGINT)) FROM raw_txn) AS d
+SELECT d AS date_sk, d AS day, CAST(FLOOR(d / 7) AS BIGINT) AS week_idx, d % 7 AS dow_idx
+FROM (SELECT DISTINCT CAST(FLOOR(TransactionDT / 86400) AS BIGINT)
+                      - (SELECT MIN(CAST(FLOOR(TransactionDT / 86400) AS BIGINT)) FROM raw_txn) AS d
       FROM raw_txn);
 
 -- ---------- 事实表：交易 ----------
 CREATE OR REPLACE TABLE fact_transaction AS
 SELECT t.TransactionID                       AS transaction_id,
        t.TransactionDT                       AS dt,
-       CAST(t.TransactionDT / 86400 AS BIGINT)
-         - (SELECT MIN(CAST(TransactionDT / 86400 AS BIGINT)) FROM raw_txn) AS date_sk,
+       CAST(FLOOR(t.TransactionDT / 86400) AS BIGINT)
+         - (SELECT MIN(CAST(FLOOR(TransactionDT / 86400) AS BIGINT)) FROM raw_txn) AS date_sk,
        c.card_sk, a.addr_sk, e.email_sk, dv.device_sk, p.product_sk,
        t.TransactionAmt                      AS amt,
        t.isFraud                             AS is_fraud

@@ -7,7 +7,7 @@
 案例库（1.2）：~3k 条，池 ⊆ 训练窗 [0,146)，检索时再按 dt <= as_of − EMBARGO 过滤
   （池静态、成熟性逐查询保证）。两类来源天然不同：
     正例 = isFraud=1（拒付确认，不依赖模型分；按月分层抽样）
-    负例 = 模型高分但 isFraud=0 的假阳（"被调查后洗清"）——专训一个只见 day<104
+    负例 = 模型高分但 isFraud=0 的假阳（标签0，无人工处理过程记录）——专训一个只见 day<104
       的模型给 [104,146) 打分挖取，不用 baseline 对自己训练集的记忆分。
 
 检索（1.4）：结构化相似主通道——同实体(card1/组合键) > 同模式(ProductCD+金额档+
@@ -76,7 +76,7 @@ def _cond_mask(df, field, op, value):
         m = s.notna()
     else:
         raise ValueError(f"未知 op: {op}")
-    return np.asarray(m == True)  # noqa: E712  —— 把可能的 NA 压成 False
+    return np.asarray(m.fillna(False), dtype=bool)  # noqa: E712  —— 把可能的 NA 压成 False
 
 
 def eval_trigger(conditions, df):
@@ -173,8 +173,8 @@ def _mine_fp_scores(meta):
 
 def _render_card(r):
     """案例卡：喂 LLM 的自然语言形态（结构化字段仍单独存，检索/对账用结构化）。"""
-    outcome = ("确认欺诈（拒付举报）" if r["isFraud"] == 1
-               else f"高分假阳（人工洗清，当时模型分 {r['score']:.2f}）")
+    outcome = ("标签确认为欺诈（isFraud=1；无具体拒付过程记录）" if r["isFraud"] == 1
+               else f"高分假阳（isFraud=0，无人工复核过程记录；模型分 {r['score']:.2f}）")
     ent = (f"card1={r['card1']}" + (f", addr1={r['addr1']:.0f}" if pd.notna(r["addr1"]) else ""))
     hist = (f"实体历史：prior {int(r['card1_addr1_prior_cnt'])} 笔"
             + (f"、成熟欺诈率 {r['card1_addr1_prior_fraud_rate']:.0%}"
@@ -255,7 +255,7 @@ class KnowledgeBase:
 def load_meta():
     meta = pd.read_parquet(MERGED, columns=META_COLS)
     graph = pd.read_parquet(GRAPH, columns=["TransactionID"] + GRAPH_COLS_USED)
-    meta = meta.merge(graph, on="TransactionID", how="left")
+    meta = meta.merge(graph, on="TransactionID", how="left", validate="one_to_one")
     day = meta["TransactionDT"] // SECS_PER_DAY
     meta["day"] = (day - day.min()).astype(int)
     return meta
@@ -318,7 +318,7 @@ def _write_report(admitted, rejected, cases, sanity_lines):
           f"负例 {len(neg):,}（模型高分假阳，分 {neg['score'].min():.2f}~{neg['score'].max():.2f}，"
           f"day {int(neg['day'].min())}~{int(neg['day'].max())}——负例只在有模型分的 [104,146) 挖，"
           "与「假阳来自模型上线后」的现实语义一致）。",
-          "- 诚实边界（1.2）：正例只含**被举报出来的**欺诈 = 选择性偏差样本（⑤ 在 RAG 层的翻版）；"
+          "- 诚实边界（1.2）：案例按标签与模型分筛选，存在选择性；原始数据没有举报/人工洗清过程记录，不能从isFraud反推该过程；"
           "标签有传播性，同实体多案例非独立作案。",
           "",
           "## 检索 sanity（3 笔 test 交易）", ""]

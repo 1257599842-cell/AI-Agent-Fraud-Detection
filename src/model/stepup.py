@@ -106,16 +106,16 @@ def make_figure(a_med, base):
         ax.pcolormesh(PP, AA, Z5, cmap=plt.get_cmap("Set3", 5), vmin=-0.5, vmax=4.5,
                       shading="auto")
         ax.set_xscale("log"); ax.set_yscale("log")
-        ax.set_xlabel("GBDT 欺诈概率 p"); ax.set_title(f"gang_score = {gang:.0f}")
+        ax.set_xlabel("GBDT model probability p (raw)"); ax.set_title(f"gang_score = {gang:.0f}")
         # 四档边界叠加为虚线，直观看出 step-up 从哪儿吃进来的
         Z4 = expected_costs(flat_p, flat_a, g, a_med, base).argmin(axis=1).reshape(PP.shape)
         ax.contour(PP, AA, Z4, levels=[0.5, 1.5, 2.5], colors="k",
                    linewidths=0.8, linestyles="--")
-    axes[0].set_ylabel("交易金额 $")
+    axes[0].set_ylabel("Transaction amount ($)")
     handles = [plt.Rectangle((0, 0), 1, 1, color=plt.get_cmap("Set3", 5)(i))
                for i in range(5)]
     axes[1].legend(handles, ACTIONS5, loc="lower right", fontsize=9, framealpha=0.9)
-    fig.suptitle("五档分区（色块）vs 四档边界（黑虚线）—— step-up 从哪里吃进来", fontsize=12)
+    fig.suptitle("Five-action cost regions (colors) vs four-action boundaries (dashed)", fontsize=12)
     fig.tight_layout()
     FIG.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(FIG, dpi=140)
@@ -137,7 +137,7 @@ def main():
     n = len(gt)
 
     L = ["# step-up 第五档（Q1）\n",
-         "真实风控系统里最常用的动作是 step-up（加验证 / OTP / 3DS），而本框架此前只有四档。",
+         "本模块为既有四动作增加step-up（加验证 / OTP / 3DS）的离线成本分析，未改变API动作空间。",
          "缺了它，「可疑但不确定」只能被推向更重的动作——**这正是「项目是否太 toy」的正解**。\n",
          "## 期望成本\n",
          "```\nE_stepup = c_friction + p·(1−r_block)·amount + (1−p)·r_abandon·margin_loss\n```",
@@ -186,22 +186,19 @@ def main():
               "",
               "### 为什么错了——机制（算得出来，不是事后找补）\n",
               "我的预测隐含了一个错误的推理：「step-up 比 hold 便宜、比 decline 温和 → 它落在两者之间」。",
-              "**成本排序说的不是这个。** step-up 是**全部五档里最便宜的干预**"
+              "step-up 的**基准固定摩擦低于人工复核成本**；总期望成本仍依赖p与金额"
               f"（摩擦仅 ${STEPUP['c_friction']:.2f}，而 hold 要 $5、贵 10 倍），",
               "所以它扩张的是 **`approve` 的上边界**，不是最贵两档之间的缝。\n",
               "两条门槛线（同一批参数下算出）：\n",
               "| 交易金额 | step-up 击败 approve 所需 p | hold 击败 approve 所需 p |",
               "|---|---|---|",
-              "| $50 | **p > 0.025** | p > 0.122 |",
-              "| $100 | **p > 0.018** | p > 0.061 |",
-              "| $300 | **p > 0.013** | p > 0.020 |",
-              "| $1000 | **p > 0.012** | p > 0.006 |",
+              *[f"| ${a} | **p > {(STEPUP['c_friction']/a + STEPUP['r_abandon']*STEPUP['margin_rate'])/(STEPUP['r_block']+STEPUP['r_abandon']*STEPUP['margin_rate']):.4f}** | p > {(BASE['c_review']+BASE['f_h']*BASE['c_fp'])/((1-BASE['m_h'])*a+BASE['f_h']*BASE['c_fp']):.4f} |"
+                for a in (50,100,300,1000)],
               "",
-              "→ 在中小额区间，step-up 的启动门槛比 hold **低一个数量级**：",
+              "→ 在表列中小额点，step-up门槛较低，但差距不是统一的一个数量级；$1000时hold反而更早：",
               "它先于 hold 从 approve 那里接管，自然吃的是 approve 而不是 hold/decline 中间带。\n",
-              "### 但结果本身比我的预测更像真实系统\n",
-              f"- step-up 覆盖 **{n_su/n:.1%}** 的交易量 —— 真实支付风控里 3DS/OTP 挑战率"
-              "通常也在 **5–15%** 这个量级，属**高频低摩擦**动作。",
+              "### 基准参数下的离线队列变化\n",
+              f"- 基准假设下step-up覆盖 **{n_su/n:.1%}** 交易；本项目未采集真实挑战率作行业对照。",
               f"- 同时把人工复核队列从 {n_hold4:,} 压到 {n_hold5:,}（**−{1-n_hold5/max(n_hold4,1):.0%}**），"
               "这正是 step-up 在真实系统里的第二个作用：**替人力挡掉一批不值得人看的单子**。",
               "",

@@ -96,6 +96,9 @@ def argmin_action(p, a, g, a_med, prm):
 def realized_cost(action, y, a, g, a_med, prm, credit_future=False):
     """代入真标签的实报成本（eval 层2 的口径雏形）。
     上报的未来收益不可观测：默认保守口径不计；credit_future=True 给模型口径。"""
+    action = np.asarray(action)
+    if not np.isin(action, ACTIONS).all():
+        raise ValueError("未知处置不能按零成本记账")
     y, a, g = (np.asarray(x, dtype=float) for x in (y, a, g))
     c = np.where(action == "approve", y * a, 0.0)
     c = np.where(action == "decline", (1 - y) * prm["c_fp"], c)
@@ -137,7 +140,8 @@ def _persist(booster, X):
 
 def train_and_cache():
     """训表+图模型（ML 核心定稿口径），缓存 test 逐笔 p + 网络项输入；有缓存则直接用。"""
-    if SCORES_OUT.exists():
+    if SCORES_OUT.exists() and all((PROJECT_ROOT / "models" / name).exists()
+                                  for name in ("scoring_model.txt", "feature_columns.json", "categorical_levels.json")):
         print(f"复用 p 缓存 {SCORES_OUT.relative_to(PROJECT_ROOT)}（删除该文件可强制重训）")
         out = pd.read_parquet(SCORES_OUT)
         from sklearn.metrics import average_precision_score, roc_auc_score
@@ -218,7 +222,7 @@ def make_figure(a_med):
         ax.pcolormesh(P, A, Z, cmap=cmap, vmin=0, vmax=3, shading="auto")
         ax.set_xscale("log"); ax.set_yscale("log")
         ax.set_title(f"gang evidence g={g:g}")
-        ax.set_xlabel("model probability p (raw, zone-verified)")
+        ax.set_xlabel("model probability p (raw; calibration not guaranteed)")
     axes[0].set_ylabel("amount ($)")
     fig.legend(handles=[Patch(color=c, label=l) for c, l in
                         zip(cmap.colors, ["approve", "hold", "decline", "escalate"])],
@@ -314,7 +318,7 @@ def _write_md(model_m, zone, a_med, n, g, dist_rows, src, med_amt_esc, examples,
          f"- 表+图模型 test PR-AUC **{model_m['pr']:.4f}** / ROC-AUC {model_m['roc']:.4f}。",
          f"- 决策区间校准 gap：top1% 预测 {zone[0.01][0]:.3f} vs 实际 {zone[0.01][1]:.3f}"
          f"（gap {zone[0.01][0]-zone[0.01][1]:+.3f}）；top2% {zone[0.02][0]:.3f} vs {zone[0.02][1]:.3f}"
-         f"（gap {zone[0.02][0]-zone[0.02][1]:+.3f}）→ raw 概率直接进成本公式（③结论的复用与复验）。",
+         f"（gap {zone[0.02][0]-zone[0.02][1]:+.3f}）→ 主模型暂用 raw；这只是 top-k 平均校准检查，不能证明全部金额/动作区间均已校准。",
          "",
          "## 时间纪律（施工提醒1）",
          f"- 网络项输入 = `graph_features.parquet`（**embargo 21 版**，泄漏审计同款，逐行时间因果）；"
@@ -348,7 +352,7 @@ def _write_md(model_m, zone, a_med, n, g, dist_rows, src, med_amt_esc, examples,
         star = "**" if v == BASE[key] else ""
         L.append(f"| {key} | {star}{v:g}{star} | " + " | ".join(f"{shares[x]:.2%}" for x in ACTIONS) + " |")
     L += ["",
-          "结论：四档份额随参数**连续、单调**变化（框架稳、参数留业务标定）；k_future=0 时上报档"
+          "结论：表中报告的是有限样本、有限网格的动作份额（离散跳变，不保证所有档位连续或单调；参数仍需业务标定）；k_future=0 时上报档"
           "退化并入挂起/拒绝（=修订2 防住的「四档塌三档」的直接演示）。",
           "",
           "## 示例",

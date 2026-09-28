@@ -25,7 +25,7 @@
 
 ## 填入 README ▢
 - baseline PR-AUC / ROC-AUC（无 embargo）：0.5645 / 0.9138
-- 线下→线上乐观 gap（PR-AUC）：0.5645 → 0.5323（Δ -0.0322，embargo 后掉了）
+- 训练/验证窗口联合变化（PR-AUC）：0.5645 → 0.5323（Δ -0.0322，embargo 后掉了）
 - recall@容量（=有效拦截率，top1%，无 embargo）：0.262
 
 > 校准意外：全局 ECE 仅 0.0071（很低）—— LightGBM logloss 训练全局已较准。但 3.4% 基率下等宽 ECE

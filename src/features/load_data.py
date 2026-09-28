@@ -39,7 +39,7 @@ def load_merged(save: bool = True) -> pd.DataFrame:
     print(f"      → {idy.shape[0]:,} 行 × {idy.shape[1]} 列")
 
     print("[3/4] 按 TransactionID 做 left join 合并 …")
-    merged = txn.merge(idy, on="TransactionID", how="left")
+    merged = txn.merge(idy, on="TransactionID", how="left", validate="one_to_one")
     print(f"      → 合并后 {merged.shape[0]:,} 行 × {merged.shape[1]} 列")
 
     if save:
