@@ -147,7 +147,7 @@
   "generator_verified": true
  },
  "drift_monitor.md": {
-  "sha256_machine_only": "9a3dcfa5649ecc9c02645943aa1b84df514b9708609e12b6fc69b5484b5b1248",
+  "sha256_machine_only": "cda53a8e74856eae46a1c7e941d35e9c395f169183b571bc76ba5a0ef389aa24",
   "tier": "heavy",
   "command": "python -m src.eval.drift_monitor",
   "has_human_block": true,
