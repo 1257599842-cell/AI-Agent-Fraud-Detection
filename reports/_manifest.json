@@ -42,7 +42,7 @@
   "generator_verified": true
  },
  "agent_gang_validity.md": {
-  "sha256_machine_only": "39bebaee76d36d36c20796f60d467e7c668dbd46ea09be6c6f4e922678424ffc",
+  "sha256_machine_only": "375a79404143e5c54c54f89adae99c42edf08cf67927b07975821433d4379eef",
   "tier": "cheap",
   "command": "python -m src.eval.gang_validity",
   "has_human_block": false,
@@ -126,7 +126,7 @@
   "generator_verified": true
  },
  "calibration.md": {
-  "sha256_machine_only": "358ffaa1c0abaf6b8ae9ac827481caa1454ce947d8dcc6e5422161956a49a3ec",
+  "sha256_machine_only": "417eeeb2af71895afb9dc741e27b15778dcd8c74c81d081e59f91815c59efb12",
   "tier": "heavy",
   "command": "python -m src.model.calibration",
   "has_human_block": true,
@@ -140,7 +140,7 @@
   "generator_verified": true
  },
  "disposition.md": {
-  "sha256_machine_only": "5aabdf611ffb2d6b32214cc53af8fd6e7d37dffd3b518174d7d0dcc31d13f804",
+  "sha256_machine_only": "0054b8812e27bf3e33a07e94e5075eaa73e25fc89cc0d9ae7aea980af7ce350b",
   "tier": "cheap",
   "command": "python -m src.agent.disposition",
   "has_human_block": false,
@@ -245,7 +245,7 @@
   "generator_verified": true
  },
  "selective_bias.md": {
-  "sha256_machine_only": "85d69c0cac8bb81e4dd8f1c0412711c503d35a7338b0d05c682afa795ae3b731",
+  "sha256_machine_only": "223269da0146b0edcb64845e76c04de42451c7147c74596fa1bf3259cf28e2f8",
   "tier": "heavy",
   "command": "python -m src.eval.selective_bias",
   "has_human_block": false,

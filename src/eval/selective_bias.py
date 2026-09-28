@@ -146,7 +146,15 @@ def _write_md(naive, recov, n_fraud_test):
         "## 结论（按实际数字）",
         f"- naive 衰减：ROC {n0:.4f} → {nL:.4f}（Δ {nL-n0:+.4f}）——放行欺诈被当好人喂回，模型逐轮变窄。",
         f"- recovery：ROC {r0:.4f} → {rL:.4f}；末轮相对 naive 救回 {rL-nL:+.4f}。",
-        "- 机制量化：naive 末轮把约 (见表) 笔真欺诈误标成 legit；随机抽检用少量无偏样本打破闭环。",
+        # 「救回多少」单看绝对值不好判量级，除以衰减幅度才知道补回了几成。
+        # 但必须同时报「recovery 自己也掉了多少」——否则读起来像「完全救回」，那不成立。
+        f"- **救回占衰减的比例：{(rL-nL)/(n0-nL):.1%}**"
+        f"（救回 {rL-nL:+.4f} ÷ 衰减 {n0-nL:.4f}）。"
+        f"注意 recovery 自身也从 {r0:.4f} 掉到 {rL:.4f}（Δ {rL-r0:+.4f}）——"
+        f"**是缓解，不是消除**：未被抽检的放行样本仍被伪标为 0。",
+        f"- 机制量化：naive 三轮把 "
+        + " / ".join(f"{d['poison']:,}" for d in naive if d["poison"])
+        + " 笔真欺诈误标成 legit；随机抽检用少量无偏样本打破闭环。",
         "- 接 ⑩：这就是回流偏差的来源，探索预算（随机放行抽检）是无偏锚定；delta 记 naive→recovery。",
     ]
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)

@@ -45,11 +45,23 @@ TEST_LO = 146
 
 
 def decision_region_gap(y, p, frac):
-    """决策区间校准 gap：按预测分取 top frac，比较 平均预测 vs 实际欺诈率。"""
+    """决策区间校准 gap：按预测分取 top frac，比较 平均预测 vs 实际欺诈率。
+
+    一并返回该区间的 **抽样标准误** 与 **gap/SE 信噪比**——否则"gap 小"只是个观感：
+    top2% 只有约 2 千笔，光靠抽样运气就能让实际率偏离真值 ±0.01 量级。
+    没有 SE 就分不清「本来就准」和「样本太少看不出不准」。
+
+    近似口径（一阶，必须随数字一起讲）：把区间内标签视作 k 次独立伯努利，
+    SE = sqrt(p̂(1−p̂)/k)，只刻画**实际率**的抽样波动；
+    未计入①区间成员本身由 p 排序选出（选择效应）、②平均预测值自身的不确定性。
+    """
     k = max(1, int(len(p) * frac))
     top = np.argsort(-p)[:k]
     pred, actual = float(p[top].mean()), float(y[top].mean())
-    return pred, actual, abs(pred - actual)
+    gap = abs(pred - actual)
+    se = float(np.sqrt(actual * (1 - actual) / k)) if k > 0 else float("nan")
+    z = gap / se if se > 0 else float("nan")
+    return pred, actual, gap, k, se, z
 
 
 def cal_metrics(y, p):
@@ -58,7 +70,9 @@ def cal_metrics(y, p):
     return {
         "ece": float(ece(y, p)), "brier": float(brier_score_loss(y, p)),
         "top1_pred": d1[0], "top1_actual": d1[1], "top1_gap": d1[2],
+        "top1_n": d1[3], "top1_se": d1[4], "top1_z": d1[5],
         "top2_pred": d2[0], "top2_actual": d2[1], "top2_gap": d2[2],
+        "top2_n": d2[3], "top2_se": d2[4], "top2_z": d2[5],
     }
 
 
@@ -180,6 +194,27 @@ def _write_md(results, m_old, m_near, n_test, n_near, n_old):
         "",
         "> 诚实读法：比较 raw 与校准后的 **top1~2% gap**（决策区间）与全局 ECE。若 raw 的决策区间 gap 已很小、"
         "而校准把它变大，说明模型本已较准、blanket 校准反伤稀疏尾（图 06 右上角看顶箱是否偏离对角线）。别只看全局 ECE 下降就以为校准有用。",
+        "",
+        # 「gap 小」单独看只是观感。区间只有约两千笔，抽样噪声本身就有 0.01 量级——
+        # 不给 SE，就分不清「本来就准」与「样本太少看不出不准」，
+        # 也就没有资格说 raw 的 gap 统计上等于零。
+        "### 1.1 gap 的信噪比（gap ÷ 抽样标准误）\n",
+        f"区间样本量：top1% = {raw['top1_n']:,} 笔，top2% = {raw['top2_n']:,} 笔。\n",
+        "| 方法 | top1% gap | top1% SE | **gap/SE** | top2% gap | top2% SE | **gap/SE** |",
+        "|---|---|---|---|---|---|---|",
+        f"| raw（未校准）| {raw['top1_gap']:.3f} | {raw['top1_se']:.3f} | **{raw['top1_z']:.1f}** | "
+        f"{raw['top2_gap']:.3f} | {raw['top2_se']:.3f} | **{raw['top2_z']:.1f}** |",
+        f"| Platt(near) | {platt['top1_gap']:.3f} | {platt['top1_se']:.3f} | **{platt['top1_z']:.1f}** | "
+        f"{platt['top2_gap']:.3f} | {platt['top2_se']:.3f} | **{platt['top2_z']:.1f}** |",
+        f"| Isotonic(near) | {iso['top1_gap']:.3f} | {iso['top1_se']:.3f} | **{iso['top1_z']:.1f}** | "
+        f"{iso['top2_gap']:.3f} | {iso['top2_se']:.3f} | **{iso['top2_z']:.1f}** |",
+        "",
+        f"> 读法：`gap/SE` < 2 表示该 gap 与零**不可区分**（落在抽样噪声内）；远大于 2 才是可报的真偏差。"
+        f"raw 在 top2% 上 gap/SE = **{raw['top2_z']:.1f}**，"
+        f"而 Platt 是 **{platt['top2_z']:.1f}**、Isotonic 是 **{iso['top2_z']:.1f}**。",
+        "> ⚠️ **SE 是一阶近似**：把区间内标签当作 k 次独立伯努利，`SE = sqrt(p̂(1−p̂)/k)`，"
+        "只刻画**实际率**的抽样波动。**未计入**①区间成员本身由 p 排序选出（选择效应）、"
+        "②平均预测值自身的不确定性。所以它是「这个 gap 值不值得当真」的量级判据，**不是正式假设检验**。",
         "",
         "## 2. 漂移对照：近窗 vs 旧窗（同 isotonic，都评 test）\n",
         "| 校准窗 | 样本数 | 全局 ECE | Brier | top2% gap |",
