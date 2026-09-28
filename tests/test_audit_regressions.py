@@ -258,3 +258,79 @@ class WholePipelineBudget(unittest.TestCase):
             self.assertFalse(out['schema_violations'])
 
 if __name__=='__main__': unittest.main()
+
+
+
+
+
+
+class CausalPriorStatsWindow(unittest.TestCase):
+    """`causal_prior_stats` 新增可选 `window`（等宽滑窗标签窗，给 embargo_age_control 用）。
+
+    这个函数是**全项目图特征的唯一入口**——graph_features / kaggle_submit /
+    embargo_age_control 都走它。加参数时最容易犯的错是默认路径悄悄变了值，
+    而图特征一变，主实验 +0.0387、规则库准入榜、gang_score、网络项会**一起漂**，
+    且不会有任何报错。所以把「默认行为逐元素不变」焊成测试。
+    """
+    D = 86_400
+
+    def test_window_none_is_byte_for_byte_the_old_truncation(self):
+        from src.features.graph_features import causal_prior_stats
+        rng = np.random.default_rng(0)
+        for _ in range(30):
+            n = int(rng.integers(50, 400))
+            dt = np.sort(rng.integers(0, 182 * self.D, n))
+            fraud = rng.integers(0, 2, n)
+            grp = rng.integers(0, 6, n).astype(np.int64)
+            emb = int(rng.integers(1, 70)) * self.D
+            a = causal_prior_stats(dt, fraud, grp, emb)
+            b = causal_prior_stats(dt, fraud, grp, emb, window=None)
+            for x, y in zip(a, b):
+                np.testing.assert_array_equal(x, y)
+
+    def test_window_wide_enough_degenerates_to_truncation(self):
+        """滑窗宽到覆盖全部历史时，必须与截断口径重合——否则下界指针有 off-by-one。"""
+        from src.features.graph_features import causal_prior_stats
+        rng = np.random.default_rng(1)
+        for _ in range(20):
+            n = int(rng.integers(50, 300))
+            dt = np.sort(rng.integers(0, 182 * self.D, n))
+            fraud = rng.integers(0, 2, n)
+            grp = rng.integers(0, 4, n).astype(np.int64)
+            emb = int(rng.integers(1, 40)) * self.D
+            a = causal_prior_stats(dt, fraud, grp, emb)
+            c = causal_prior_stats(dt, fraud, grp, emb, window=10 ** 12)
+            for x, y in zip(a, c):
+                np.testing.assert_array_equal(x, y)
+
+    def test_window_counts_only_the_band(self):
+        """手算一格：邻居 day60/95/118/135/148，本笔 day150。
+
+        emb=21d → 上界 day129；window=39d → 下界 day90（严格晚于）
+        → 带内只剩 day95(正常) 与 day118(欺诈) → obs_cnt=2、obs_fraud=1。
+        """
+        from src.features.graph_features import causal_prior_stats
+        dt = np.array([60, 95, 118, 135, 148, 150]) * self.D
+        fraud = np.array([1, 0, 1, 1, 0, 0])
+        grp = np.zeros(6, np.int64)
+
+        _, oc, of = causal_prior_stats(dt, fraud, grp, 21 * self.D)
+        self.assertEqual((oc[-1], of[-1]), (3, 2))          # 截断：day60/95/118
+
+        _, oc, of = causal_prior_stats(dt, fraud, grp, 21 * self.D, window=39 * self.D)
+        self.assertEqual((oc[-1], of[-1]), (2, 1))          # 滑窗：day95/118
+
+        _, oc, of = causal_prior_stats(dt, fraud, grp, 60 * self.D, window=39 * self.D)
+        self.assertEqual((oc[-1], of[-1]), (1, 1))          # 滑窗：仅 day60
+
+    def test_window_never_exceeds_the_truncation_count(self):
+        """滑窗是截断的子集，obs_cnt/obs_fraud 都不得超过截断版——方向性护栏。"""
+        from src.features.graph_features import causal_prior_stats
+        rng = np.random.default_rng(2)
+        dt = np.sort(rng.integers(0, 182 * self.D, 500))
+        fraud = rng.integers(0, 2, 500)
+        grp = rng.integers(0, 5, 500).astype(np.int64)
+        _, oc_t, of_t = causal_prior_stats(dt, fraud, grp, 21 * self.D)
+        _, oc_w, of_w = causal_prior_stats(dt, fraud, grp, 21 * self.D, window=30 * self.D)
+        self.assertTrue((oc_w <= oc_t).all())
+        self.assertTrue((of_w <= of_t).all())

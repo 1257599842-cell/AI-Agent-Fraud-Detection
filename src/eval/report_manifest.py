@@ -45,6 +45,7 @@ GENERATORS = {
     "calib_window_size.md": (["src.model.calib_window_size"], "heavy"),
     "cost_sensitive.md": (["src.model.cost_sensitive"], "heavy"),
     "embargo_decomposition.md": (["src.model.embargo_control"], "heavy"),
+    "embargo_age_control.md": (["src.model.embargo_age_control"], "heavy"),
     "graph_vs_tabular.md": (["src.model.graph_vs_tabular"], "heavy"),
     "graph_leak_audit.md": (["src.model.graph_leak_audit"], "heavy"),
     "graph_feature_ablation.md": (["src.model.graph_feature_ablation"], "heavy"),

@@ -160,6 +160,13 @@
   "has_human_block": false,
   "generator_verified": true
  },
+ "embargo_age_control.md": {
+  "sha256_machine_only": "bca3d9088c23cd7b161e06033e01a26afc7316596a613839b35ff2077376099d",
+  "tier": "heavy",
+  "command": "python -m src.model.embargo_age_control",
+  "has_human_block": false,
+  "generator_verified": true
+ },
  "embargo_decomposition.md": {
   "sha256_machine_only": "3df4ad331c53b7ef6e942cba21dd8a95f5f1121fcad968aba36030f86dde7af3",
   "tier": "heavy",

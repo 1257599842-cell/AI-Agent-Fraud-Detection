@@ -34,10 +34,19 @@ OUT = PROJECT_ROOT / "data" / "processed" / f"graph_features{_suffix}.parquet"
 BASE_COLS = ["card1", "addr1", "P_emaildomain", "DeviceInfo"]
 
 
-def causal_prior_stats(dt, fraud, group_codes, embargo):
+def causal_prior_stats(dt, fraud, group_codes, embargo, window=None):
     """按 group 分组、组内按时间：返回每行的
        prior_cnt（组内更早行数）、obs_cnt（DT≤t−emb 的更早行数）、obs_fraud（其中的欺诈数）。
-    two-pointer，O(n)。"""
+    two-pointer，O(n)。
+
+    `window`（秒，可选）——**默认 None = 原行为，一个字节都不变**。
+    给定时，标签窗从「截断」变成「**等宽滑窗**」：只数 `t−emb−window < DT ≤ t−emb` 的邻居。
+    为什么要它：拉长 embargo（21→60 天）会**同时**改变可用标签数量、标签年龄、
+    估计噪声与缺失率——那 −39.6% 的增益缩水是个**无法归因的联合差异**。
+    等宽滑窗把「数量」这一维大致固定住（窗宽相同），才可能把差异归给「年龄」。
+    ⚠️ 等宽 **不等于** 等量（交易密度随时间变、实体早期历史短），所以用它的实验
+    **必须实测两臂的 obs_cnt 分布是否真对上**，对不上就报残余不平衡、不许当已对齐。
+    """
     n = len(dt)
     order = np.lexsort((dt, group_codes))          # 先按 group、再按 dt 升序
     g, d, f = group_codes[order], dt[order], fraud[order].astype(np.int64)
@@ -51,13 +60,18 @@ def causal_prior_stats(dt, fraud, group_codes, embargo):
         dd, ff = d[s:e], f[s:e]
         cumf = np.concatenate(([0], np.cumsum(ff)))   # 前缀：cumf[k]=[0,k) 的欺诈数
         p = 0
+        q = 0                                          # 滑窗下界指针（window=None 时恒为 0）
         for i in range(len(dd)):
             prior_cnt[s + i] = i
             thr = dd[i] - embargo
             while p < i and dd[p] <= thr:
                 p += 1
-            obs_cnt[s + i] = p
-            obs_fraud[s + i] = cumf[p]
+            if window is not None:
+                lo_thr = thr - window
+                while q < p and dd[q] <= lo_thr:       # 下界同样取「严格晚于」，与上界同尺
+                    q += 1
+            obs_cnt[s + i] = p - q
+            obs_fraud[s + i] = cumf[p] - cumf[q]
     inv = np.empty(n, np.int64)
     inv[order] = np.arange(n)
     return prior_cnt[inv], obs_cnt[inv], obs_fraud[inv]
