@@ -6,6 +6,13 @@
   "has_human_block": false,
   "generator_verified": true
  },
+ "agent_autonomy_surface.md": {
+  "sha256_machine_only": "6ae1eecb6aec41fd857e24291cfe154dd5059989c19a507a26ee99e084df39be",
+  "tier": "cheap",
+  "command": "python -m src.eval.agent_autonomy_surface",
+  "has_human_block": false,
+  "generator_verified": true
+ },
  "agent_cost_attribution.md": {
   "sha256_machine_only": "9f8f87828dd1d7c87fb1029df88b14c7d44b1ca992e79069f91756a5dacb6814",
   "tier": "cheap",
