@@ -104,6 +104,17 @@ class TestSiteContract(unittest.TestCase):
                          "Risk models. Decisions. Evidence."):
             self.assertNotIn(old_copy, self.html)
 
+    def test_agent_overview_describes_implemented_capabilities(self):
+        readme = (ROOT / "README.md").read_text()
+        self.assertIn("Agent 调查使用", readme)
+        self.assertIn("evidence_ids", readme)
+        self.assertIn("工具调用与输出验收", self.html)
+        self.assertIn("闸门与调用记账实现", self.html)
+        for content in (readme, self.html,
+                        (ROOT / "docs/EVIDENCE.md").read_text(),
+                        (ROOT / "MODEL_CARD.md").read_text()):
+            self.assertNotIn("agent_autonomy_surface.md", content)
+
 
 if __name__ == "__main__":
     unittest.main()

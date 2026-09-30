@@ -1,8 +1,7 @@
 {
-  "model_card_sha256": "51fbbf0585fede372fbcaa5adbacfb1941e5e0bb4d9df40510ba67664c8978b3",
+  "model_card_sha256": "73aa539c4e3afaf4b0726212881ff31772764da413d8e9591112d041900a3b0d",
   "sources": {
     "EXPERIMENT_PROTOCOL.md": "483ba93da3d58516f1e750b25fa766488be574d1fdebce94a80464e1d4f232a5",
-    "reports/agent_autonomy_surface.md": "6ae1eecb6aec41fd857e24291cfe154dd5059989c19a507a26ee99e084df39be",
     "reports/agent_disposition_sensitivity.md": "bb8322ce74b75378cdcc24755b0e3425533cda43ed3456751e1920d4aa3ab7d5",
     "reports/agent_eval_r1.md": "1a7fbb4f9f96a21e4a05065083fb3d8fac01997cfc9f897918954c7277f6fa20",
     "reports/agent_gang_validity.md": "375a79404143e5c54c54f89adae99c42edf08cf67927b07975821433d4379eef",

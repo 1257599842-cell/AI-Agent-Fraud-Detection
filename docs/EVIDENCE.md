@@ -28,7 +28,7 @@
 
 - [事实账本与两级数字对账](../reports/agent_grounding.md)：r1 的 565 条数值 finding 中，522 条引用充分、43 条引用不完整；2,672 个数字经机械检查未发现事实池外数字。**这不是语义正确率，也不是“零幻觉”。**
 - [证据解释 vs 决策](../reports/agent_evidence_vs_decision.md)：历史对照支持将证据组织与成本决策拆开；一致率的参照不是独立真值。
-- [自主性活动面](../reports/agent_autonomy_surface.md)：四轮 318 份归档的事实集合高度集中；770/770 次统计查询都查询本笔字段值。**归档事实不等于完整调用轨迹；尚未完成固定流程/单次 LLM/多轮工具循环的三臂对照。**
+- [工具接口与事实账本](../src/agent/tools.py)：交易信息、实体关联、历史统计、规则与案例检索采用统一的事实结构；报告通过证据 ID 引用本次调查取到的事实。
 - [缺陷分类](../reports/agent_defect_taxonomy.md)：少量人工核查用于识别错误形态，不能外推总体错误率；LLM-as-judge 未作为可靠软层验收依据。
 - [受控翻转](../reports/agent_flip_experiment.md)、[证据不足实验](../reports/agent_abstention.md)：小规模受控干预，不是一般化的鲁棒性保证。
 - [当前管道](../src/agent/pipeline.py)、[工具后端](../src/agent/backends.py)：v5 限制最多 8 次工具请求尝试，校验不通过的草稿隔离并模板降级。**当前代码保护与历史付费评估分属不同版本，不能混算。**

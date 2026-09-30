@@ -269,7 +269,7 @@ footer{padding:30px 0 42px;color:var(--muted);font-size:13px}
       <h3>补充验证</h3>
       <div class="proof-item"><b>时间泄漏与同秒边界</b><p>结构历史按交易先后可见，标签历史另设成熟期。SQL 对账还故意使用错误窗函数，确认检查能发现同秒边界错误。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/sql_vs_pandas_reconciliation.md">逐值对账与负对照 ↗</a></div>
       <div class="proof-item"><b>报告数字与引用核验</b><p>结论携带 evidence_ids，能展开到事实值与时间窗。数字匹配、引用完整和推理正确是三件不同的事。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/agent_grounding.md">两级数字对账 ↗</a></div>
-      <div class="proof-item"><b>工具调用的必要性</b><p>现有归档的取证集合高度集中；多轮工具编排是否比固定取证更好，尚未得到证明。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/agent_autonomy_surface.md">Agent 自主性测量 ↗</a></div>
+      <div class="proof-item"><b>工具调用与输出验收</b><p>四类工具采用统一事实结构；报告引用本次调查的证据。管道执行调用预算和输出检查，失败时进入模板降级路径。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/src/agent/pipeline.py">Agent 调查管道 ↗</a></div>
     </div>
   </div>
 </section>
@@ -311,7 +311,7 @@ footer{padding:30px 0 42px;color:var(--muted);font-size:13px}
   </div>
   <div class="proof-grid" style="margin-top:24px">
     <div class="card"><h3>LLM 报告与模板降级对照</h3><div class="seg" id="fbseg" role="group" aria-label="历史正常与降级案例"><button type="button" data-m="llm" aria-pressed="true">历史 LLM 报告</button><button type="button" data-m="degraded" aria-pressed="false">确定性模板降级</button></div><div id="fb" style="margin-top:20px"></div><p class="note">这里切换的是历史缓存，不是实时服务健康状态；历史验收结果不代表 v5 已重新完成付费评估。</p></div>
-    <div class="card"><h3>调查闸门与历史调用成本</h3><div class="funnel" id="funnel"></div><p class="note" id="funnote"></p><div class="callout">多轮编排的收益还没有被独立识别。待完成的对照实验是：固定取证 + 模板 / 固定取证 + 单次 LLM / 多轮工具循环。</div><p class="source-line"><a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/agent_autonomy_surface.md">已有归档测量 ↗</a></p></div>
+    <div class="card"><h3>调查闸门与历史调用成本</h3><div class="funnel" id="funnel"></div><p class="note" id="funnote"></p><div class="callout">四动作策略中，公式判为放行的交易默认跳过 LLM 调查。进入调查后，管道累计记录 token 用量与估算费用，工具请求和降级取证共同受调用预算约束。</div><p class="source-line"><a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/src/agent/pipeline.py">闸门与调用记账实现 ↗</a></p></div>
   </div>
 </section>
 <section id="resources" aria-labelledby="resources-title">

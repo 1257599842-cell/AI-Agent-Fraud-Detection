@@ -46,7 +46,7 @@ flowchart LR
 | LLM 输出必须能追到本次调用返回的事实 | [事实账本](src/agent/tools.py) · [调查管道](src/agent/pipeline.py) | [Agent 契约测试](tests/test_agent_contracts.py) · [数字对账](reports/agent_grounding.md) |
 | 服务特征不能只凭离线测试推定正确 | [历史特征查询](src/serving/feature_store.py) · [API](src/serving/app.py) | [独立回放与负对照](reports/online_replay.md) |
 
-关于 Agent 的一个未决问题：多轮工具选择是否优于固定流程？[四轮 318 份归档的测量](reports/agent_autonomy_surface.md)显示取证集合高度集中，770/770 次统计查询均针对本笔字段值。**现有证据尚不能证明自主编排的增益**；完整调用轨迹与固定流程 / 单次 LLM / 多轮工具循环三臂对照仍需补充。
+Agent 调查使用交易信息、实体关联、历史统计、规则与案例检索四类工具。工具返回统一登记为事实，报告结论通过 `evidence_ids` 引用；管道记录调用用量，并对工具预算、输出结构、引用和时间边界执行检查。调用或验收失败时，进入模板降级路径。
 
 ## 交互演示
 
