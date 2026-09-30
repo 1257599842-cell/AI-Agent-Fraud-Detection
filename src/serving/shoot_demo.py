@@ -1,104 +1,112 @@
-"""用 WebKit（Safari 同引擎）给演示页出图 + 实测断网现场的三件事。
+"""真实浏览器检查与截图：桌面/手机、两种主题、全部案例、离线交互。
 
-**为什么用 WebKit 而不是 Chromium**：owner 现场用 Safari 演示，
-用同一引擎渲染才是忠实的检查——Chrome 上好看不代表 Safari 上不塌。
-
-产出 reports/demo/shots/：浅色/深色各一张 1280×720，另加两张整页长图备用。
-同时**实测**（此前只能静态推断）：横向滚动、JS 运行时报错、字体回退后的实际渲染。
-
-用法：python -m src.serving.shoot_demo
+默认 WebKit；已有 Chrome 可用 --browser chromium --channel chrome。
+--check-only 不写截图，可用于持续集成。截图是页面真实渲染，不做后期合成。
 """
-
-import sys
+import argparse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PAGE = ROOT / "reports" / "demo" / "index.html"
 OUT = ROOT / "reports" / "demo" / "shots"
-W, H = 1280, 720
+
+
+def no_overflow(page, context):
+    overflow = page.evaluate("document.documentElement.scrollWidth - innerWidth")
+    assert overflow <= 0, f"{context}: 横向溢出 {overflow}px"
+
+
+def scroll_to(page, selector):
+    page.locator(selector).evaluate(
+        "el => window.scrollTo(0, el.getBoundingClientRect().top + scrollY - 90)")
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--browser", choices=("webkit", "chromium"), default="webkit")
+    parser.add_argument("--channel", help="使用本机 Chrome: --channel chrome")
+    parser.add_argument("--check-only", action="store_true")
+    args = parser.parse_args()
+    if args.channel and args.browser != "chromium":
+        parser.error("--channel 只适用于 chromium")
     from playwright.sync_api import sync_playwright
-    OUT.mkdir(parents=True, exist_ok=True)
-    errors, results = [], []
 
+    if not args.check_only:
+        OUT.mkdir(parents=True, exist_ok=True)
+    errors, requests = [], []
     with sync_playwright() as pw:
-        b = pw.webkit.launch()
-        for theme, scene in [("light", "sandbox"), ("dark", "case")]:
-            pg = b.new_page(viewport={"width": W, "height": H}, device_scale_factor=2)
-            pg.on("console", lambda m: errors.append(f"[console.{m.type}] {m.text}")
-                  if m.type == "error" else None)
-            pg.on("pageerror", lambda e: errors.append(f"[pageerror] {e}"))
-            pg.goto(PAGE.as_uri())            # file:// —— 与现场双击打开完全一致
-            pg.wait_for_timeout(400)
+        launch = {"channel": args.channel} if args.channel else {}
+        browser = getattr(pw, args.browser).launch(**launch)
+        for width in (320, 375, 768, 1280, 1440):
+            for theme in ("light", "dark"):
+                context = browser.new_context(
+                    viewport={"width": width, "height": 900}, offline=True,
+                    reduced_motion="reduce", device_scale_factor=1)
+                page = context.new_page()
+                page.on("pageerror", lambda e: errors.append(str(e)))
+                page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
+                page.on("request", lambda r: requests.append(r.url)
+                        if r.url.startswith(("http:", "https:")) else None)
+                page.goto(PAGE.as_uri())
+                page.wait_for_function("document.querySelectorAll('.caseitem').length === 7")
+                if theme == "dark":
+                    page.click("#theme")
+                no_overflow(page, f"{width}/{theme}/首页")
+                if width == 1280 and theme == "light" and not args.check_only:
+                    page.screenshot(path=str(OUT / "overview.png"))
 
-            if theme == "dark":
-                pg.click("#theme")
-                pg.wait_for_timeout(300)
+                # 所有案例都展开所有证据：长文本不能撑破移动端。
+                for i in range(7):
+                    page.locator(".caseitem").nth(i).click()
+                    page.eval_on_selector_all(".finding", "els => els.forEach(el => el.open = true)")
+                    assert page.locator('#cases [aria-pressed="true"]').count() == 1
+                    assert page.locator("#detail .teach").inner_text().strip()
+                    assert "**" not in page.locator("#detail .teach").inner_text()
+                    no_overflow(page, f"{width}/{theme}/案例{i}")
 
-            if scene == "sandbox":
-                # p=0.30、金额 $20、gang=无 → 五档 argmin = 加验证，且与第二名分得最开。
-                # **别用 p=0.24/$100**：那一格已翻回挂起（$76 才是 stepup），坐标越界一格。
-                pg.eval_on_selector("#p", "el=>{el.value='-0.5229';el.dispatchEvent(new Event('input'))}")
-                pg.eval_on_selector("#a", "el=>{el.value='1.3010';el.dispatchEvent(new Event('input'))}")
-                pg.wait_for_timeout(200)
-                # 对准标题而非 section 盒：section 上下 padding 相加 128px，
-                # 按盒顶取景会在主图顶上留一条大空带。
-                target = pg.query_selector("section:nth-of-type(2) h2")
-            else:
-                # 案卷：选 p≈0.007 那笔。finding 3、4 由模板默认展开（P0-1/P0-2），
-                # 无需点击。对准 finding 3——它供结构型那条，finding 4 紧随其后。
-                pg.eval_on_selector_all(
-                    ".caseitem", "els=>els.find(e=>e.textContent.includes('0.006987')).click()")
-                pg.wait_for_timeout(300)
-                target = pg.query_selector("#detail .finding[open]")
+                # 验证四/五动作、关联分和成本条都真能交互。
+                assert page.locator("#rows .rowc").count() == 4
+                page.click('#tiers [data-tiers="5"]')
+                assert page.locator("#rows .rowc").count() == 5
+                page.eval_on_selector("#p", "el => {el.value='-0.52'; el.dispatchEvent(new Event('input'))}")
+                page.eval_on_selector("#a", "el => {el.value='1.30'; el.dispatchEvent(new Event('input'))}")
+                assert page.locator("#rows .win").get_attribute("data-action") == "stepup"
+                page.click('#tiers [data-tiers="4"]')
+                assert page.locator("#rows .win").get_attribute("data-action") == "hold"
+                page.click('#gseg [data-g="1"]')
+                assert not page.locator("#negative-note").is_hidden()
+                assert page.locator("#rows .win").get_attribute("data-action") == "escalate"
+                fills = page.locator(".bar-i").evaluate_all(
+                    "els => els.map(el => ({w: el.getBoundingClientRect().width, h: el.getBoundingClientRect().height}))")
+                assert all(x["w"] > 0 and x["h"] > 0 for x in fills), "成本条塌陷"
+                no_overflow(page, f"{width}/{theme}/沙盘")
 
-            ovf = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
-            if target:
-                # 用 rect+scrollY，不用 offsetTop——offsetTop 是相对 offsetParent 的，
-                # finding 嵌在多层定位容器里，按它滚会冲过头把标题切掉。
-                pg.evaluate("el=>window.scrollTo(0, el.getBoundingClientRect().top"
-                            "+window.scrollY-80)", target)
-                pg.wait_for_timeout(250)
+                page.click('#fbseg [data-m="degraded"]')
+                assert "degraded" in page.locator("#fb").inner_text()
+                assert "$0.0000" in page.locator("#fb").inner_text()
+                page.click('#fbseg [data-m="llm"]')
+                assert "llm" in page.locator("#fb").inner_text()
+                no_overflow(page, f"{width}/{theme}/降级")
 
-            if scene == "case":
-                # Markdown 记号必须已转成标签——曾把 ** 原样漏在页面上
-                html = pg.eval_on_selector("#detail .teach", "el=>el.innerHTML")
-                assert "<b>" in html and "**" not in html, "teaches 的 ** 未转粗体"
-                # P0-2 由脚本守住，不靠肉眼看一次：视口内必须同时有
-                # 标签型 chip、结构型 chip、以及 embargo 说明行。缺一即拍废。
-                seen = pg.evaluate("""() => {
-                  const inView = el => { const r = el.getBoundingClientRect();
-                    return r.top >= 0 && r.bottom <= window.innerHeight; };
-                  const txt = [...document.querySelectorAll('#detail .finding[open] .chipsm')]
-                    .filter(inView).map(e => e.textContent);
-                  const emb = [...document.querySelectorAll('#detail .embargo')].some(inView);
-                  return {lb: txt.some(t => t.includes('标签型')),
-                          st: txt.some(t => t.includes('结构型')), emb: emb}; }""")
-                assert seen["lb"] and seen["st"], f"P0-2 两型未同屏：{seen}"
-                assert seen["emb"], "P0-2 embargo 说明行不在视口内"
-            f = OUT / f"{theme}_{scene}_{W}x{H}.png"
-            pg.screenshot(path=str(f))
-            full = OUT / f"{theme}_full.png"
-            pg.screenshot(path=str(full), full_page=True)
-            results.append((theme, scene, ovf, f.stat().st_size // 1024,
-                            full.stat().st_size // 1024))
-            pg.close()
-        b.close()
-
-    print(f"{'主题':<7}{'场景':<9}{'横向溢出':>9}{'视口图KB':>10}{'整页图KB':>10}")
-    for t, s, o, k1, k2 in results:
-        flag = "✅ 0" if o <= 0 else f"❌ {o}px"
-        print(f"{t:<8}{s:<10}{flag:>9}{k1:>10}{k2:>10}")
-    print()
-    if errors:
-        print("❌ 运行时报错：")
-        for e in dict.fromkeys(errors):
-            print("   ", e)
-        sys.exit(1)
-    print("✅ 无 JS 运行时报错（file:// 直开，与现场双击一致）")
-    print(f"✅ 图 → {OUT.relative_to(ROOT)}/")
+                if width == 1280 and not args.check_only:
+                    page.set_viewport_size({"width": 1280, "height": 720})
+                    if theme == "light":
+                        page.click('#gseg [data-g="0"]')
+                        scroll_to(page, "#sandbox h2")
+                        page.screenshot(path=str(OUT / "light_sandbox_1280x720.png"))
+                    else:
+                        page.locator('.caseitem').first.click()
+                        page.locator(".finding").nth(2).locator("summary").click()
+                        scroll_to(page, "#detail .finding[open]")
+                        page.screenshot(path=str(OUT / "dark_case_1280x720.png"))
+                print(f"✅ {width}px / {theme}: 7 案例、四/五动作、负成本提示、降级、无横向溢出")
+                context.close()
+        browser.close()
+    assert not errors, f"浏览器错误：{errors}"
+    assert not requests, f"离线页面发起了远程请求：{requests}"
+    print("✅ 无 JS 错误、无远程资源请求；全部交互在 offline 模式下通过")
+    if not args.check_only:
+        print("✅ 已更新 overview.png / light_sandbox_1280x720.png / dark_case_1280x720.png")
 
 
 if __name__ == "__main__":

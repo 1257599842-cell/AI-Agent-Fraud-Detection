@@ -3,464 +3,459 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI 反欺诈调查助手 — 离线演示</title>
+<meta name="description" content="可核验的交易反欺诈项目：时间感知图特征、成本敏感决策、带事实账本的 LLM 调查。查看实验对照、展开案例证据、操作离线决策沙盘。">
+<meta name="color-scheme" content="light dark">
+<title>Fraud Intelligence Lab · 从风险评分到可核验的调查</title>
 <style>
-/* ── 无外部依赖：系统字体栈 + 手写 CSS。断网、file:// 双击均可打开 ── */
 :root{
-  --bg:#ffffff; --surface:#fafafa; --surface2:#f4f4f5; --border:#e4e4e7;
-  --text:#18181b; --muted:#5b5b66; --accent:#2563eb; --accent-soft:#eff4ff;
-  --ok:#15803d; --warn:#b45309; --bad:#b91c1c; --esc:#6d28d9;
-  --ok-bg:#ecfdf3; --warn-bg:#fffbeb; --bad-bg:#fef2f2; --esc-bg:#f5f3ff;
-  --shadow:0 1px 2px rgba(0,0,0,.04);
+  --bg:#f7f8f5; --surface:#ffffff; --surface2:#edf0eb; --border:#dce2d9;
+  --text:#172c26; --muted:#54665e; --accent:#17654c; --accent-soft:#e6f1e9;
+  --ok:#17654c; --warn:#875214; --bad:#b13338; --esc:#694b91;
+  --ok-bg:#e8f3ec; --warn-bg:#fbf1df; --bad-bg:#fceced; --esc-bg:#f0eaf8;
+  --inverse:#ffffff; --hero:#e8efe7;
 }
 html[data-theme="dark"]{
-  --bg:#131316; --surface:#1a1a1e; --surface2:#212126; --border:#2e2e35;
-  --text:#f4f4f5; --muted:#a1a1aa; --accent:#7aa2f7; --accent-soft:#1c2537;
-  --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --esc:#c4b5fd;
-  --ok-bg:#0f2418; --warn-bg:#2a1f06; --bad-bg:#2a1113; --esc-bg:#1e1633;
-  --shadow:0 1px 2px rgba(0,0,0,.3);
+  --bg:#111d19; --surface:#192822; --surface2:#22352c; --border:#374a3f;
+  --text:#edf3eb; --muted:#b1c3b7; --accent:#96d6b4; --accent-soft:#213d2f;
+  --ok:#96d6b4; --warn:#efc285; --bad:#f5a6aa; --esc:#cbb4ee;
+  --ok-bg:#213d2f; --warn-bg:#3d301d; --bad-bg:#40272a; --esc-bg:#342943;
+  --inverse:#12291e; --hero:#1b3025;
 }
 *{box-sizing:border-box}
+html{scroll-padding-top:90px}
 html,body{margin:0;padding:0}
-body{
-  background:var(--bg); color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",
-              "PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif;
-  font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased;
-}
+body{background:var(--bg);color:var(--text);font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:4px}
+a:hover{text-decoration-thickness:2px}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.wrap{max-width:1200px;padding:0 32px;margin:auto}
+.mono,code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
-.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
-section{padding:64px 0;border-top:1px solid var(--border)}
-section:first-of-type{padding-top:52px}   /* P2-6：首屏顶部留白 120px→52px */
-section:first-of-type{border-top:0}
-h1,h2,h3{margin:0;font-weight:640;letter-spacing:-.01em}
-h1{font-size:30px;line-height:1.25}
-h2{font-size:21px;margin-bottom:8px}
-h3{font-size:15px;margin-bottom:8px}
-p{margin:8px 0}
-.sub{color:var(--muted);font-size:14px}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;
-  background:var(--surface2);border-radius:12px;padding:1px 6px}
-
-/* 顶栏 */
-.bar{position:sticky;top:0;z-index:20;background:var(--bg);
-     border-bottom:1px solid var(--border);padding:12px 0}
-.bar .wrap{display:flex;align-items:center;gap:16px}
-.badge{display:inline-flex;align-items:center;gap:8px;padding:4px 12px;
-  border:1px solid var(--border);border-radius:12px;background:var(--surface);
-  font-size:13px;color:var(--muted);white-space:nowrap}
-.badge b{color:var(--text);font-weight:600}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--warn);flex:none}
-.spacer{flex:1}
-button.ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);
-  border-radius:12px;padding:6px 14px;font:inherit;font-size:13px;cursor:pointer}
-button.ghost:hover{border-color:var(--accent);color:var(--accent)}
-
-/* 首屏 */
-.chips{display:flex;gap:16px;flex-wrap:wrap;margin-top:24px}
-.chip{flex:1 1 0;min-width:220px;background:var(--surface);border:1px solid var(--border);
-  border-radius:12px;padding:16px 20px;box-shadow:var(--shadow)}
+.muted,.sub,.note{color:var(--muted)}
+.sub{font-size:15px}
+.note{font-size:13px;line-height:1.7}
+p{margin:10px 0}
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.035em}
+h1{font-size:64px;line-height:1.16}
+h2{font-size:34px;line-height:1.35}
+h3{font-size:19px;line-height:1.5}
+code{padding:2px 5px;background:var(--surface2);border-radius:4px}
+.eyebrow{font-size:13px;letter-spacing:.14em;font-weight:650;color:var(--accent);text-transform:uppercase}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:28px;margin-bottom:28px}
+.section-head p{max-width:520px;margin-bottom:0}
+section{padding:76px 0;border-bottom:1px solid var(--border);scroll-margin-top:16px}
+.skip{position:absolute;top:-60px;left:16px;background:var(--surface);padding:8px;z-index:50}
+.skip:focus{top:8px}
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border)}
+.bar .wrap{display:flex;align-items:center;gap:24px;min-height:72px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:700;font-size:15px;letter-spacing:-.02em;white-space:nowrap}
+.brand-mark{display:grid;place-items:center;width:30px;height:30px;background:var(--accent);color:var(--inverse);border-radius:7px;font-size:16px}
+nav{display:flex;gap:22px;margin-left:auto}
+nav a{font-size:13px;text-decoration:none;color:var(--muted)}
+.ghost{border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);font-size:13px;padding:7px 12px}
+.ghost:hover{border-color:var(--accent)}
+.hero{padding-top:64px;padding-bottom:32px}
+.hero-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:62px;align-items:center}
+.hero h1{margin:20px 0}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero-copy{max-width:550px;font-size:17px;line-height:1.9}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0 18px}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:22px;border:1px solid var(--border);border-radius:7px;padding:11px 18px;text-decoration:none;font-size:14px;font-weight:600;background:var(--surface);color:var(--text)}
+.button.primary{background:var(--accent);border-color:var(--accent);color:var(--inverse)}
+.scope{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.dot{width:7px;height:7px;flex-shrink:0;border-radius:50%;background:var(--accent)}
+.system{background:var(--hero);border:1px solid var(--border);border-radius:16px;padding:24px}
+.system-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;font-size:13px;gap:8px}
+.system-node{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:15px 18px;display:grid;grid-template-columns:27px 1fr auto;align-items:center;gap:10px}
+.system-node .index{color:var(--accent);font-size:13px}
+.system-node b{font-size:15px;font-weight:650}
+.system-node small{display:block;font-size:13px;color:var(--muted)}
+.node-tag{font-size:13px;color:var(--accent);border:1px solid var(--border);padding:2px 7px;border-radius:4px;white-space:nowrap}
+.connector{height:29px;border-left:1px dashed var(--accent);margin-left:30px;padding-left:18px;font-size:13px;color:var(--muted);display:flex;align-items:center}
+.system-note{font-size:13px;color:var(--muted);margin:17px 0 0}
+.chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:48px;border-top:1px solid var(--border)}
+.chip{padding:26px 24px 8px 0}
+.chip+.chip{border-left:1px solid var(--border);padding-left:28px}
 .chip .k{font-size:13px;color:var(--muted)}
-.chip .v{font-size:28px;font-weight:660;margin-top:4px;letter-spacing:-.02em}
-.chip .n{font-size:13px;color:var(--muted);margin-top:4px}
-
-/* 通用卡片 / 表 */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
-  padding:20px;box-shadow:var(--shadow)}
+.chip .v{font-size:29px;font-weight:650;letter-spacing:-.035em;margin:7px 0}
+.chip .n{font-size:13px;color:var(--muted)}
+.chip .n a{white-space:nowrap}
+.grid2{display:grid;grid-template-columns:350px minmax(0,1fr);gap:24px;align-items:start}
+.proof-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:24px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;min-width:0}
+.card-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.pill{display:inline-block;font-size:13px;color:var(--accent);background:var(--accent-soft);border-radius:5px;padding:3px 8px;white-space:nowrap}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{height:40px;padding:0 12px;border-bottom:1px solid var(--border);text-align:left}
-th{font-size:13px;color:var(--muted);font-weight:600}
-td.r,th.r{text-align:right}
+th,td{padding:11px 10px;border-bottom:1px solid var(--border);text-align:left}
+th{font-size:13px;font-weight:500;color:var(--muted)}
 tr:last-child td{border-bottom:0}
-
-/* 沙盘 */
-.grid2{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start}
-.ctl{margin-bottom:20px}
-.ctl label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
-.ctl label b{color:var(--text);font-size:20px;font-weight:660}
-input[type=range]{width:100%;margin-top:8px;accent-color:var(--accent);height:24px}
-.seg{display:flex;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:8px}
-.seg button{flex:1;background:var(--surface);border:0;padding:8px;font:inherit;font-size:13px;
-  color:var(--muted);cursor:pointer;border-right:1px solid var(--border)}
-.seg button:last-child{border-right:0}
-.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);font-weight:600}
-.rowc{display:flex;align-items:center;gap:12px;height:48px;
-  border-bottom:1px solid var(--border);padding:0 12px}
-.rowc:last-child{border-bottom:0}
-.rowc .nm{width:104px;font-size:14px}
-.rowc .barwrap{flex:1;height:8px;background:var(--surface2);border-radius:12px;overflow:hidden}
-/* display:block 必需——span 是行内元素，行内非替换元素的 width/height 会被忽略，
-   条会整根消失（静态检查查不出，只有真渲染才现形）。 */
-.rowc .bar-i{display:block;height:100%;border-radius:12px;transition:width 120ms linear}
-.rowc .cost{width:120px;text-align:right;font-size:20px;font-weight:640;font-variant-numeric:tabular-nums}
-.rowc.win{background:var(--accent-soft);border-radius:12px}
-.rowc.win .nm{font-weight:660}
-.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:13px;
-  border:1px solid transparent;white-space:nowrap}
-.t-approve{color:var(--ok);background:var(--ok-bg);border-color:var(--ok)}
-.t-stepup,.t-hold{color:var(--warn);background:var(--warn-bg);border-color:var(--warn)}
-.t-decline{color:var(--bad);background:var(--bad-bg);border-color:var(--bad)}
-.t-escalate{color:var(--esc);background:var(--esc-bg);border-color:var(--esc)}
-details{border-top:1px solid var(--border);margin-top:16px;padding-top:12px}
-summary{cursor:pointer;font-size:14px;color:var(--accent);list-style:none}
-summary::-webkit-details-marker{display:none}
-summary::before{content:"▸ ";display:inline-block;transition:transform 180ms ease}
-details[open] summary::before{transform:rotate(90deg)}
-.assume{font-size:13px;color:var(--warn);border:1px solid var(--warn);
-  border-radius:12px;padding:0 6px;margin-left:6px}
-
-/* 案卷 */
-/* P1-4 限宽：行长 >100 字符是投影可读性最大伤害源 */
-.grid3{display:grid;grid-template-columns:264px minmax(0,820px);gap:24px;align-items:start}
-/* sticky：翻证据链时案例列表要一直在，否则换一笔就得滚回顶部 */
-.caselist{display:flex;flex-direction:column;gap:8px;
-  position:sticky;top:72px;max-height:calc(100vh - 88px);overflow-y:auto}
-.caseitem{text-align:left;background:var(--surface);border:1px solid var(--border);
-  border-radius:12px;padding:12px 14px;cursor:pointer;font:inherit;color:var(--text)}
-.caseitem:hover{border-color:var(--accent)}
+td.r,th.r{text-align:right}
+.table-wrap{overflow-x:auto}
+.highlight{color:var(--accent);font-weight:650}
+.proof-item{padding:16px 0;border-bottom:1px solid var(--border)}
+.proof-item:first-of-type{padding-top:14px}
+.proof-item:last-child{padding-bottom:0;border-bottom:0}
+.proof-item p{font-size:14px;color:var(--muted);margin:6px 0}
+details{border-top:1px solid var(--border);margin-top:20px;padding-top:14px}
+summary{cursor:pointer;color:var(--accent);font-size:14px}
+details > p,details > ul{font-size:14px}
+.callout{border-left:3px solid var(--accent);padding:10px 18px;background:var(--accent-soft);font-size:14px;margin-top:22px}
+.grid3{display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;align-items:start}
+.caselist{display:flex;flex-direction:column;gap:8px;position:sticky;top:95px}
+.caseitem{display:block;text-align:left;background:transparent;border:1px solid transparent;border-radius:8px;padding:13px 14px;color:var(--text);width:100%;font:inherit}
+.caseitem:hover{background:var(--surface)}
 .caseitem[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
-.caseitem .cl{font-size:14px;font-weight:600;line-height:1.35}
-.caseitem .cm{font-size:13px;color:var(--muted);margin-top:4px}
-.teach{background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;
-  padding:12px 16px;font-size:14px;margin-bottom:16px}
-.teach .lab{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:4px}
-.caveat{background:var(--warn-bg);border:1px solid var(--warn);border-radius:12px;
-  padding:12px 16px;font-size:14px;margin-bottom:16px;color:var(--text)}
-.finding{border:1px solid var(--border);border-radius:12px;margin-bottom:8px;
-  background:var(--bg);overflow:hidden}
-.finding > summary{padding:12px 16px;font-size:14px;color:var(--text);line-height:1.5}
-.finding[open] > summary{border-bottom:1px solid var(--border)}
-.finding .body{padding:12px 16px;background:var(--surface)}
-/* 每条 finding 都渲染这行，但只显示**当前展开项里的第一条**：同屏印两遍纯属冗余。
-   必须写成 :has(.embargo)——只写 .finding[open] ~ .finding[open] 是错的：
-   finding 1 没有标签型事实、不渲染这行，可它一展开就占住「首条」，
-   会把后面真正带这行的全压掉（实测全展开时可见 0 条）。
-   :has() 不被支持时整条规则失效 → 退化为重复显示，无害。 */
-.finding[open]:has(.embargo) ~ .finding[open] .embargo{display:none}
-.embargo{font-size:14px;color:var(--esc);border:1px dashed var(--esc);border-radius:12px;
-  padding:8px 12px;margin-bottom:8px;line-height:1.5}
-.fact{border-bottom:1px solid var(--border);padding:8px 0}
+.caseitem .cl{font-size:14px;font-weight:600}
+.caseitem .cm{font-size:13px;color:var(--muted);margin-top:3px}
+.case-index{display:inline-block;color:var(--accent);font-size:13px;width:27px}
+.teach{padding:18px 20px;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;background:var(--accent-soft);font-size:14px;margin-bottom:16px}
+.teach .lab{font-size:13px;color:var(--accent);font-weight:650;margin-bottom:6px}
+.caveat{padding:12px 16px;border:1px solid var(--border);background:var(--warn-bg);border-radius:8px;font-size:13px;margin-bottom:16px}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;font-size:14px;margin-bottom:20px}
+.kv div span{font-size:13px;color:var(--muted)}
+.kv b{font-weight:600;overflow-wrap:anywhere}
+.tag{display:inline-block;padding:2px 8px;border-radius:5px;font-size:13px;white-space:nowrap}
+.t-approve{color:var(--ok);background:var(--ok-bg)}
+.t-stepup,.t-hold{color:var(--warn);background:var(--warn-bg)}
+.t-decline{color:var(--bad);background:var(--bad-bg)}
+.t-escalate{color:var(--esc);background:var(--esc-bg)}
+.case-decision{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:13px 0;border-top:1px solid var(--border);font-size:14px}
+.report-summary{font-size:14px;color:var(--muted);line-height:1.85}
+.finding{border:1px solid var(--border);border-radius:8px;margin-top:10px;padding:0;background:var(--surface)}
+.finding > summary{padding:14px 16px;color:var(--text);font-size:14px;line-height:1.8;overflow-wrap:anywhere}
+.finding .body{padding:14px 16px;border-top:1px solid var(--border);background:var(--bg);border-radius:0 0 8px 8px}
+.embargo{font-size:13px;color:var(--esc);border-left:2px solid var(--esc);padding:6px 12px;margin-bottom:10px}
+.fact{border-bottom:1px solid var(--border);padding:10px 0}
 .fact:last-child{border-bottom:0}
-.fact .fid{font-weight:600;font-size:13px}
-.fact .fv{font-size:14px;color:var(--muted);word-break:break-word}
-.chipsm{display:inline-block;padding:1px 8px;border-radius:12px;font-size:13px;
-  border:1px solid var(--border);color:var(--muted);margin-left:6px;white-space:nowrap}
+.fact .fid{font-size:13px;font-weight:650;overflow-wrap:anywhere}
+.fact .fv{font-size:14px;color:var(--muted);overflow-wrap:anywhere;margin-top:5px}
+.chipsm{display:inline-block;margin:3px 0 3px 6px;padding:1px 6px;font-size:13px;border:1px solid var(--border);border-radius:4px;color:var(--muted)}
 .chipsm.lb{color:var(--esc);border-color:var(--esc)}
-.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px 16px;
-  font-size:13px;margin-bottom:16px}
-.kv div span{color:var(--muted)}
-
-/* 漏斗 */
-.funnel{display:flex;flex-direction:column;gap:8px}
-.fstep{display:flex;align-items:center;gap:12px;height:40px}
-.fstep .fl{width:180px;font-size:14px}
-.fstep .fb{height:24px;border-radius:12px;background:var(--accent);opacity:.85}
-.fstep .fn{font-size:14px;font-variant-numeric:tabular-nums}
-.ok-line{color:var(--ok);font-weight:600}
-.note{font-size:13px;color:var(--muted);margin-top:12px}
-footer{padding:40px 0 64px;color:var(--muted);font-size:13px}
-@media (max-width:900px){
-  .grid2,.grid3{grid-template-columns:1fr}
-  h1{font-size:24px}
+.source-line{font-size:13px;margin-top:18px;color:var(--muted)}
+.ctl{margin-bottom:24px}
+.ctl label{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted);gap:10px}
+.ctl label b{font-size:23px;color:var(--text);font-weight:650}
+input[type=range]{width:100%;accent-color:var(--accent);height:24px;margin:10px 0 0}
+.range-labels{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.seg{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:10px}
+.seg button{flex:1;min-width:0;border:0;border-right:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;padding:9px 8px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);font-weight:650}
+.rowc{display:flex;align-items:center;gap:12px;min-height:63px;border-bottom:1px solid var(--border);padding:0 10px}
+.rowc:last-child{border-bottom:0}
+.rowc .nm{width:66px;flex-shrink:0;font-size:14px}
+.rowc .barwrap{flex:1;min-width:0;height:7px;border-radius:4px;background:var(--surface2);overflow:hidden}
+.rowc .bar-i{display:block;height:100%;border-radius:4px;transition:width 120ms linear}
+.rowc .cost{font-size:24px;width:124px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.rowc.win{background:var(--accent-soft);border-radius:7px}
+.verdict{margin-top:20px;padding:14px 16px;background:var(--accent-soft);font-size:14px;border-radius:7px}
+.assume{font-size:13px;color:var(--warn)}
+.formula{white-space:pre-wrap;overflow-wrap:anywhere;padding:16px;background:var(--surface2);border-radius:7px;line-height:1.9}
+.design-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.design-grid p{font-size:14px;color:var(--muted)}
+.design-no{font-size:13px;color:var(--accent);margin-bottom:16px}
+.funnel{margin-top:18px}
+.fstep{display:grid;grid-template-columns:120px 1fr 55px;gap:12px;align-items:center;margin:12px 0;font-size:13px}
+.fstep .fb{height:7px;background:var(--accent);border-radius:4px;min-width:2px}
+.fstep .track{background:var(--surface2);border-radius:4px}
+.fstep .fn{text-align:right}
+.ok-line{color:var(--ok)}
+.resource-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:26px 0}
+.resource{padding:20px;border:1px solid var(--border);border-radius:9px;text-decoration:none;background:var(--surface);color:var(--text)}
+.resource:hover{border-color:var(--accent)}
+.resource b{font-size:16px}
+.resource p{font-size:13px;color:var(--muted);margin:7px 0 0}
+.limit-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.limit-grid h3{font-size:16px}
+.limit-grid ul{padding-left:20px;font-size:14px;color:var(--muted)}
+.limit-grid li{margin:8px 0}
+footer{padding:30px 0 42px;color:var(--muted);font-size:13px}
+.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media(max-width:1050px){
+  h1{font-size:52px}
+  .hero-grid{gap:28px}
+  .chip .v{font-size:25px}
+  nav{gap:15px}
+  .grid2{grid-template-columns:300px minmax(0,1fr)}
 }
+@media(max-width:800px){
+  .wrap{padding:0 22px}
+  .bar .wrap{min-height:64px;gap:12px}
+  nav{display:none}
+  #theme{margin-left:auto}
+  .hero-grid,.proof-grid,.grid2,.grid3{grid-template-columns:1fr}
+  .hero{padding-top:40px}
+  .system{margin-top:10px}
+  h1{font-size:50px}
+  h2{font-size:29px}
+  section{padding:48px 0}
+  .section-head{display:block}
+  .section-head p{margin-top:14px}
+  .chips{margin-top:28px}
+  .chip,.chip+.chip{padding:20px 14px}
+  .chip:first-child{padding-left:0}
+  .chip .v{font-size:21px}
+  .caselist{position:static;display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .design-grid,.resource-grid{grid-template-columns:1fr}
+  .limit-grid{grid-template-columns:1fr;gap:8px}
+}
+@media(max-width:480px){
+  .wrap{padding:0 18px}
+  h1{font-size:43px}
+  .hero-copy{font-size:16px}
+  .chips{grid-template-columns:1fr}
+  .chip,.chip+.chip{border-left:0;border-bottom:1px solid var(--border);padding:16px 0}
+  .chip:last-child{border-bottom:0}
+  .chip .v{font-size:27px}
+  .system{padding:17px}
+  .system-node{padding:12px;grid-template-columns:23px 1fr;gap:7px}
+  .node-tag{display:none}
+  .card{padding:18px}
+  .kv{grid-template-columns:1fr 1fr}
+  .caselist{grid-template-columns:1fr}
+  .rowc{gap:8px;padding:0 7px}
+  .rowc .cost{font-size:22px;width:104px}
+  .rowc .nm{width:58px}
+  .card-top{align-items:start;flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){*{transition-duration:0s!important}}
 </style>
 </head>
 <body>
-<div class="wrap"><p class="note">审查口径：本页为五动作离线沙盘，当前评分API与Agent为四动作。案例和用量来自历史版本，不代表v5管道实测；原始案例中的“人工洗清”等说法无真实处理记录支持。</p></div>
-
-<div class="bar"><div class="wrap">
-  <span class="badge"><span class="dot"></span><b>离线演示 / 非生产系统</b></span>
-  <span class="badge">历史预置案例 · 不调用实时 API</span>
-  <span class="spacer"></span>
-  <button class="ghost" id="theme">切换深浅</button>
-</div></div>
-
-<div class="wrap">
-
-<!-- ① 首屏 -->
-<section>
-  <h1>AI 反欺诈调查助手</h1>
-  <p class="sub" style="max-width:760px;margin-top:8px">
-    交易风险评分 → 代价最优处置 → Agent 取证并生成可追溯的调查报告。
-    定位是<b>离线决策系统 + 已推演工业化路径</b>，<b>不声称曾在生产环境运行</b>。
-    数据集 IEEE-CIS（Vesta 真实电商交易，59 万笔，欺诈率 3.5%）。
-  </p>
-  <div class="chips" id="chips"></div>
-  <p class="note">本页所有数字均取自项目既有产物，未新造数据；成本参数为假设值并附敏感性区间。</p>
+<a class="skip" href="#main">跳到正文</a>
+<header class="bar"><div class="wrap">
+  <a class="brand" href="#main"><span class="brand-mark" aria-hidden="true">F</span> FRAUD / LAB</a>
+  <nav aria-label="主导航"><a href="#results">实验结果</a><a href="#investigation">调查案卷</a><a href="#sandbox">决策沙盘</a><a href="#design">技术设计</a></nav>
+  <button class="ghost" id="theme" type="button" aria-label="切换到深色主题">深色模式</button>
+  <a class="ghost" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection" style="text-decoration:none">GitHub ↗</a>
+</div></header>
+<main class="wrap" id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-grid">
+    <div>
+      <div class="eyebrow">Risk models. Decisions. Evidence.</div>
+      <h1 id="hero-title">分数之后，<br><em>把决策说清楚。</em></h1>
+      <p class="hero-copy">一个可核验的交易反欺诈项目。<br>用时间感知图特征识别风险，用成本公式选择处置，让 LLM 把调查结论连回原始证据。</p>
+      <div class="actions"><a class="button primary" href="#investigation">打开调查案卷 <span aria-hidden="true">↗</span></a><a class="button" href="#results">查看实验对照 ↓</a></div>
+      <div class="scope"><span class="dot" aria-hidden="true"></span> IEEE-CIS 公开数据 · 离线研究原型 · 无实时 API 调用</div>
+    </div>
+    <div class="system" aria-label="职责划分：模型预测，公式决策，LLM取证解释">
+      <div class="system-title"><span class="mono">SYSTEM / RESPONSIBILITIES</span><span class="pill">三层分工</span></div>
+      <div class="system-node"><span class="index mono">01</span><div><b>预测风险</b><small>LightGBM · 表特征 + 时间感知图特征</small></div><span class="node-tag">可对照</span></div>
+      <div class="connector">风险分 p + 金额 + 成本假设</div>
+      <div class="system-node"><span class="index mono">02</span><div><b>计算处置</b><small>四动作期望成本取最小值</small></div><span class="node-tag">可复算</span></div>
+      <div class="connector">调查层组织证据，不覆盖公式决策</div>
+      <div class="system-node"><span class="index mono">03</span><div><b>生成调查</b><small>工具取证 · 事实账本 · 引用与时间检查</small></div><span class="node-tag">可追溯</span></div>
+      <p class="system-note">这是职责划分，不是已上线的自动流水线。评分与调查目前使用两个入口。</p>
+    </div>
+  </div>
+  <div class="chips" id="chips">
+    <div class="chip"><div class="k">预测增量 / PR-AUC</div><div class="v num">0.5645 → 0.6032</div><div class="n">纯表 → 表 + 图 · <a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/graph_vs_tabular.md">同配置对照 ↗</a></div></div>
+    <div class="chip"><div class="k">固定复核容量 / recall @ top 2%</div><div class="v num">42.3% → 45.2%</div><div class="n">同一评估窗 · 不是所有容量均改善</div></div>
+    <div class="chip"><div class="k">跨实现一致性 / SQL × pandas</div><div class="v num">590,540 × 15</div><div class="n">全量交易 × 特征列逐值一致 · <a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/sql_vs_pandas_reconciliation.md">对账记录 ↗</a></div></div>
+  </div>
 </section>
-
-<!-- ② 决策成本沙盘 -->
-<section>
-  <h2>① 决策成本沙盘</h2>
-  <p class="sub">阈值不是拍 0.5，是把业务成本写进目标函数解出来的。拖动滑块，五档期望成本实时重算，最低者即处置建议。</p>
-  <div class="grid2" style="margin-top:24px">
+<section id="results" aria-labelledby="results-title">
+  <div class="section-head"><div><div class="eyebrow">01 / Measured, not assumed</div><h2 id="results-title">先看增量，再看它成立的条件。</h2></div><p class="sub">主实验只改变是否加入 15 列图特征。时间切分、模型配置相同，保留改善与退步的工作点。</p></div>
+  <div class="proof-grid">
     <div class="card">
-      <div class="ctl">
-        <label>欺诈概率 p<b class="num" id="pv">0.239</b></label>
-        <input type="range" id="p" min="-4" max="0" step="0.01" value="-0.62">
-      </div>
-      <div class="ctl">
-        <label>交易金额<b class="num" id="av">$100</b></label>
-        <input type="range" id="a" min="0" max="3.48" step="0.01" value="2">
-      </div>
-      <div class="ctl">
-        <label>团伙证据 gang_score<b class="num" id="gv">0.00</b></label>
-        <div class="seg" id="gseg">
-          <button data-g="0" aria-pressed="true">无 0.0</button>
-          <button data-g="0.5">中 0.5</button>
-          <button data-g="1">强 1.0</button>
-        </div>
-      </div>
-      <details><summary>成本参数（全部为假设值）</summary>
-        <table style="margin-top:8px"><tbody id="ptab"></tbody></table>
-      </details>
+      <div class="card-top"><h3>图特征带来了什么？</h3><span class="pill">同窗 · 同配置</span></div>
+      <div class="table-wrap"><table><caption class="note" style="text-align:left;padding-bottom:12px">102,703 笔评估交易；其中 3,513 笔欺诈</caption>
+        <thead><tr><th>指标</th><th class="r">纯表</th><th class="r">表 + 图</th></tr></thead>
+        <tbody class="num"><tr><td>PR-AUC</td><td class="r">0.5645</td><td class="r highlight">0.6032</td></tr><tr><td>ROC-AUC</td><td class="r">0.9138</td><td class="r highlight">0.9306</td></tr><tr><td>Recall @ 2%</td><td class="r">42.3%</td><td class="r highlight">45.2%</td></tr><tr><td>Recall @ 1%</td><td class="r">26.2%</td><td class="r">26.8%</td></tr><tr><td>Recall @ 0.5%</td><td class="r">14.2%</td><td class="r">13.9%</td></tr></tbody>
+      </table></div>
+      <p class="note">图特征是实体的历史计数、成熟欺诈率与连接数量，不是 GNN。增益主要来自标签历史；未跑 GNN 对照。</p>
+      <details><summary>时间窗与标签可得性：这组分数的边界</summary><p>fit &lt; day 132，验证 [132,146)，评估 [146,182)。图标签历史使用 21 天合成成熟期，但主训练和早停标签没有统一施加该隔离。</p><p>另做了全部拟合/选择标签在 day 146 前成熟的审计，PR-AUC 为 0.5086 → 0.5531。它改变了训练与选择流程，且复用了最终时间窗，是回顾性检查，不是新的盲测。</p><a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/label_availability_audit.md">查看独立审计 ↗</a></details>
+      <p class="source-line"><a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/graph_vs_tabular.md">完整主对照 ↗</a> &nbsp; / &nbsp; <a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/graph_feature_ablation.md">特征消融 ↗</a></p>
     </div>
     <div class="card">
-      <div id="rows"></div>
-      <p class="note" id="verdict"></p>
+      <h3>不只看一个模型分数</h3>
+      <div class="proof-item"><b>01 &nbsp; 核验时间，而不只核验字段</b><p>结构历史按交易先后可见，标签历史另设成熟期。SQL 对账还故意使用错误窗函数，确认检查能发现同秒边界错误。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/sql_vs_pandas_reconciliation.md">逐值对账与负对照 ↗</a></div>
+      <div class="proof-item"><b>02 &nbsp; 核验报告，而不只看流畅程度</b><p>结论携带 evidence_ids，能展开到事实值与时间窗。数字匹配、引用完整和推理正确是三件不同的事。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/agent_grounding.md">两级数字对账 ↗</a></div>
+      <div class="proof-item"><b>03 &nbsp; 接受不支持原设想的结果</b><p>现有归档的取证集合高度集中；多轮工具编排是否比固定取证更好，尚未得到证明。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/agent_autonomy_surface.md">Agent 自主性测量 ↗</a></div>
     </div>
   </div>
 </section>
-
-<!-- ③ 调查案卷 -->
-<section>
-  <h2>② 调查案卷</h2>
-  <p class="sub">每条结论都必须挂证据。展开任意一条，可见它引用的原始 fact、时间窗，以及该证据是否为标签型（须留 21 天拒付窗）。</p>
-  <div class="grid3" style="margin-top:24px">
-    <div class="caselist" id="cases"></div>
-    <div id="detail"></div>
-  </div>
+<section id="investigation" aria-labelledby="investigation-title">
+  <div class="section-head"><div><div class="eyebrow">02 / Open the evidence</div><h2 id="investigation-title">报告不是终点，证据才是入口。</h2></div><p class="sub">选择一份历史案卷，展开结论核查引用。默认案例展示一个关键取舍：LLM 的建议不能代替成本计算。</p></div>
+  <noscript><p class="caveat">案例交互需要 JavaScript。你仍可通过页面中的 GitHub 链接阅读全部报告与源代码。</p></noscript>
+  <div class="grid3"><div class="caselist" id="cases" aria-label="选择历史案例"></div><div id="detail"></div></div>
+  <p class="note">预置归档，不实时调用模型。事后标签仅供展示，不提供给调查工具；标签 0 不等于“已被人工洗清”。card1 是匿名卡属性，DeviceInfo 不是唯一设备指纹。案例库经过选择，其正负比例不是风险概率。</p>
 </section>
-
-<!-- ④ 韧性与成本 -->
-<section>
-  <h2>③ 韧性与成本</h2>
-  <p class="sub">同一笔交易的两个版本：LLM 可用与不可用。降级是产品行为，不是服务故障。</p>
-  <div class="grid2" style="margin-top:24px">
+<section id="sandbox" aria-labelledby="sandbox-title">
+  <div class="section-head"><div><div class="eyebrow">03 / Make the trade-off visible</div><h2 id="sandbox-title">同一个风险分，不一定同一种处置。</h2></div><p class="sub">改变金额、风险分和关联证据，比较不同动作的期望成本。默认使用当前 API 的四动作；第五动作仅供离线探索。</p></div>
+  <div class="grid2">
     <div class="card">
-      <h3>⑨ 兜底降级</h3>
-      <div class="seg" id="fbseg" style="max-width:320px">
-        <button data-m="llm" aria-pressed="true">LLM 可用</button>
-        <button data-m="degraded">LLM 不可用</button>
-      </div>
-      <div id="fb" style="margin-top:16px"></div>
+      <div class="ctl"><label for="p">模型风险分 p <b class="num" id="pv">0.239</b></label><input type="range" id="p" min="-4" max="0" step="0.01" value="-0.62"><div class="range-labels"><span>0.0001</span><span>1.0 · 对数刻度</span></div></div>
+      <div class="ctl"><label for="a">交易金额 <b class="num" id="av">$100</b></label><input type="range" id="a" min="0" max="3.48" step="0.01" value="2"><div class="range-labels"><span>$1</span><span>约 $3,020</span></div></div>
+      <div class="ctl"><label>关联证据分 g <b class="num" id="gv">0.00</b></label><div class="seg" id="gseg" role="group" aria-label="关联证据分"><button type="button" data-g="0" aria-pressed="true">0.0</button><button type="button" data-g="0.5" aria-pressed="false">0.5</button><button type="button" data-g="1" aria-pressed="false">1.0</button></div><p class="note">g 是构造的代理分，不是校准后的团伙概率。</p></div>
+      <div class="seg" id="tiers" role="group" aria-label="成本模型动作数"><button type="button" data-tiers="4" aria-pressed="true">四动作 · 当前 API</button><button type="button" data-tiers="5" aria-pressed="false">五动作 · 离线扩展</button></div>
+      <details><summary>查看成本参数与假设</summary><div class="table-wrap"><table><thead><tr><th>范围</th><th>参数</th><th class="r">值</th></tr></thead><tbody id="ptab"></tbody></table></div><p class="note">上述干预参数全部是假设；未来收益项使用训练欺诈金额中位数 $76.02。不存在真实处置效果或收益标签。</p></details>
     </div>
     <div class="card">
-      <h3>⑧ 闸门漏斗</h3>
-      <div class="funnel" id="funnel" style="margin-top:12px"></div>
-      <p class="note" id="funnote"></p>
+      <div class="card-top"><h3>期望成本比较</h3><span class="pill" id="model-label">四动作</span></div>
+      <div id="rows"></div><div class="verdict" id="verdict" aria-live="polite"></div><p class="note" id="negative-note" hidden>出现负成本，是假设的未来收益抵扣了当前支出，不代表已经产生真实收益。条形长度按本组最小值平移，仅辅助比较；精确金额以右侧数值为准。</p>
+      <p class="note">raw score 未校准，将它代入概率公式只是决策敏感性演示，不能直接部署为真实最优策略。step-up 未接通 OTP/3DS。</p>
+      <details><summary>展开四动作公式</summary><pre class="formula">放行：p × 金额
+挂起：复核成本 + 漏放损失 + 误拦损失
+拒绝：(1 − p) × 误拦成本
+上报：上报成本 + 残余损失 − 假设未来收益
+
+决策 = argmin（各动作期望成本）</pre><a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/src/agent/disposition.py">查看可复算实现 ↗</a></details>
     </div>
   </div>
 </section>
-
-<footer class="wrap" style="padding-left:0;padding-right:0">
-  离线演示 / 非生产系统 · 案例为预置缓存 · 成本参数为假设值并附敏感性区间 ·
-  数据集 IEEE-CIS Fraud Detection
-</footer>
-</div>
-
+<section id="design" aria-labelledby="design-title">
+  <div class="section-head"><div><div class="eyebrow">04 / Boundaries by design</div><h2 id="design-title">把模型能力，也把模型边界写进系统。</h2></div><p class="sub">关键不是多接几个工具，而是明确谁负责决策、怎样验收输出、失败时如何继续提供结果。</p></div>
+  <div class="design-grid">
+    <div class="card"><div class="design-no mono">01 / DECISION AUTHORITY</div><h3>预测、决策、解释分开</h3><p>GBDT 输出风险分；成本公式选动作；LLM 组织证据和解释。报告中的处置文字不覆盖四动作公式。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/agent_evidence_vs_decision.md">设计依据 ↗</a></div>
+    <div class="card"><div class="design-no mono">02 / VALIDATED OUTPUT</div><h3>不合规草稿不直接交付</h3><p>当前 v5 最多允许 8 次工具请求尝试；结构、引用或时间校验不通过时隔离草稿并降级。机械校验不保证语义正确。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/src/agent/pipeline.py">查看验收与预算实现 ↗</a></div>
+    <div class="card"><div class="design-no mono">03 / FEATURE PARITY</div><h3>离线与服务口径对账</h3><p>独立“先查后写”回放中，3,000 笔 × 27 列对齐。15 列图特征入模，12 列 velocity 仅作诊断返回。</p><a class="note" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/online_replay.md">回放及负对照 ↗</a></div>
+  </div>
+  <div class="proof-grid" style="margin-top:24px">
+    <div class="card"><h3>同一交易：有 LLM，也能无 LLM</h3><div class="seg" id="fbseg" role="group" aria-label="历史正常与降级案例"><button type="button" data-m="llm" aria-pressed="true">历史 LLM 报告</button><button type="button" data-m="degraded" aria-pressed="false">确定性模板降级</button></div><div id="fb" style="margin-top:20px"></div><p class="note">这里切换的是历史缓存，不是实时服务健康状态；历史验收结果不代表 v5 已重新完成付费评估。</p></div>
+    <div class="card"><h3>先过成本闸门，再支付调查费用</h3><div class="funnel" id="funnel"></div><p class="note" id="funnote"></p><div class="callout">多轮编排的收益还没有被独立识别。下一项有价值的对照是：固定取证 + 模板 / 固定取证 + 单次 LLM / 多轮工具循环。</div><p class="source-line"><a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/reports/agent_autonomy_surface.md">已有归档测量 ↗</a></p></div>
+  </div>
+</section>
+<section id="resources" aria-labelledby="resources-title">
+  <div class="eyebrow">05 / Go one level deeper</div><h2 id="resources-title">从展示，走到可复核的实现。</h2>
+  <div class="resource-grid">
+    <a class="resource" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/docs/EVIDENCE.md"><b>结果与证据导航 ↗</b><p>按问题找实验、原始归档和对应代码。</p></a>
+    <a class="resource" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/docs/REPRODUCE.md"><b>分层复现指南 ↗</b><p>从零凭证浏览，到测试、数据与模型复现。</p></a>
+    <a class="resource" href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/MODEL_CARD.md"><b>模型卡与已知限制 ↗</b><p>数据口径、版本边界与没有证明的事情。</p></a>
+  </div>
+  <div class="limit-grid">
+    <div><h3>已实现 / 可以检查</h3><ul><li>时间切分建模、图特征消融、成本敏感决策。</li><li>事实账本、历史调查归档、引用和时间审计、模板降级。</li><li>FastAPI 评分与调查入口、SQL / pandas 对账、独立在线回放。</li></ul></div>
+    <div><h3>未实现 / 不作声称</h3><ul><li>没有生产流量、真实干预结局或已验证的业务收益。</li><li>没有真实拒付到达时间，也没有未使用的新最终测试时段。</li><li>评分服务历史不随请求追加；任意新交易尚未接通调查。未接案件队列、反馈重训或真实验证动作。</li></ul></div>
+  </div>
+</section>
+</main>
+<footer class="wrap"><div class="footer-row"><span>FRAUD / LAB &nbsp; · &nbsp; AI Fraud Investigation Copilot</span><span>离线研究原型 · 原始归档保留 · <a href="https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/LICENSE">MIT License</a></span></div><p>页面不加载远程字体、脚本或数据。所有交互在本地完成；源报告链接需联网打开。工程实现使用 AI 结对协助。</p></footer>
 <script>
 /*__DEMO_DATA__*/
-
-/* ── 成本模型：与 src/agent/disposition.py 及 src/model/stepup.py 逐字对应 ── */
-var P4 = DEMO.params.four_tier, P5 = DEMO.params.stepup, AMED = DEMO.params.a_med.value;
+var REPO='https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/blob/main/';
+var P4=DEMO.params.four_tier,P5=DEMO.params.stepup,AMED=DEMO.params.a_med.value;
 function v(o,k){return o[k].value}
-function costs(p, a, g){
-  var c_fp=v(P4,'c_fp'), c_rev=v(P4,'c_review'), c_rep=v(P4,'c_report');
+function costs(p,a,g){
+  var c_fp=v(P4,'c_fp'),c_rev=v(P4,'c_review'),c_rep=v(P4,'c_report');
   return {
-    approve:  p*a,
-    stepup:   v(P5,'c_friction') + p*(1-v(P5,'r_block'))*a
-              + (1-p)*v(P5,'r_abandon')*v(P5,'margin_rate')*a,
-    hold:     c_rev + p*v(P4,'m_h')*a + (1-p)*v(P4,'f_h')*c_fp,
-    decline:  (1-p)*c_fp,
-    escalate: c_rep + p*v(P4,'m_e')*a + (1-p)*v(P4,'f_e')*c_fp
-              - p*g*v(P4,'k_future')*AMED
+    approve:p*a,
+    stepup:v(P5,'c_friction')+p*(1-v(P5,'r_block'))*a+(1-p)*v(P5,'r_abandon')*v(P5,'margin_rate')*a,
+    hold:c_rev+p*v(P4,'m_h')*a+(1-p)*v(P4,'f_h')*c_fp,
+    decline:(1-p)*c_fp,
+    escalate:c_rep+p*v(P4,'m_e')*a+(1-p)*v(P4,'f_e')*c_fp-p*g*v(P4,'k_future')*AMED
   };
 }
 var ORDER=['approve','stepup','hold','decline','escalate'];
+var FOUR=['approve','hold','decline','escalate'];
 var CN={approve:'放行',stepup:'加验证',hold:'挂起',decline:'拒绝',escalate:'上报'};
-function money(x){return (x<0?'-$':'$')+Math.abs(x).toFixed(2)}
-function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){
-  return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
-/* teaches/caveat 是 Markdown 原文（**粗体** 与 `代码`）。**必须先 esc 再转**，
-   否则等于把数据当 HTML 执行。只认这两种记号，不引入 Markdown 库。 */
-function md(s){return esc(s).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
-  .replace(/`([^`]+)`/g,'<code>$1</code>')}
+function money(x){return(x<0?'-$':'$')+Math.abs(x).toFixed(2)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function md(s){return esc(s).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/\x60([^\x60]+)\x60/g,'<code>$1</code>')}
+function selectButton(group,button){[].forEach.call(group.querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',b===button?'true':'false')})}
+function tag(action){return '<span class="tag t-'+esc(action)+'">'+esc(CN[action]||action)+'</span>'}
 
-/* ① 首屏 chips */
-var G=DEMO.globals;
-document.getElementById('chips').innerHTML=[
-  ['评估窗事后成本扫描 vs 0.5','−26.1%','同窗选阈值；非独立测试或业务收益'],
-  ['历史数字匹配未发现无来源项','0','2,672 个数字；不保证语义推理正确'],
-  ['⑧ 闸门放行（不进 Agent）',(G.gate_pass_rate_four_tier*100).toFixed(1)+'%',
-   '离线五档方案自动化率 '+(G.auto_rate_five_tier*100).toFixed(1)+'%']
-].map(function(c){return '<div class="chip"><div class="k">'+c[0]+
-  '</div><div class="v num">'+c[1]+'</div><div class="n">'+c[2]+'</div></div>'}).join('');
-
-/* ② 沙盘 */
-var gang=0;
+// 四动作是当前服务；五动作仅用于离线比较。
+var gang=0,tiers=4;
 function draw(){
-  var p=Math.pow(10, parseFloat(document.getElementById('p').value));
-  var a=Math.pow(10, parseFloat(document.getElementById('a').value));
+  var p=Math.pow(10,parseFloat(document.getElementById('p').value));
+  var a=Math.pow(10,parseFloat(document.getElementById('a').value));
   document.getElementById('pv').textContent=p<0.001?p.toExponential(1):p.toFixed(3);
-  document.getElementById('av').textContent='$'+a.toFixed(a<10?2:0);
+  document.getElementById('av').textContent=money(a);
   document.getElementById('gv').textContent=gang.toFixed(2);
-  var c=costs(p,a,gang), vals=ORDER.map(function(k){return c[k]});
-  var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals.concat([0]));
-  var lo=Math.min(mn,0), span=(mx-lo)||1;
-  var best=ORDER[vals.indexOf(mn)];
-  document.getElementById('rows').innerHTML=ORDER.map(function(k){
-    var w=Math.max(2,((c[k]-lo)/span)*100);
-    return '<div class="rowc'+(k===best?' win':'')+'">'
-      +'<span class="nm"><span class="tag t-'+k+'">'+CN[k]+'</span></span>'
-      +'<span class="barwrap"><span class="bar-i" style="width:'+w.toFixed(1)
-      +'%;background:var(--'+({approve:'ok',stepup:'warn',hold:'warn',decline:'bad',escalate:'esc'}[k])+')'
-      /* 非最优档降到 45%：最长最扎眼的「上报」恰是最差选项，
-         满色会把视线第一落点引到错的地方。 */
-      +(k===best?'':';opacity:.45')+'"></span></span>'
-      +'<span class="cost num">'+money(c[k])+'</span></div>'}).join('');
-  document.getElementById('verdict').innerHTML='期望成本最低 → <b class="tag t-'+best+'">'
-    +CN[best]+'</b>　该建议由公式给出，不由模型自陈。';
+  var order=tiers===4?FOUR:ORDER,c=costs(p,a,gang),vals=order.map(function(k){return c[k]});
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals.concat([0])),lo=Math.min(mn,0),span=(mx-lo)||1;
+  var best=order[vals.indexOf(mn)];
+  document.getElementById('rows').innerHTML=order.map(function(k){
+    var w=Math.max(2,((c[k]-lo)/span)*100),color={approve:'ok',stepup:'warn',hold:'warn',decline:'bad',escalate:'esc'}[k];
+    return '<div class="rowc'+(k===best?' win':'')+'" data-action="'+k+'"><span class="nm">'+tag(k)
+      +'</span><span class="barwrap" aria-hidden="true"><span class="bar-i" style="width:'+w.toFixed(1)+'%;background:var(--'+color+')'
+      +(k===best?'':';opacity:.45')+'"></span></span><span class="cost num">'+money(c[k])+'</span></div>';
+  }).join('');
+  document.getElementById('verdict').innerHTML='在当前假设下，最低期望成本为 '+tag(best)+' <b class="num">'+money(c[best])+'</b>。';
+  document.getElementById('model-label').textContent=tiers===4?'四动作 · 当前 API':'五动作 · 离线扩展';
+  document.getElementById('negative-note').hidden=mn>=0;
 }
 ['p','a'].forEach(function(id){document.getElementById(id).addEventListener('input',draw)});
-document.getElementById('gseg').addEventListener('click',function(e){
-  var b=e.target.closest('button'); if(!b)return;
-  gang=parseFloat(b.dataset.g);
-  [].forEach.call(this.querySelectorAll('button'),function(x){
-    x.setAttribute('aria-pressed', x===b?'true':'false')});
-  draw();
-});
-document.getElementById('ptab').innerHTML=
-  Object.keys(P4).map(function(k){return ['四档',k,v(P4,k)]})
-  .concat(Object.keys(P5).map(function(k){return ['step-up',k,v(P5,k)]}))
-  .map(function(r){return '<tr><td>'+r[0]+'</td><td class="mono">'+r[1]
-    +'</td><td class="r num">'+r[2]+'</td><td class="r"><span class="assume">假设</span></td></tr>'}).join('');
+document.getElementById('gseg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;gang=parseFloat(b.dataset.g);selectButton(this,b);draw()});
+document.getElementById('tiers').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;tiers=parseInt(b.dataset.tiers,10);selectButton(this,b);draw()});
+document.getElementById('ptab').innerHTML=Object.keys(P4).map(function(k){return['四动作',k,v(P4,k)]})
+  .concat(Object.keys(P5).map(function(k){return['step-up',k,v(P5,k)]}))
+  .map(function(r){return'<tr><td>'+r[0]+'</td><td class="mono">'+r[1]+'</td><td class="r num">'+r[2]+'</td></tr>'}).join('');
 draw();
 
-/* ③ 案卷 */
-var cases=DEMO.cases, cur=0;
-document.getElementById('cases').innerHTML=cases.map(function(c,i){
-  return '<button class="caseitem" data-i="'+i+'" aria-pressed="'+(i===0)+'">'
-    +'<div class="cl">'+esc(c.label)
-    /* 符号统一：原先只有两条标签里带 ⑧/⑨ 前缀，其余没有，列表看着参差。
-       摘成独立 chip —— 既整齐，又保住对设计决策编号的指认。 */
-    +(c.decision?'<span class="chipsm">决策 '+esc(c.decision)+'</span>':'')+'</div>'
-    +'<div class="cm num">txn '+c.transaction_id+' · p='+c.p+'</div></button>'}).join('');
+// 当前导读与历史报告分层。归档、事实和生成文本不改写；旧措辞不作当前结论。
+var NOTES={
+  lowp_gang:{label:'低分，却存在关联风险',note:'**LLM 建议上报，四动作公式仍然放行。** 这份报告可用于核查关联历史与引用，但不能证明 LLM 的动作更优。我们据此把“解释证据”和“计算处置”分开。',caveat:'这是一份强制调查的历史评估样本，正常闸门下不一定会发起调查。关联证据分是代理量，不代表已确认真实团伙。'},
+  highp_fraud:{label:'极高风险分，动作仍有分歧',note:'**风险判断与动作计算是两件事。** 这笔交易事后标签为欺诈，但 LLM 给出挂起建议，公式给出拒绝。正确识别风险，不意味着能稳定计算最小成本。'},
+  highp_fp:{label:'高分假阳：模型也会误报',note:'**高分不等于事实已确认。** 这笔交易的事后标签为 0；检索到的相似案例也不能作为概率估计。',caveat:'原始归档中的“人工洗清”没有人工处理记录支持。这里仅展示已知标签，不宣称曾进行真实人工复核。'},
+  mid_ambiguous:{label:'边界案例：参数改变动作',note:'**处置依赖成本假设，不是额外的真标签。** 这笔交易落在成本边界附近；应结合参数敏感性，而不是把某个动作当作客观正确答案。'},
+  gang_escalate:{label:'未来收益假设改变处置',note:'**关联项可以改变公式结果，但它依赖假设。** 上报成本中抵扣了预期未来损失；这不是已验证的冻结收益，也没有执行真实冻结。'},
+  fallback:{label:'同一交易，切换模板降级',note:'**没有 LLM，也保留结构化结果。** 与上一份案卷是同一交易，改用确定性模板生成。它展示备用路径，不证明模板与 LLM 的解释质量相同。'},
+  gated:{label:'闸门放行，不发起调查',note:'**不需要每笔交易都调用大模型。** 四动作成本公式选择放行时，调查层直接跳过，不发生本次 LLM 调用。'}
+};
+var cases=DEMO.cases,cur=cases.findIndex(function(c){return c.key==='lowp_gang'});
+var displayOrder=['lowp_gang','highp_fraud','highp_fp','mid_ambiguous','gang_escalate','fallback','gated'];
+document.getElementById('cases').innerHTML=displayOrder.map(function(key,n){
+  var i=cases.findIndex(function(c){return c.key===key}),c=cases[i];
+  return'<button class="caseitem" type="button" data-i="'+i+'" aria-pressed="'+(i===cur)+'"><div class="cl"><span class="case-index mono">0'+(n+1)+'</span>'+esc(NOTES[key].label)+'</div><div class="cm num">txn '+c.transaction_id+' · p='+c.p+'</div></button>';
+}).join('');
 function factRow(f){
   var w=f.window||[0,0];
-  return '<div class="fact"><div><span class="fid mono">'+esc(f.fact_id)+'</span>'
-    +'<span class="chipsm">'+esc(f.type)+'</span>'
-    /* TransactionDT 是相对秒；换算成「第 N 天」才和 21 天禁运期同一把尺，
-       原始八位秒数在投影上没人能和「21 天」对上号。
-       零宽区间不是「窗」——时点事实写「时点 Dx」，区间事实才写「窗 Dx–Dy」。 */
-    +'<span class="chipsm">'+(w[0]===w[1]
-        ? '时点 D'+(w[0]/86400).toFixed(1)
-        : '窗 D'+(w[0]/86400).toFixed(1)+'–D'+(w[1]/86400).toFixed(1))+'</span>'
-    +(f.label_based?'<span class="chipsm lb">标签型 · 留 21 天</span>':'<span class="chipsm">结构型</span>')
-    +'</div><div class="fv">'+esc(typeof f.value==='object'?JSON.stringify(f.value):f.value)+'</div></div>';
+  return'<div class="fact"><div><span class="fid mono">'+esc(f.fact_id)+'</span><span class="chipsm">'+esc(f.type)+'</span>'
+    +(f.label_based?'<span class="chipsm lb">标签型</span>':'<span class="chipsm">非标签型</span>')+'</div><div class="fv">'
+    +esc(typeof f.value==='object'?JSON.stringify(f.value):f.value)+'</div><div class="note">实体：'+esc(f.entity||'未记录')
+    +' · 时间范围（TransactionDT 相对秒）：'+esc(w[0])+' → '+esc(w[1])
+    +(f.support_n!=null?' · 支持样本数：'+esc(f.support_n):'')+'</div>'
+    +(f.type==='prior_fraud_rate'&&f.support_n==null?'<div class="note">此条归档未附成熟样本分母，不能仅凭比率判断证据强弱。</div>':'')+'</div>';
 }
 function renderCase(i){
-  cur=i; var c=cases[i], r=c.report, facts={};
+  cur=i;var c=cases[i],r=c.report,facts={},n=NOTES[c.key];
   (c.facts||[]).forEach(function(f){facts[f.fact_id]=f});
-  var h='<div class="teach"><div class="lab">这一笔用来展示什么</div>'+md(c.teaches)+'</div>';
-  if(c.caveat) h+='<div class="caveat">'+md(c.caveat)+'</div>';
-  h+='<div class="card"><div class="kv">'
-    +'<div><span>交易号</span><br><b class="num">'+c.transaction_id+'</b></div>'
-    +'<div><span>GBDT p</span><br><b class="num">'+c.p+'</b></div>'
-    +'<div><span>金额</span><br><b class="num">$'+(c.fields.TransactionAmt||0).toFixed(2)+'</b></div>'
-    +'<div><span>gang_score</span><br><b class="num">'+c.gang_score+'</b></div>'
-    +'<div><span>四档 argmin</span><br><span class="tag t-'+c.cost_four.argmin+'">'+CN[c.cost_four.argmin]+'</span></div>'
-    +'<div><span>五档 argmin</span><br><span class="tag t-'+c.cost_five.argmin+'">'+CN[c.cost_five.argmin]+'</span></div>'
-    +'<div><span>真标签</span><br><b>'+(c.is_fraud?'欺诈':'正常')+'</b></div>'
-    +'<div><span>运行模式</span><br><b class="mono">'+esc(c.mode)+'</b></div></div>';
-  if(!r){ h+='<p class="sub">'+esc(c.note||'本笔未进入 Agent（闸门放行），无调查报告——成本 $0。')+'</p></div>'; }
-  else{
-    h+='<div class="kv" style="margin-bottom:12px">'
-      +'<div><span>Agent 处置</span><br><span class="tag t-'+esc(r.disposition)+'">'+CN[r.disposition]+'</span></div>'
-      +'<div><span>风险等级</span><br><b>'+esc(r.risk_level)+'</b></div>'
-      +'<div><span>自陈置信</span><br><b>'+esc(r.confidence)+'</b></div>'
-      +'<div><span>证据不足</span><br><b>'+(r.evidence_insufficient?'是':'否')+'</b></div></div>'
-      +'<p class="sub">'+esc(r.summary)+'</p></div>'
-      +'<h3 style="margin-top:24px">结论与证据（展开看引用的原始 fact）</h3>';
+  var h='<div class="teach"><div class="lab">当前导读 / '+esc(n.label)+'</div>'+md(n.note)+'</div>';
+  if(n.caveat)h+='<div class="caveat">'+esc(n.caveat)+'</div>';
+  h+='<div class="card"><div class="kv"><div><span>交易号</span><br><b class="num">'+c.transaction_id+'</b></div>'
+    +'<div><span>模型 raw score</span><br><b class="num">'+c.p+'</b></div><div><span>交易金额</span><br><b class="num">'+money(c.fields.TransactionAmt)+'</b></div>'
+    +'<div><span>关联证据分 g</span><br><b class="num">'+c.gang_score+'</b></div><div><span>事后标签 · 仅展示</span><br><b>'+(c.is_fraud?'1 / 欺诈':'0 / 非欺诈标签')+'</b></div>'
+    +'<div><span>历史运行模式</span><br><b class="mono">'+esc(c.mode)+'</b></div></div>'
+    +'<div class="case-decision"><span>四动作公式</span>'+tag(c.cost_four.argmin)+(r?'<span>历史报告建议</span>'+tag(r.disposition):'')+'</div>';
+  if(r)h+='<details><summary>阅读历史报告摘要（原文）</summary><p class="report-summary">'+esc(r.summary)+'</p><p class="note">以下为归档生成文本，保留原始措辞以便核查；引用能追溯，不代表推理已通过人工正确性验收。</p></details>';
+  else h+='<p class="report-summary">成本闸门直接放行，没有生成调查报告，也没有本次 LLM 费用。</p>';
+  h+='<p class="source-line"><a href="'+REPO+esc(c.source_file)+'">打开原始 JSON 归档 ↗</a></p></div>';
+  if(r){
+    h+='<div class="card-top" style="margin-top:24px"><h3>历史结论 → 引用 → 原始事实</h3><span class="note">原文保留 · 点击核查</span></div><p class="note">下列生成文本可追溯到引用，推理正确性并未因此获得保证。</p>';
     (r.key_findings||[]).forEach(function(kf,j){
       var ids=kf.evidence_ids||[];
-      /* P0-1 默认展开 finding 4（「模型分与证据冲突」＝本页叙事主线）。
-         但 finding 4 的三条证据**全是标签型**，单独展开满足不了 P0-2 的「两型同屏」，
-         故连同相邻的 finding 3 一并展开——它是 标签型×3 + 结构型×1。
-         **不改数据、不重排顺序**，只改默认展开集合。 */
-      h+='<details class="finding"'+(j===2||j===3?' open':'')+'><summary><b>'+(j+1)+'.</b> '+esc(kf.finding)
-        +' <span class="chipsm">'+esc(kf.assertion_strength)+'</span>'
-        +' <span class="chipsm">'+ids.length+' 条证据</span></summary><div class="body">'
-        /* P0-2：没有这行，时间窗就只是一串数字，该模块等于白做。
-           措辞用「至少早 21 天」——本例最小恰好 21.0 天，但另有早至 44 天的，
-           写死「早 21 天」会被那几条当场证伪。 */
-        +(ids.some(function(id){return facts[id]&&facts[id].label_based})
-          ? '<div class="embargo">标签型事实的窗口右端<b>至少比本笔交易早 21 天</b>'
-            +'（本例最小 21.0 天）—— 这就是标签成熟期（embargo）：'
-            +'拒付要等这么久才回来，训练时不能假装当时就知道。</div>' : '')
-        +(ids.length?ids.map(function(id){return facts[id]?factRow(facts[id])
-            :'<div class="fact"><span class="fid mono">'+esc(id)+'</span> <span class="fv">（本笔证据池中不存在）</span></div>'}).join('')
-          :'<div class="fv">未引用任何证据</div>')+'</div></details>';
+      h+='<details class="finding"><summary><b class="mono">0'+(j+1)+'</b> &nbsp;'+esc(kf.finding)+' <span class="chipsm">'+ids.length+' 条引用</span></summary><div class="body">'
+        +(ids.some(function(id){return facts[id]&&facts[id].label_based})?'<div class="embargo">标签型事实使用 21 天合成成熟期。这是本实验的可见性假设，不是真实拒付到达时间。</div>':'')
+        +(ids.length?ids.map(function(id){return facts[id]?factRow(facts[id]):'<p class="caveat">引用不存在：'+esc(id)+'</p>'}).join(''):'<p class="note">本条没有引用事实。</p>')+'</div></details>';
     });
   }
   document.getElementById('detail').innerHTML=h;
 }
-document.getElementById('cases').addEventListener('click',function(e){
-  var b=e.target.closest('.caseitem'); if(!b)return;
-  [].forEach.call(this.querySelectorAll('.caseitem'),function(x){
-    x.setAttribute('aria-pressed', x===b?'true':'false')});
-  renderCase(parseInt(b.dataset.i,10));
-});
-renderCase(0);
-
-/* ④ 韧性 */
-function byKey(k){for(var i=0;i<cases.length;i++)if(cases[i].key===k)return cases[i];return null}
+document.getElementById('cases').addEventListener('click',function(e){var b=e.target.closest('.caseitem');if(!b)return;selectButton(this,b);renderCase(parseInt(b.dataset.i,10))});
+renderCase(cur);
+function byKey(k){return cases.find(function(c){return c.key===k})}
 function renderFb(mode){
-  var c=byKey(mode==='llm'?'gang_escalate':'fallback'), r=c.report;
-  var vio=(c.acceptance.schema_violations||[]).length, aud=(c.acceptance.time_audit_violations||[]).length;
-  document.getElementById('fb').innerHTML=
-    '<div class="kv"><div><span>交易号（两版同一笔）</span><br><b class="num">'+c.transaction_id+'</b></div>'
-    +'<div><span>HTTP</span><br><b class="ok-line">200</b></div>'
-    +'<div><span>运行模式</span><br><b class="mono">'+esc(c.mode)+'</b></div>'
-    +'<div><span>本次 LLM 花费</span><br><b class="num">$'+(c.cost_usd||0).toFixed(4)+'</b></div></div>'
-    +'<table><tbody>'
-    +'<tr><td>schema 校验违规</td><td class="r num '+(vio?'':'ok-line')+'">'+vio+'</td></tr>'
-    +'<tr><td>时间边界泄漏审计违规</td><td class="r num '+(aud?'':'ok-line')+'">'+aud+'</td></tr>'
-    +'<tr><td>处置建议</td><td class="r"><span class="tag t-'+esc(r.disposition)+'">'+CN[r.disposition]+'</span></td></tr>'
-    +'<tr><td>结论条数</td><td class="r num">'+(r.key_findings||[]).length+'</td></tr>'
-    +'</tbody></table>'
-    +'<p class="note">'+(mode==='llm'
-      ? '正常路径：Agent 调用工具取证后生成报告。'
-      : '<b>降级路径</b>：LLM 不可用，改由确定性成本框架出报告——<b class="ok-line">过同一个校验器、结构合法、仍返回 200</b>。降级是产品行为，不是服务故障。')+'</p>';
+  var c=byKey(mode==='llm'?'gang_escalate':'fallback'),r=c.report;
+  var vio=(c.acceptance.schema_violations||[]).length,aud=(c.acceptance.time_audit_violations||[]).length;
+  document.getElementById('fb').innerHTML='<div class="kv"><div><span>同一交易</span><br><b class="num">'+c.transaction_id+'</b></div><div><span>历史运行模式</span><br><b class="mono">'+esc(c.mode)+'</b></div>'
+    +'<div><span>归档 LLM 费用</span><br><b class="num">$'+(c.cost_usd||0).toFixed(4)+'</b></div></div><table><tbody>'
+    +'<tr><td>结构校验违规</td><td class="r num">'+vio+'</td></tr><tr><td>时间边界审计违规</td><td class="r num">'+aud+'</td></tr>'
+    +'<tr><td>归档处置建议</td><td class="r">'+tag(r.disposition)+'</td></tr></tbody></table>';
 }
-document.getElementById('fbseg').addEventListener('click',function(e){
-  var b=e.target.closest('button'); if(!b)return;
-  [].forEach.call(this.querySelectorAll('button'),function(x){
-    x.setAttribute('aria-pressed', x===b?'true':'false')});
-  renderFb(b.dataset.m);
-});
+document.getElementById('fbseg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;selectButton(this,b);renderFb(b.dataset.m)});
 renderFb('llm');
-
-var g4=G.gate_pass_rate_four_tier, a5=G.auto_rate_five_tier;
-document.getElementById('funnel').innerHTML=[
-  ['全部交易',1,'var(--muted)'],
-  ['⑧ 闸门直接放行',g4,'var(--ok)'],
-  ['五档：+ 自动加验证',a5,'var(--warn)'],
-  ['需 Agent 或人工',1-a5,'var(--esc)']
-].map(function(r){return '<div class="fstep"><span class="fl">'+r[0]
-  +'</span><span class="fb" style="width:'+(r[1]*100*0.62).toFixed(1)+'%;background:'+r[2]
-  +'"></span><span class="fn">'+(r[1]*100).toFixed(1)+'%</span></div>'}).join('');
-document.getElementById('funnote').innerHTML='每单调查 <b class="num">$'
-  +G.cost_per_investigation_usd+'</b>、平均 <b class="num">'+G.avg_tool_calls
-  +'</b> 次工具调用。step-up 份额 <b class="num">'+(G.stepup_share*100).toFixed(1)
-  +'%</b>（全网格 '+(G.stepup_share_grid_range[0]*100).toFixed(1)+'–'
-  +(G.stepup_share_grid_range[1]*100).toFixed(1)+'%，<b>只报区间不报点值</b>）。';
-
-/* 主题 */
+var G=DEMO.globals;
+document.getElementById('funnel').innerHTML=[['评估窗交易',1],['闸门直接放行',G.gate_pass_rate_four_tier],['其余待调查',G.needs_agent_or_human_four]].map(function(r){
+  return'<div class="fstep"><span>'+r[0]+'</span><span class="track"><span class="fb" style="display:block;width:'+(r[1]*100)+'%"></span></span><span class="fn num">'+(r[1]*100).toFixed(1)+'%</span></div>';
+}).join('');
+document.getElementById('funnote').innerHTML='四动作历史分布；不是实时吞吐指标。r1 调查平均费用 $'+G.cost_per_investigation_usd+' / 单，平均 '+G.avg_tool_calls+' 次工具调用，按当时价格估算。<br><a href="'+REPO+'reports/agent_eval_r1.md">费用来源 ↗</a>';
 document.getElementById('theme').addEventListener('click',function(){
-  var h=document.documentElement;
-  h.dataset.theme = h.dataset.theme==='dark'?'light':'dark';
+  var h=document.documentElement,dark=h.dataset.theme!=='dark';h.dataset.theme=dark?'dark':'light';
+  this.textContent=dark?'浅色模式':'深色模式';this.setAttribute('aria-label',dark?'切换到浅色主题':'切换到深色主题');
 });
 </script>
 </body>

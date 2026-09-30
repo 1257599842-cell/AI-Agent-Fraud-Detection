@@ -1,4 +1,4 @@
-"""演示页发版前检查（静态部分）。
+"""演示页发版前检查（静态契约与真实浏览器公式对账）。
 
 **为什么要落成脚本**：这些检查此前是在 shell 里临时敲的，改一次 CSS 就得重打一遍，
 必然会漏。演示页是现场唯一的展示物，断网打不开 / 投影看不清 / 页面上的数和报告里的数
@@ -18,10 +18,12 @@
 用法：python -m src.serving.check_demo_page
 """
 
-import json
+import argparse
 import re
 import sys
 from pathlib import Path
+
+from src.serving.page_contract import external_dependencies
 
 ROOT = Path(__file__).resolve().parents[2]
 PAGE = ROOT / "reports" / "demo" / "index.html"
@@ -47,23 +49,20 @@ def _vars(html, selector):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--browser", choices=("webkit", "chromium"), default="webkit")
+    parser.add_argument("--channel", help="Chromium 可选本机 Chrome: --channel chrome")
+    args = parser.parse_args()
+    if args.channel and args.browser != "chromium":
+        parser.error("--channel 只适用于 chromium")
     html = PAGE.read_text(encoding="utf-8")
     fails = []
 
     # 1. 零外部依赖
-    ext = {
-        "http(s) 外链": len(re.findall(r'(?:src|href)\s*=\s*["\']https?://', html)),
-        "//协议相对": len(re.findall(r'(?:src|href)\s*=\s*["\']//', html)),
-        "fetch/XHR": len(re.findall(r"\bfetch\s*\(|XMLHttpRequest", html)),
-        "@import": html.count("@import"),
-        "cdn 字样": len(re.findall(r"cdn", html, re.I)),
-        "Google Fonts": len(re.findall(r"fonts\.(googleapis|gstatic)", html)),
-    }
-    for k, v in ext.items():
-        if v:
-            fails.append(f"外部依赖：{k} × {v}")
-    print(f"1. 零外部依赖         {'✅' if not any(ext.values()) else '❌'}  " +
-          "、".join(f"{k}={v}" for k, v in ext.items()))
+    ext = external_dependencies(html)
+    fails.extend(f"外部依赖：{item}" for item in ext)
+    print(f"1. 零外部依赖         {'✅' if not ext else '❌'}  "
+          f"自动加载资源/网络调用 {len(ext)}；允许导航到证据页面")
 
     # 2. 字号
     sizes = [int(x) for x in re.findall(r"font-size:\s*(\d+)px", html)]
@@ -81,7 +80,7 @@ def main():
 
     # 3. 对比度：正文、次要文字、各档语义色，浅深两套都验
     pairs = [("text", "bg"), ("text", "surface"), ("muted", "bg"), ("muted", "surface"),
-             ("accent", "bg"), ("accent", "accent-soft"),
+             ("accent", "bg"), ("accent", "accent-soft"), ("inverse", "accent"),
              ("ok", "ok-bg"), ("warn", "warn-bg"), ("bad", "bad-bg"), ("esc", "esc-bg")]
     worst = {}
     for theme, sel in [("浅色", ":root"), ("深色", 'html[data-theme="dark"]')]:
@@ -99,8 +98,7 @@ def main():
           "、".join(f"{t} 最低 {r:.2f}({fg}/{bg})" for t, (r, fg, bg) in worst.items()))
 
     # 4/5 都在真浏览器里取值。
-    # **用 WebKit 而不是 node**：WebKit 就是页面实际运行的引擎（owner 用 Safari 演示），
-    # 而且直接读 DEMO 全局变量比正则去 HTML 里抠 JSON 可靠得多。
+    # 用真实浏览器执行页面，直接取内联 DEMO，支持 WebKit 和 Chromium。
     import numpy as np
     from playwright.sync_api import sync_playwright
     from src.agent.disposition import BASE
@@ -111,7 +109,8 @@ def main():
     gangs = rng.choice([0., .5, 1.], 400)
 
     with sync_playwright() as pw:
-        b = pw.webkit.launch()
+        launch = {"channel": args.channel} if args.channel else {}
+        b = getattr(pw, args.browser).launch(**launch)
         pg = b.new_page()
         pg.goto(PAGE.as_uri())
         got = np.array(pg.evaluate(
@@ -128,7 +127,7 @@ def main():
     if dev > 1e-9:
         fails.append(f"公式偏差 {dev:.2e} —— 页面算的和报告里的数会对不上")
     print(f"4. 公式一致性         {'✅' if dev <= 1e-9 else '❌'}  "
-          f"400 组随机输入（WebKit 实算），最大偏差 {dev:.2e}")
+          f"400 组随机输入（{args.browser} 实算），最大偏差 {dev:.2e}")
 
     # 5. 数据完整性
     if True:

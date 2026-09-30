@@ -146,17 +146,8 @@ class TestPageIsSelfContained(unittest.TestCase):
         cls.html = PAGE.read_text(encoding="utf-8")
 
     def test_no_external_resource_of_any_kind(self):
-        checks = {
-            "http(s) 外链": r'(?:src|href)\s*=\s*["\']https?://',
-            "协议相对链接": r'(?:src|href)\s*=\s*["\']//',
-            "fetch / XHR": r"\bfetch\s*\(|XMLHttpRequest",
-            "@import": r"@import",
-            "CDN": r"cdn",
-            "Google Fonts": r"fonts\.(?:googleapis|gstatic)",
-        }
-        for name, pat in checks.items():
-            with self.subTest(check=name):
-                self.assertEqual(re.findall(pat, self.html, re.I), [])
+        from src.serving.page_contract import external_dependencies
+        self.assertEqual(external_dependencies(self.html), [])
 
     def test_data_is_inlined_not_fetched(self):
         """`file://` 下 fetch 会被 CORS 拦、页面全白——数据必须内联。"""

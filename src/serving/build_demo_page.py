@@ -7,8 +7,11 @@
 用法：python -m src.serving.build_demo_page
 """
 
+import argparse
 import json
 from pathlib import Path
+
+from src.serving.page_contract import external_dependencies
 
 ROOT = Path(__file__).resolve().parents[2]
 TPL = ROOT / "reports" / "demo" / "_template.html"
@@ -19,14 +22,31 @@ OUT = ROOT / "reports" / "demo" / "index.html"
 PAGES = ROOT / "docs" / "index.html"
 
 
-def build():
+def render():
+    """只读模板和归档，不写文件、不访问网络。"""
     data = json.loads(DATA.read_text(encoding="utf-8"))
     # </script> 必须转义，否则会提前闭合脚本块
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
-    html = TPL.read_text(encoding="utf-8").replace(
+    template = TPL.read_text(encoding="utf-8")
+    assert template.count("/*__DEMO_DATA__*/") == 1, "模板必须且只能有一个数据占位符"
+    html = template.replace(
         "/*__DEMO_DATA__*/", "var DEMO = " + payload + ";")
-    assert "fetch(" not in html and "cdn" not in html.lower(), "检测到外部依赖或 fetch"
-    assert "fonts.googleapis" not in html, "检测到 Google Fonts"
+    assert not external_dependencies(html), "检测到外部加载依赖"
+    return data, html
+
+
+def build(check=False):
+    data, html = render()
+    if check:
+        stale = [str(p.relative_to(ROOT)) for p in (OUT, PAGES)
+                 if not p.exists() or p.read_bytes() != html.encode("utf-8")]
+        if not (PAGES.parent / ".nojekyll").exists():
+            stale.append("docs/.nojekyll")
+        if stale:
+            raise SystemExit("构建产物过期：" + ", ".join(stale)
+                             + "；运行 python -m src.serving.build_demo_page")
+        print("✅ 模板、数据、本地页面与 Pages 产物一致（只读检查）")
+        return
     OUT.write_text(html, encoding="utf-8")
     PAGES.parent.mkdir(parents=True, exist_ok=True)
     PAGES.write_text(html, encoding="utf-8")
@@ -40,4 +60,6 @@ def build():
 
 
 if __name__ == "__main__":
-    build()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="只读检查构建产物是否过期")
+    build(check=parser.parse_args().check)
