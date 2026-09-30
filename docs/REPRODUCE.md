@@ -33,16 +33,41 @@ python3 -m src.serving.build_demo_page
 运行单元测试：
 
 ~~~bash
-python3 -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
+python -m pip check
 python -m unittest discover -s tests -t .
 python -m src.eval.report_manifest
+python -m src.eval.modelcard_review
 ~~~
 
 测试使用合成小样本、mock 和随仓库发布的归档，不要求下载原始交易数据，也不发送付费请求。报告清单检查核对登记的报告和冻结归档是否变化，**不等于审定实验结论正确**。
 
-项目当前本地环境为 Python 3.13。依赖清单不是完整锁文件；跨版本模型重训不能保证逐字节一致，须同时核对数据、配置、库版本和时间窗口。macOS 的 LightGBM 如提示 OpenMP 缺失，需先安装相应系统运行库（如 libomp）。
+项目统一使用 **Python 3.13**；本地检查使用 macOS，CI 使用 Linux。Windows 尚未验证。macOS 的 LightGBM 如提示 OpenMP 缺失，需先安装相应系统运行库（如 `brew install libomp`）。
+
+### 依赖分层与版本维护
+
+| 清单 | 用途 |
+|---|---|
+| [requirements.txt](../requirements.txt) | 模型、API、报告与数据无关测试；不安装 JupyterLab 或浏览器 |
+| [requirements/browser.txt](../requirements/browser.txt) | 核心环境 + Playwright；CI 使用此清单 |
+| [requirements/notebooks.txt](../requirements/notebooks.txt) | 核心环境 + JupyterLab；只在交互分析时需要 |
+
+三个清单由对应 `.in` 文件生成，直接和传递依赖均固定版本；扩展环境以核心清单为约束。可选的实时 LLM SDK 不在这些测试环境中，没有安装它也能执行上述检查。
+
+需要交互 Notebook 时，运行 `python -m pip install -r requirements/notebooks.txt`。维护者更新版本时，先修改 [core.in](../requirements/core.in) 或对应扩展 `.in`，再在独立的 Python 3.13 维护环境安装 `pip-tools==7.6.1` 并运行：
+
+~~~bash
+python -m piptools compile --no-header --no-annotate --strip-extras \
+  --output-file requirements.txt requirements/core.in
+python -m piptools compile --no-header --no-annotate --strip-extras \
+  --output-file requirements/browser.txt requirements/browser.in
+python -m piptools compile --no-header --no-annotate --strip-extras \
+  --output-file requirements/notebooks.txt requirements/notebooks.in
+~~~
+
+更新后须在干净虚拟环境安装，执行 `pip check`、完整测试及 Linux CI；浏览器版本变动还要重跑真实渲染检查。清单锁定 Python 包版本，不锁操作系统、OpenMP 或二进制构建；Windows 条件依赖不在已验证范围内，模型重训也不承诺跨平台逐字节一致。
 
 ## 2. 用自己的合规数据副本重建
 
@@ -117,7 +142,7 @@ docker run --rm -p 127.0.0.1:8000:8000 \
 ## 可选：检查网页真实渲染
 
 ~~~bash
-pip install playwright
+python -m pip install -r requirements/browser.txt
 python -m playwright install chromium
 python -m src.serving.check_demo_page --browser chromium
 python -m src.serving.shoot_demo --browser chromium --check-only

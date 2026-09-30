@@ -38,13 +38,36 @@ class TestSiteContract(unittest.TestCase):
             self.assertTrue((ROOT / case["source_file"]).is_file())
 
     def test_reading_guides_have_no_broken_relative_links(self):
-        for rel in ("README.md", "docs/EVIDENCE.md", "docs/REPRODUCE.md"):
-            path = ROOT / rel
+        paths = [ROOT / "README.md", *sorted((ROOT / "docs").rglob("*.md"))]
+        for path in paths:
+            rel = path.relative_to(ROOT)
             for target in re.findall(r"\[[^\]]*\]\(([^)]+)\)", path.read_text()):
                 if target.startswith(("http:", "https:", "#")):
                     continue
                 dest = path.parent / unquote(urlsplit(target).path)
                 self.assertTrue(dest.exists(), f"{rel}: {target}")
+
+    def test_readme_leads_with_results_not_a_screenshot(self):
+        readme = (ROOT / "README.md").read_text()
+        self.assertLess(readme.index("## 主要结果"), readme.index("## 系统设计"))
+        prefix = readme.split("## 主要结果", 1)[0]
+        self.assertNotIn("reports/demo/shots/", prefix)
+        self.assertIn("actions/workflows/verify.yml/badge.svg?branch=main", prefix)
+        self.assertIn("<details>", readme)
+
+    def test_historical_documents_have_a_separate_home(self):
+        paths = {
+            "AGENT_DESIGN.md": "design",
+            "AUDIT_REPORT.md": "audits",
+            "AUDIT_CHECKS.json": "audits",
+            "BANK_EVIDENCE_REVIEW.md": "audits",
+            "MODEL_CARD_SOURCES.json": "audits",
+        }
+        index = (ROOT / "docs/README.md").read_text()
+        for name, section in paths.items():
+            self.assertFalse((ROOT / name).exists(), name)
+            self.assertTrue((ROOT / "docs" / section / name).is_file(), name)
+            self.assertIn(f"{section}/{name}", index)
 
     def test_navigation_is_allowed_but_remote_resources_are_not(self):
         self.assertEqual(external_dependencies('<a href="https://example.org">source</a>'), [])

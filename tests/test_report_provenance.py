@@ -240,7 +240,7 @@ class TestModelCardIsNotStale(unittest.TestCase):
 
     def test_reviewed_source_content_has_not_changed(self):
         """比对复核时的内容；mtime 在 clone/复制后会变，不能充当实验日期。"""
-        record = json.loads((ROOT / "MODEL_CARD_SOURCES.json").read_text())
+        record = json.loads((ROOT / "docs/audits/MODEL_CARD_SOURCES.json").read_text())
         self.assertEqual(record["model_card_sha256"], sha_full(self.card))
         self.assertTrue(record["sources"])
         for rel, digest in record["sources"].items():

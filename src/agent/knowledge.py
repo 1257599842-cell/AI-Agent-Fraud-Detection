@@ -1,4 +1,4 @@
-"""Agent 知识库（AGENT_DESIGN.md 第一组，施工顺序2）：规则库 + 案例库 + 结构化检索。
+"""规则库、历史案例库与结构化匹配检索。
 
 规则库（1.1 + 修订4）：候选规则清单 → 在 [0,125) 天窗上算真实欺诈率 → 数据准入
   （lift>=1.5 且样本够）才收录，拒收的也报告。窗口终点取 125 = 146−21：任何
@@ -10,9 +10,9 @@
     负例 = 模型高分但 isFraud=0 的假阳（标签0，无人工处理过程记录）——专训一个只见 day<104
       的模型给 [104,146) 打分挖取，不用 baseline 对自己训练集的记忆分。
 
-检索（1.4）：结构化相似主通道——同实体(card1/组合键) > 同模式(ProductCD+金额档+
-  卡类型) > 同品类；案例入库时渲染成自然语言案例卡（card_text）。向量粗排层
-  （BGE/Chroma）暂缓：等管道跑通看检索质量再定（待决项，见 reports/agent_knowledge.md）。
+检索：同实体键(card1/组合键) > 同模式(ProductCD+金额档+卡类型) > 同品类；
+  案例入库时渲染成自然语言案例卡（card_text）。未实现 embedding 向量检索。
+  案例库经过选择，返回案例的标签比例不能作为总体欺诈概率。
 
 用法（项目根、已激活 .venv）：python -m src.agent.knowledge
 产出：data/processed/agent_rules.json + agent_cases.parquet + reports/agent_knowledge.md

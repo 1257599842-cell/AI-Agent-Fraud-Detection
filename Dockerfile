@@ -1,7 +1,7 @@
 # 工程层容器：只装依赖与代码，**不打包数据**。
 # 理由：data/ 里是 590,540 行的 parquet + 知识库 + 应然档，几百 MB 且不是代码资产；
 # 打进镜像会让镜像巨大、且每次换数据都要重建。运行时用挂载卷。
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 # LightGBM 需要 libgomp（arm64 wheel 自带，但 slim 基础镜像上仍显式装稳妥）
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \

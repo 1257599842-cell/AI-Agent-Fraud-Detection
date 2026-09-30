@@ -1,17 +1,17 @@
-"""时间因果图特征（硬点① + ⑥ 素材）。
+"""按交易时间构建实体历史特征，并区分结构可见性与标签成熟期。
 
-按 graph_eda 结论：IEEE-CIS 无细粒度设备/账户 ID（addr1=地区、DeviceInfo=OS、邮箱域全公共），
-唯 card1 有特异性 → 用**组合键**造"稀有共享实体"：card1、card1+addr1、card1+邮箱、card1+设备。
+IEEE-CIS 未提供可确认的唯一账户或设备标识。这里使用匿名字段 card1 及其与
+addr1、邮箱域、DeviceInfo 的组合键；这些关联不能直接解释为同一真实持卡人或设备。
 
-两层防泄漏（加固二，图特征版硬点②）：
+两类时间边界：
   - 结构型（prior_count / fan-out）：按 (DT, 输入次序) 取前序边；本数据以 TransactionID 排序，同秒较小 ID 也计入。
-  - 标签型（prior_fraud_rate）：邻居 isFraud 只取 DT ≤ t−EMBARGO（拒付延迟，"之前"再往前挪 21 天）。
+  - 标签型（prior_fraud_rate）：邻居 isFraud 只取 DT ≤ t−EMBARGO（默认合成延迟 21 天，非真实拒付到达记录）。
 
 每个实体键 K：
-  {K}_prior_cnt         —— 之前同 K 的交易数（度/velocity；结构型）
+  {K}_prior_cnt         —— 之前同 K 的交易数（累计计数，不是固定窗口 velocity）
   {K}_prior_fraud_cnt   —— 之前同 K 且已确认(embargo)的欺诈数（标签型）
   {K}_prior_fraud_rate  —— 成熟欺诈数 / 成熟历史行数（不是全部 prior_cnt；无成熟历史则 NaN）
-card1 的 fan-out（结构型）：prior 见过的 distinct addr1 / 邮箱 / 设备数（团伙扩散信号）。
+card1 的 fan-out（结构型）：此前见过的不同 addr1 / 邮箱域 / DeviceInfo 值数，不是真实团伙标签。
 
 用法：python -m src.features.graph_features
 产出：data/processed/graph_features.parquet（TransactionID + 图特征列）

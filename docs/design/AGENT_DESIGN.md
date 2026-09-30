@@ -1,5 +1,7 @@
 # Agent 层W5历史设计登记（非当前实现规格）
 
+[文档目录](../README.md) · [当前实验协议](../../EXPERIMENT_PROTOCOL.md)
+
 > **2026-09-13复核**：以下保留施工前计划，当前实现以EXPERIMENT_PROTOCOL.md为准。实际规则统计窗[0,125)，案例结构化检索，无BGE/Chroma向量检索落地；四动作API，step-up仅离线；自动重校准、双模型起草流程尚未落地。当前预算/出口阻断为pipeline v5，历史8次承诺不等于旧实现已强制执行。
 > 上报实际公式为 c_report+p·m_e·a+(1−p)·f_e·c_FP−p·g·k_future·A_med；g不是已校准团伙概率。
 

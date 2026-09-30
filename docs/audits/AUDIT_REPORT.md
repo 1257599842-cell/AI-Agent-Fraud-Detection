@@ -2,7 +2,7 @@
 
 审查日期：2026-09-13。结论：主对照的数值能够复现，但原先的部分口径超出了实现和实验的证明范围；同时存在会改变提交特征、评分输入和运行行为的实际缺陷。本次已修复下列代码与文档问题，并将不能由现有数据补齐的证据缺口单独列出。
 
-当前统一口径见[EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md)，模型结论见[MODEL_CARD.md](MODEL_CARD.md)，检查汇总见[AUDIT_CHECKS.json](AUDIT_CHECKS.json)。这份审查不把“测试通过”解释成“所有可能问题均已排除”。
+当前统一口径见[EXPERIMENT_PROTOCOL.md](../../EXPERIMENT_PROTOCOL.md)，模型结论见[MODEL_CARD.md](../../MODEL_CARD.md)，检查汇总见[AUDIT_CHECKS.json](AUDIT_CHECKS.json)。这份审查不把“测试通过”解释成“所有可能问题均已排除”。
 
 ## 1. 范围与保全
 
@@ -27,7 +27,7 @@
 | 校验器/预算并非强制阻断 | v5在每次工具尝试前检查预算；出口将已检测到的无效草稿放入诊断并降级，降级报告也校验，仍无效则report为空。兜底取证也受剩余预算约束 | 已修运行约束；不声称能识别所有语义违规 |
 | 训练标签可得性 | 增加独立的统一冻结、早停、校准拟合与选择窗口实验；旧embargo差异改为联合窗口差异，不作单因素因果归因 | 回顾性审计已完成；真正未使用新时段仍缺数据 |
 
-对应入口：[Kaggle](src/model/kaggle_submit.py)、[小额边界](src/model/small_amount_floor.py)、[Agent管道](src/agent/pipeline.py)、[标签可得性审计](src/model/label_availability_audit.py)。
+对应入口：[Kaggle](../../src/model/kaggle_submit.py)、[小额边界](../../src/model/small_amount_floor.py)、[Agent管道](../../src/agent/pipeline.py)、[标签可得性审计](../../src/model/label_availability_audit.py)。
 
 ## 3. 另行发现并修复的实现问题
 
@@ -59,7 +59,7 @@
 21. **模型卡过期检查用mtime。** 克隆时间不能代表实验时间；改为记录已人工复核的模型卡与28份引用源内容摘要。来源定位按精确路径，不再随意取同名文件。
 22. **依赖与私有路径保护不足。** 增加直接使用的scipy/tabulate及Pydantic版本约束，保留已有httpx；将个人资料加入Git/Docker忽略。内容检查器只豁免必须包含检测词表的自身，避免一经跟踪就因自己的词表误报。
 
-入口：[服务](src/serving/app.py)、[事件历史](src/serving/feature_store.py)、[完整轮次检查](src/eval/run_integrity.py)、[报告出处](src/eval/report_manifest.py)、[模型卡复核](src/eval/modelcard_review.py)。
+入口：[服务](../../src/serving/app.py)、[事件历史](../../src/serving/feature_store.py)、[完整轮次检查](../../src/eval/run_integrity.py)、[报告出处](../../src/eval/report_manifest.py)、[模型卡复核](../../src/eval/modelcard_review.py)。
 
 ## 4. 统计与叙事纠正
 
@@ -85,7 +85,7 @@
 
 这些结果不覆盖主模型、主缓存评分或Kaggle提交。与主实验比较时，训练时期、模型选择及校准同时变化，不能把差异全部归因于“消除泄漏”。现有评估末段已经被研究使用，所以该实验明确叫回顾性审计。
 
-完整产物：[审计报告](reports/label_availability_audit.md)、[机器结果](reports/label_availability_audit.json)。
+完整产物：[审计报告](../../reports/label_availability_audit.md)、[机器结果](../../reports/label_availability_audit.json)。
 
 ## 6. 验证结果与复查入口
 

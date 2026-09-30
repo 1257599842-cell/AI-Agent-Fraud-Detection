@@ -1,21 +1,17 @@
-"""四个调查工具的接口与返回格式（AGENT_DESIGN.md 2.1/2.2，施工顺序1：先接口后实现）。
+"""四类调查工具的接口、事实账本与时间边界检查。
 
-工具是"取数管道"不是"能力"：能力来自多轮编排 + 推理。锁死四个，不加假工具；
-query_similar_transactions 不单列，作为 retrieve_rules_and_cases 的内部实现（1.4）。
-
-返回格式（焊点级，2.2）：一切事实都是 Fact——唯一 fact_id + 值 + 时间窗 + 样本量
-+ 结构型/标签型标记。报告只能引用本次调查返回过的 fact_id（FactRegistry 是账本，
-schema.validate_report 拿它对账）。
+案例检索整合在 retrieve_rules_and_cases 中。每条 Fact 带唯一 ID、值、时间窗
+和结构型/标签型标记；样本量 support_n 可选，并非所有后端都已提供。
+报告只允许引用本次调查已登记的事实，schema.validate_report 负责引用检查。
 
 时间边界契约（每个实现必须遵守；audit_time_boundary 把"泄漏自查"写成代码）：
   - 结构型事实（label_based=False：字段快照/计数/fan-out）：只用 as_of 之前的数据，
     window[1] <= as_of。
   - 标签型事实（label_based=True：prior_fraud_rate/案例结局/欺诈率统计）：只用
-    as_of − EMBARGO 之前的标签，window[1] <= as_of − EMBARGO_SECS（拒付延迟 21 天，
+    as_of − EMBARGO 之前的标签，window[1] <= as_of − EMBARGO_SECS（合成标签延迟 21 天，
     同 src/features/graph_features.py 口径）。
-  - 施工提醒1（AGENT_DESIGN.md）：上报档的未来暴露项消费 query_entity_graph 的
-    fan-out / prior_fraud_rate——这两个数的时间口径错了，修订4 堵的泄漏会经修订2
-    回流。disposition.py 只准吃过审计的 Fact。
+  - 上报成本的网络项使用同一历史特征来源；时间检查只验证声明的窗口边界，
+    不能独立证明源数据的真实到达时间或字段生成过程。
 
 用法（自测，无 LLM 无数据）：python -m src.agent.tools
 """
@@ -25,7 +21,7 @@ from dataclasses import dataclass, field
 
 EMBARGO_DAYS = 21
 EMBARGO_SECS = EMBARGO_DAYS * 86_400
-MAX_TOOL_CALLS = 8  # 2.3：单次调查上限，超则强制收尾（管道层执行，兼⑧素材）
+MAX_TOOL_CALLS = 8  # 管道在每次请求尝试前执行限额检查，包括降级取证。
 
 # fact_id 前缀 ↔ 工具（ID 形如 GRAPH_003；报告 evidence_ids 只能引用这些）
 ID_PREFIXES = {
@@ -171,7 +167,7 @@ class FactRegistry:
 
 
 def audit_time_boundary(facts, as_of, embargo_secs=EMBARGO_SECS):
-    """泄漏自查（AGENT_DESIGN.md 验证方式第2条，代码化）：返回违规清单。
+    """检查事实声明的窗口是否超出相应截止时间，返回违规清单。
 
     结构型：window[1] <= as_of；标签型：window[1] <= as_of − embargo。
     eval（步骤5）对每单调查的全部 Fact 跑一遍；施工提醒1 的抽查也走这里。

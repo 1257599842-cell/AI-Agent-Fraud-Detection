@@ -1,18 +1,17 @@
-"""Agent 调查管道（施工顺序4）：出分 → 闸门 → 工具调查 → JSON 报告 + ⑨兜底。
+"""已有交易的调查管道：成本闸门、工具循环、证据验收与模板降级。
 
-流程（AGENT_DESIGN.md 第五组）：
-  1. ⑧ 闸门：GBDT 应然档 = approve 的交易不进 Agent（挡 ~90%，便宜模型挡在贵 LLM 前）。
-  2. 调查：Claude (claude-opus-4-8) + 四工具手写 agentic loop，上限 MAX_TOOL_CALLS=8，
-     超限后 tool_choice=none 强制收尾。模型分以「待核实线索」喂入（5.1 防谄媚措辞）。
-  3. 硬层验收（无 LLM 参与）：schema.validate_report 引用对账 + audit_time_boundary 泄漏审计。
-  4. ⑨ 兜底：LLM 连接失败/超时/限流/refusal → GBDT 出分 + 规则模板报告，照常产出合法
-     JSON（结构上与正常报告同 schema、过同一校验器），summary 打 [降级模式] 标记。
+当前 v5 运行约束：
+  1. 公式动作是 approve 时跳过调查，除非显式要求强制调查。
+  2. 每次工具请求尝试前检查 MAX_TOOL_CALLS=8；异常请求与兜底取证也占预算。
+  3. 验收报告结构、证据引用和时间边界；已检测到的无效草稿只进入诊断字段。
+  4. 调用或验收失败则模板降级；模板也接受验收，仍不通过时 report 为空。
 
-成本记账（⑧）：逐调用累计 input/output tokens，按 opus-4-8 $5/$25 每 MTok 估算。
+逐调用累计 input/output tokens，按代码中的历史价格常量估算费用。
+这些保护不保证语义正确，当前版本也没有重跑历史付费评估。
 
 用法：
   python -m src.agent.pipeline --txn 3496539            # 单笔调查
-  python -m src.agent.pipeline --txn 3496539 --kill-llm  # ⑨ 兜底演示（真连不可达地址）
+  python -m src.agent.pipeline --txn 3496539 --kill-llm  # 连接不可达地址，演示降级
   python -m src.agent.pipeline --drill                   # 5 笔演习 + 兜底演示 + md 报告
 产出：reports/samples/*.json + reports/agent_pipeline.md
 """
@@ -371,7 +370,7 @@ def _save(result, tag):
 
 
 def _pick_drill_txns(res):
-    """5 笔已知结局的演习交易（AGENT_DESIGN.md 验证方式）。"""
+    """选择 5 笔已知标签的交易，用于历史调查演示。"""
     g = res.gt
     fraud, legit = g[g["isFraud"] == 1], g[g["isFraud"] == 0]
     picks = {}

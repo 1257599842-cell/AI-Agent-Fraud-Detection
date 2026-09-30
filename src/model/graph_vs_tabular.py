@@ -1,8 +1,8 @@
-"""纯表 vs 表+图 干净对照（硬点⑥ 的量化依据）。
+"""纯表与表+图特征对照：固定时间切分和 LightGBM 配置。
 
 同 baseline 时间切分（fit<132/val[132,146)/test≥146）、同 LGB 配置，只差图特征。
-产出 delta（PR-AUC / ROC-AUC / recall@容量）——即"轻量图特征带来了 X"，
-是 ⑥"为何图特征而非 GNN"的量化前提。**delta 可能≈0，那是诚实结论，不硬凑。**
+比较 PR-AUC、ROC-AUC 和固定容量召回率。此实验不包含 GNN，不能据此判断
+图特征与 GNN 的优劣；训练和早停标签的成熟隔离另见标签可得性审计。
 
 用法：python -m src.model.graph_vs_tabular
 产出：控制台对比 + reports/graph_vs_tabular.md

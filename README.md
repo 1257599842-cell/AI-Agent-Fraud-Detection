@@ -1,119 +1,99 @@
-# AI Fraud Investigation Copilot
-### 时间感知风险建模 · 成本敏感决策 · 可追溯的 LLM 调查
+# 交易反欺诈：风险建模与辅助调查
 
-基于 590,540 笔 IEEE-CIS 交易，比较表特征与实体历史特征的欺诈识别效果，并实现成本敏感处置和带引用的 LLM 调查报告。实验覆盖时间切分、标签可得性、特征一致性与报告证据核验。
+[![Tests and site checks](https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/actions/workflows/verify.yml/badge.svg?branch=main)](https://github.com/1257599842-cell/AI-Agent-Fraud-Detection/actions/workflows/verify.yml)
 
-**[打开交互网站 ↗](https://1257599842-cell.github.io/AI-Agent-Fraud-Detection/)** · [结果与证据导航](docs/EVIDENCE.md) · [复现指南](docs/REPRODUCE.md) · [模型卡](MODEL_CARD.md)
+基于 **590,540 笔 IEEE-CIS 交易**的离线研究与服务原型：用 LightGBM 和时间感知实体特征预测风险，用成本公式选择处置，用带引用的 LLM 报告辅助调查。重点验证特征增量、时间边界，以及报告是否有据可查。
 
-![项目概览：模型增益、职责划分与证据入口](reports/demo/shots/overview.png)
-
-> 离线研究原型，使用公开数据。网页内置历史案例，零凭证、零实时 LLM 调用即可体验；不声称已上线或产生真实业务收益。
+[交互演示](https://1257599842-cell.github.io/AI-Agent-Fraud-Detection/) · [证据导航](docs/EVIDENCE.md) · [复现指南](docs/REPRODUCE.md) · [模型卡](MODEL_CARD.md) · [全部文档](docs/README.md)
 
 ## 主要结果
 
-| 问题 | 实测结果 | 直接证据 |
+| 验证问题 | 结果 | 实验记录 |
 |---|---|---|
-| 实体关联历史有没有预测增量？ | 同切分、同配置，PR-AUC **0.5645 → 0.6032**；recall @ top 2% **42.3% → 45.2%** | [纯表 vs 表 + 图](reports/graph_vs_tabular.md) |
-| 实验与服务的特征口径是否一致？ | SQL / pandas **590,540 笔 × 15 列**全量一致；独立在线回放 **3,000 笔 × 27 列**一致 | [全量对账](reports/sql_vs_pandas_reconciliation.md) · [回放与负对照](reports/online_replay.md) |
-| 调查报告的数字能否追溯？ | r1 对 **2,672 个数字**做机械对账；565 条数值结论中 **522 条引用充分、43 条引用不完整**，未发现事实池外数字 | [两级数字对账](reports/agent_grounding.md) |
+| 实体历史能否改善预测？ | 431 列表特征 → 加入 15 列图特征，PR-AUC **0.5645 → 0.6032**；recall @ top 2% **42.3% → 45.2%** | [同配置对照](reports/graph_vs_tabular.md) |
+| 不同实现的特征是否一致？ | SQL / pandas **590,540 笔 × 15 列**一致；先查后写回放 **3,000 笔 × 27 列**一致，并设置错误实现的负对照 | [SQL 对账](reports/sql_vs_pandas_reconciliation.md) · [回放](reports/online_replay.md) |
+| 报告数字能否追溯到证据？ | r1 的 **2,672 个数字**经机械对账；565 条数值结论中 **522 条引用充分、43 条引用不完整** | [两级数字对账](reports/agent_grounding.md) |
 
-主实验中，图历史采用 21 天合成标签成熟期，训练和早停标签没有统一施加该隔离；更严格的[标签可得性审计](reports/label_availability_audit.md)另行报告。增益不适用于所有容量：top 0.5% recall 为 14.2% → 13.9%。数字能匹配事实池不等于语义正确，更不等于“零幻觉”。
+主对照的图历史使用 21 天合成标签成熟期，训练和早停标签未统一隔离；[更严格的标签可得性审计](reports/label_availability_audit.md)单独报告。增益并非覆盖所有容量：top 0.5% recall 为 14.2% → 13.9%。数字可追溯不等于推理正确。
 
-## 系统分工
+## 系统设计
 
 ~~~mermaid
 flowchart LR
     A["原始交易字段"] --> B["历史特征 + LightGBM"]
     B --> C["四动作成本公式"]
-    C --> D["处置建议 / 调查闸门"]
+    C --> D["处置建议"]
 
-    E["既有交易 ID + 离线证据库"] --> F["LLM 工具取证"]
-    F --> G["事实账本 / 引用与时间检查"]
-    G --> H["报告或模板降级"]
+    E["既有交易 ID"] --> F["闸门 / LLM 工具取证"]
+    F --> G["事实账本 + 输出验收"]
+    G --> H["带引用报告 / 模板降级"]
 ~~~
 
-**模型预测，公式决策，LLM 组织与解释证据。** 两条线是当前的两个入口，不是已经打通的任意新交易实时流水线。报告建议不能覆盖公式动作。
+**模型预测，公式决策，LLM 组织与解释证据。** /score 接受原始交易字段；/investigate 针对离线证据库中的既有交易 ID。两者尚未打通任意新交易的实时调查链路，LLM 建议不能覆盖公式动作。
 
-- **评分层**：431 列表特征 + 15 列时间感知图特征，LightGBM 按时间窗训练。图特征是实体历史计数、成熟欺诈率与 fan-out，未使用 GNN。
-- **决策层**：比较放行、挂起、拒绝、上报四种动作的期望成本。第五动作 step-up 仅离线分析，未接通 OTP/3DS。
-- **调查层**：四类工具、规则与结构化案例检索、事实账本、报告验收。当前 v5 最多允许 8 次工具请求尝试；违规草稿隔离并模板降级。
+- **特征与模型**：实体历史计数、成熟欺诈率、fan-out；按时间切分训练 LightGBM，不使用 GNN。SQL 与 pandas 独立实现，检查空值、同秒顺序和标签成熟截止。
+- **成本决策**：显式比较放行、挂起、拒绝、上报的期望成本，并分析参数敏感性。第五动作 step-up 仅用于离线分析与网页沙盘。
+- **调查与验收**：四类工具、结构化规则/案例检索、唯一证据 ID、引用和时间检查。当前 v5 最多 8 次工具请求尝试；已检测到的无效草稿隔离，失败时按相同结构验收模板报告。
 
-技术栈：**Python · LightGBM · pandas · DuckDB / SQL · FastAPI · Docker**。检索采用结构化匹配排序，不是 embedding 向量检索。
+技术栈：Python 3.13 · LightGBM · pandas · DuckDB / SQL · FastAPI · Docker。规则与案例采用结构化匹配，不依赖向量数据库。
 
-## 方法与设计
+## 从这些实现开始读
 
-### 1. 图特征增量与时间边界
+| 设计取舍 | 核心实现 | 对应验证 |
+|---|---|---|
+| 结构历史与标签历史采用不同时间边界 | [图特征](src/features/graph_features.py) · [SQL 窗函数](src/features/sql) | [泄漏边界测试](tests/test_leak_prevention.py) · [特征消融](reports/graph_feature_ablation.md) |
+| 相同风险分，金额与成本不同可以产生不同动作 | [四动作公式](src/agent/disposition.py) | [成本模型测试](tests/test_cost_model.py) · [敏感性分析](reports/agent_disposition_sensitivity.md) |
+| LLM 输出必须能追到本次调用返回的事实 | [事实账本](src/agent/tools.py) · [调查管道](src/agent/pipeline.py) | [Agent 契约测试](tests/test_agent_contracts.py) · [数字对账](reports/agent_grounding.md) |
+| 服务特征不能只凭离线测试推定正确 | [历史特征查询](src/serving/feature_store.py) · [API](src/serving/app.py) | [独立回放与负对照](reports/online_replay.md) |
 
-主对照只增减图特征，再用[消融](reports/graph_feature_ablation.md)区分标签历史与裸连接数量；用[延迟实验](reports/graph_vs_tabular_e60.md)、[标签可得性审计](reports/label_availability_audit.md)检查时间假设。
-
-跨实现对账不止检查“跑出来相同”：故意把 SQL 窗函数换错，确认负对照会被检出。空值、同秒顺序和成熟截止都进入测试。
-
-### 2. 成本敏感处置
-
-同样的风险分，在不同金额和误拦成本下可以对应不同动作。将假设显式写进[四动作公式](src/agent/disposition.py)，再做[敏感性分析](reports/agent_disposition_sensitivity.md)与[小额边界推导](reports/small_amount_floor.md)。
-
-网站保留 LLM 建议与公式不一致的历史案例；调查层提供解释，不获得处置覆盖权。成本参数是假设，raw score 未校准，因此沙盘用于分析权衡，不是可直接上线的最优策略。
-
-### 3. 调查工具与报告评估
-
-[四轮 318 份归档的只读测量](reports/agent_autonomy_surface.md)显示取证集合高度集中；770/770 次统计查询都针对本笔字段值。**多轮自主编排相对固定流程的增益尚未被证明**，归档事实集合也不是完整调用轨迹。
-
-当前可检查的工作是：事实账本、强制引用、数字对账、时间边界、预算约束和降级。下一项需要的实验是“固定取证 + 模板 / 固定取证 + 单次 LLM / 多轮工具循环”三臂对照，而不是继续堆工具。
+关于 Agent 的一个未决问题：多轮工具选择是否优于固定流程？[四轮 318 份归档的测量](reports/agent_autonomy_surface.md)显示取证集合高度集中，770/770 次统计查询均针对本笔字段值。**现有证据尚不能证明自主编排的增益**；完整调用轨迹与固定流程 / 单次 LLM / 多轮工具循环三臂对照仍需补充。
 
 ## 交互演示
 
-[打开网站](https://1257599842-cell.github.io/AI-Agent-Fraud-Detection/)，可以依次体验：
+[打开在线演示](https://1257599842-cell.github.io/AI-Agent-Fraud-Detection/)——不需要账号、API key 或下载数据，也不产生实时 LLM 费用。
 
-1. **调查案卷**：7 份预置案例，逐条展开结论、引用事实与时间范围；可打开原始 JSON。
-2. **决策沙盘**：调节风险分、金额和关联证据，观察四动作成本；可切换五动作离线扩展。
-3. **模板降级**：对照同一笔交易的 LLM 报告和确定性模板，查看历史验收与费用。
+- **7 份历史案卷**：展开结论、原始引用和时间范围，查看 LLM 建议与公式不一致的案例。
+- **四 / 五动作沙盘**：改变风险分和金额，比较动作成本；五动作明确标为离线扩展。
+- **降级对照**：查看同一交易的历史 LLM 报告与确定性模板。
 
-网站与本地 HTML 是同一份构建产物；断网可打开，外部证据链接需要网络。案例标签 0 不代表人工洗清，选取的相似案例比例也不代表风险概率。
+<details>
+<summary>查看页面预览</summary>
 
-## 快速复核
+![调查案例：报告、处置对照与可展开证据](reports/demo/shots/dark_case_1280x720.png)
 
-无需数据和 API key，即可浏览网站、读取报告或检查页面构建：
+</details>
+
+## 本地验证
+
+仅检查网页是否由当前模板生成，只需 Python 标准库：
 
 ~~~bash
 git clone https://github.com/1257599842-cell/AI-Agent-Fraud-Detection.git
 cd AI-Agent-Fraud-Detection
 python3 -m src.serving.build_demo_page --check
-# 直接用浏览器打开 docs/index.html
+# 用浏览器打开 docs/index.html；案卷与沙盘支持离线使用
 ~~~
 
-运行测试（需要 Python 环境，不需要原始交易数据或付费 LLM）：
+运行数据无关测试和归档完整性检查（Python 3.13）：
 
 ~~~bash
-python3 -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 python -m unittest discover -s tests -t .
+python -m src.eval.report_manifest
 ~~~
 
-数据、模型训练、API 启动、浏览器检查分别见[分层复现指南](docs/REPRODUCE.md)。模型和大体量数据不随仓库发布；下载 IEEE-CIS 数据须自行接受比赛条款。
+核心依赖及其传递依赖固定版本；Notebook 和浏览器验收依赖单独安装。测试不需要原始交易数据或付费 LLM。模型重建、API 启动、依赖维护与平台要求见[复现指南](docs/REPRODUCE.md)。
 
-## 代码与证据地图
+## 适用范围与已知限制
 
-| 入口 | 内容 |
-|---|---|
-| [src/features](src/features) · [SQL](src/features/sql) | 时间感知图特征、SQL 数据建模与特征实现 |
-| [src/model](src/model) | 时间切分、模型对照、校准、成本、不平衡与漂移实验 |
-| [src/agent](src/agent) | 成本决策、知识检索、工具后端、事实账本与输出验收 |
-| [src/eval](src/eval) · [tests](tests) | 机械评估、受控干预、报告清单与回归测试 |
-| [src/serving](src/serving) | FastAPI、历史特征查询、回放与离线网页构建 |
-| [docs/EVIDENCE.md](docs/EVIDENCE.md) | 按问题组织的报告、实现与限制索引 |
-| [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md) · [MODEL_CARD.md](MODEL_CARD.md) | 当前实验口径、版本边界、完整模型卡 |
+- **离线研究，不是已上线系统**：使用公开匿名数据，没有真实拒付到达时间、真实干预结局或新的未使用最终评估时段。成本参数是假设，raw score 未校准，不能把沙盘结果当作线上收益。
+- **服务是原型**：评分使用固定历史快照，不随请求追加；尚未接案件队列、实际拦截、反馈重训或并发生产压测。
+- **评估有版本边界**：历史 LLM 归档与当前 v5 保护机制分属不同版本，未重跑付费评估；机械验收不能替代语义判断，LLM-as-judge 尚无可靠独立参照。
 
-补充实验：[银行 KS 与分层表](reports/bank_metrics.md) · [WOE/IV 评分卡](reports/scorecard.md) · [校准](reports/calibration.md) · [选择性标签](reports/selective_bias.md) · [漂移监控](reports/drift_monitor.md)。
-
-## 使用边界
-
-- **研究边界**：没有真实拒付到达时间、真实干预结局或未使用的新最终评估时段；成本改善不是线上收益。
-- **服务边界**：评分历史快照不随请求追加；调查仍针对已有交易 ID。未接案件队列、真实拦截、反馈重训与并发生产压测。
-- **评估边界**：历史 LLM 归档与当前 v5 保护机制分属不同版本，未重跑付费评估；LLM-as-judge 未成为可靠的软层验收标准。
-
-更详细的限制、修订与出处见[模型卡](MODEL_CARD.md)、[独立审查](AUDIT_REPORT.md)和[证据导航](docs/EVIDENCE.md)。历史实验与原始归档保留，不用新文案改写旧结果。
+详细口径见[实验协议](EXPERIMENT_PROTOCOL.md)与[模型卡](MODEL_CARD.md)。设计历史、审查记录和报告索引统一收在[文档目录](docs/README.md)；原始实验与归档保持原文。
 
 ---
 
-代码采用 [MIT License](LICENSE)；数据使用遵循 [IEEE-CIS 比赛条款](https://www.kaggle.com/competitions/ieee-fraud-detection/rules)。工程实现使用 AI 结对协助。
+代码采用 [MIT License](LICENSE)；原始数据与模型不随仓库发布，数据使用遵循 [IEEE-CIS 比赛条款](https://www.kaggle.com/competitions/ieee-fraud-detection/rules)。工程实现使用 AI 结对协助。

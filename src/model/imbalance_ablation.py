@@ -1,17 +1,15 @@
-"""不平衡处理消融（硬点④）—— 反例演示：SMOTE/scale_pos_weight 如何毁校准。
+"""类别不平衡消融：自然分布、类别加权与随机正类过采样。
 
-口径（项目负责人 2026-07-01）：这是**反例演示**，证明"任何动先验的操作（重采样/加权）都会破坏
-我整条链依赖的概率质量"，**不是**"我用了 SMOTE 提升了 X"。看的是：
-  1. 可靠性图怎么被带偏（预测概率被抬到远离对角线）。
-  2. 决策区间 recall 有没有真提升（大概率没有，甚至更差）—— **不看全局 AUC**（延续"全局指标会骗人"主线）。
+比较概率可靠性和固定容量召回。结论限于本数据、切分与配置，
+不能外推为所有重采样方法都会损害校准，也没有直接运行 SMOTE。
 
 三组（同 baseline 时间切分 fit<132 / val[132,146) / test[146,182)）：
   A. natural         —— 自然分布（baseline，无重采样无加权）
   B. scale_pos_weight—— = n_neg/n_pos（LightGBM 原生加权）
   C. oversample      —— 随机过采样正类到 ~均衡（SMOTE 的先验抬升效应之代理）
 
-关于 SMOTE 本体：IEEE-CIS 有大量缺失 + 31 个类别列，SMOTE 需数值且无 NaN，
-在此**不能干净地用**——这本身就是"SMOTE 是错的工具"的又一论据。故用随机过采样代理其先验抬升效应。
+原始表包含缺失值和类别列；直接插值需要另行设计预处理。
+本实验只用随机过采样研究类别比例变化，不评估 SMOTE 的插值机制。
 
 用法：python -m src.model.imbalance_ablation
 产出：reports/figures/10_imbalance_reliability.png + reports/imbalance_ablation.md

@@ -1,15 +1,12 @@
-"""调查报告 schema（AGENT_DESIGN.md 3.1）+ 硬层结构校验（⑦ groundedness 硬层第一块积木）。
+"""结构化调查报告及确定性校验。
 
-为什么是 JSON/结构体而不是散文：eval 硬层要逐字段对账（evidence_ids 存在性、
-数字真伪、该弃权未弃权），自由文本让对账代码全废；给人读的话放 summary 字段。
+validate_report 返回逐项 violation，供管道和评估共同使用；无需 LLM。
+结构、枚举与引用检查不保证数字语义、证据推理或处置建议正确。
 
-为什么手写校验器而不是 pydantic：不引新依赖，且 validate_report 返回的
-violation 清单本身就是硬层 eval 的计数单位（步骤5 的 agent_eval 直接复用）。
-
-三个要害字段（拍板稿 3.1）：
+三个需要区分含义的字段：
   assertion_strength    —— 抓 overclaiming 的钩子（软层再对照证据支持强度）
   evidence_insufficient —— 合法弃权出口（不给这个，Agent 会被迫硬编）
-  confidence            —— 序数（low/medium/high），不是校准概率；真概率归 GBDT
+  confidence            —— 序数（low/medium/high），不是校准概率
 
 用法（自测，无 LLM）：python -m src.agent.schema
   构造 1 份合法报告 + 7 份注入已知错误的报告，校验器应 0 误放过。

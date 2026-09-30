@@ -1,6 +1,9 @@
-"""⑦ Agent eval（施工顺序5）：三指标（能硬则硬）+ 分层 eval 集 + judge + 盲标锚定。
+"""历史 Agent 评估：机械对账、处置一致性、分层样本与 judge 实验。
 
-指标（AGENT_DESIGN.md 第四组 + 修订5）：
+历史 judge 锚定未建立可靠的独立人工参照；相关输出不可作为语义正确率。
+报告生成文本保留历史口径，当前适用范围见 EXPERIMENT_PROTOCOL.md。
+
+指标：
   1. Groundedness
      硬层（代码）：evidence_ids 存在性（validate_report）+ 数字对账（finding 里的数字
        必须能在其引用的 fact 值中找到来源，含 %/小数/lift 换算；找不到=未匹配数字，
@@ -15,7 +18,7 @@
 
 eval 集：200 = 4 层×50（高分真欺诈/高分假阳/中分模糊/低分正常），取 test 窗；
   每层再切 dev/holdout 25/25——prompt 迭代只看 dev，最终 delta 报 holdout
-  （防 eval 集过拟合 = 硬点② 思想在 eval 层的翻版）。
+  （分离开发样本与保留样本，避免用同一批报告反复选择 prompt）。
 
 盲标协议（owner 提醒一）：--export-anchor 生成的标注表与 judge prompt 出自同一
   RUBRIC（人机同卷），且不含任何 judge 判定；owner 独立标完后 --agreement 比对，
@@ -344,7 +347,7 @@ def score_round(tag):
 
 # ================================================================ judge（DeepSeek，OpenAI 兼容）
 
-# 与被评 Claude 分家（AGENT_DESIGN.md 4.4 防自评偏差）。deepseek-chat 别名已下线，
+# 使用与被评模型不同的 judge，但这不能替代独立人工参照。deepseek-chat 别名已下线，
 # /models 现仅返回 v4 系列；用 pro 保判断质量（成本可忽略，κ 才是它可不可信的裁判）。
 JUDGE_MODEL = "deepseek-v4-pro"
 
