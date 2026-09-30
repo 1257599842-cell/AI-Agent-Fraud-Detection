@@ -1,7 +1,7 @@
 # AI Fraud Investigation Copilot
 ### 时间感知风险建模 · 成本敏感决策 · 可追溯的 LLM 调查
 
-在 59 万笔 IEEE-CIS 交易上，研究从**风险预测 → 处置选择 → 证据解释**的完整问题链。核心不是让 LLM 决定是否拦截，而是把模型增益做成可对照实验，把处置写成可复算公式，把调查结论连回原始事实。
+基于 590,540 笔 IEEE-CIS 交易，比较表特征与实体历史特征的欺诈识别效果，并实现成本敏感处置和带引用的 LLM 调查报告。实验覆盖时间切分、标签可得性、特征一致性与报告证据核验。
 
 **[打开交互网站 ↗](https://1257599842-cell.github.io/AI-Agent-Fraud-Detection/)** · [结果与证据导航](docs/EVIDENCE.md) · [复现指南](docs/REPRODUCE.md) · [模型卡](MODEL_CARD.md)
 
@@ -9,7 +9,7 @@
 
 > 离线研究原型，使用公开数据。网页内置历史案例，零凭证、零实时 LLM 调用即可体验；不声称已上线或产生真实业务收益。
 
-## 三个值得先看的结果
+## 主要结果
 
 | 问题 | 实测结果 | 直接证据 |
 |---|---|---|
@@ -40,21 +40,21 @@ flowchart LR
 
 技术栈：**Python · LightGBM · pandas · DuckDB / SQL · FastAPI · Docker**。检索采用结构化匹配排序，不是 embedding 向量检索。
 
-## 三个设计取舍
+## 方法与设计
 
-### 1. “图特征有用”必须拆开验证
+### 1. 图特征增量与时间边界
 
 主对照只增减图特征，再用[消融](reports/graph_feature_ablation.md)区分标签历史与裸连接数量；用[延迟实验](reports/graph_vs_tabular_e60.md)、[标签可得性审计](reports/label_availability_audit.md)检查时间假设。
 
 跨实现对账不止检查“跑出来相同”：故意把 SQL 窗函数换错，确认负对照会被检出。空值、同秒顺序和成熟截止都进入测试。
 
-### 2. 处置不是另一个分类标签，而是一组可讨论的代价
+### 2. 成本敏感处置
 
 同样的风险分，在不同金额和误拦成本下可以对应不同动作。将假设显式写进[四动作公式](src/agent/disposition.py)，再做[敏感性分析](reports/agent_disposition_sensitivity.md)与[小额边界推导](reports/small_amount_floor.md)。
 
 网站保留 LLM 建议与公式不一致的历史案例；调查层提供解释，不获得处置覆盖权。成本参数是假设，raw score 未校准，因此沙盘用于分析权衡，不是可直接上线的最优策略。
 
-### 3. Agent 的价值要测量，不能由工具数量代替
+### 3. 调查工具与报告评估
 
 [四轮 318 份归档的只读测量](reports/agent_autonomy_surface.md)显示取证集合高度集中；770/770 次统计查询都针对本笔字段值。**多轮自主编排相对固定流程的增益尚未被证明**，归档事实集合也不是完整调用轨迹。
 

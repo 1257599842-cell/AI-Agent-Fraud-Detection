@@ -73,6 +73,14 @@ class TestSiteContract(unittest.TestCase):
         self.assertIn("14.2%", self.html)
         self.assertIn("13.9%", self.html)
 
+    def test_project_heading_is_descriptive(self):
+        self.assertIn('id="hero-title">交易反欺诈', self.html)
+        self.assertIn("风险建模与辅助调查", self.html)
+        self.assertIn("主实验设置", self.html)
+        for old_copy in ("分数之后", "把决策说清楚", "FRAUD / LAB",
+                         "Risk models. Decisions. Evidence."):
+            self.assertNotIn(old_copy, self.html)
+
 
 if __name__ == "__main__":
     unittest.main()

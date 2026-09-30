@@ -4,6 +4,7 @@
 --check-only 不写截图，可用于持续集成。截图是页面真实渲染，不做后期合成。
 """
 import argparse
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -40,14 +41,20 @@ def main():
         for width in (320, 375, 768, 1280, 1440):
             for theme in ("light", "dark"):
                 context = browser.new_context(
-                    viewport={"width": width, "height": 900}, offline=True,
+                    viewport={"width": width, "height": 900},
+                    offline=args.browser != "webkit",
                     reduced_motion="reduce", device_scale_factor=1)
+                # WebKit 的模拟离线状态会令首个 file:// 导航报内部错误。
+                # 从创建 context 起阻断全部 HTTP(S)，本地文件加载后再启用
+                # offline；不允许用一次成功的远程加载掩盖页面的资源依赖。
+                context.route(re.compile(r"^https?://"), lambda route: route.abort())
                 page = context.new_page()
                 page.on("pageerror", lambda e: errors.append(str(e)))
                 page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
                 page.on("request", lambda r: requests.append(r.url)
                         if r.url.startswith(("http:", "https:")) else None)
                 page.goto(PAGE.as_uri())
+                context.set_offline(True)
                 page.wait_for_function("document.querySelectorAll('.caseitem').length === 7")
                 if theme == "dark":
                     page.click("#theme")
